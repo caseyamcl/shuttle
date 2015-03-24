@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+// Check CLI
+if (php_sapi_name() != 'cli') {
+    header("HTTP/1.0 418 I Am A Teapot");
+    header("Content-type: text/plain");
+    die("What are you doing?!  This is a CLI App");
+}
+
+// Require autoloader
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Base Directory
+$baseDir = Phar::running(false)
+    ? dirname(Phar::running(false))
+    : __DIR__;
+
+ConveyorBelt\CliApp\App::main($baseDir);

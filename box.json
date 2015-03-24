@@ -1,0 +1,8 @@
+{
+    "directories": ["src", "vendor"],
+    "files": ["run.php"],
+    "main": "run.php",
+    "output": "ticketmove.phar",
+    "stub": true,
+    "chmod": "0755"
+}

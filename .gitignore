@@ -1,0 +1,12 @@
+# IDE stuff
+.idea
+
+# Tracker DB
+cli/statusdb/!.gitkeep
+
+# Configuration
+cli/config/config.yml
+
+# Composer stuff
+vendor/
+composer.lock
