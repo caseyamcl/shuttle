@@ -24,13 +24,22 @@ namespace ConveyorBelt\MigrateSource;
 class SimpleCSVSource extends SimpleJsonSource
 {
     /**
+     * @var bool
+     */
+    private $hasHeaders;
+
+    // ---------------------------------------------------------------
+
+    /**
      * Constructor
      *
      * @param string $csvSourceUri
      * @param string $idFieldName
+     * @param bool   $hasHeaders
      */
-    public function __construct($csvSourceUri, $idFieldName)
+    public function __construct($csvSourceUri, $idFieldName, $hasHeaders = true)
     {
+        $this->hasHeaders = $hasHeaders;
         parent::__construct($csvSourceUri, $idFieldName);
     }
 
@@ -38,12 +47,29 @@ class SimpleCSVSource extends SimpleJsonSource
 
     protected function decodeInput($rawInput, $idFieldName)
     {
-        $recs = [];
+        $headers = [];
+        $recs    = [];
 
         $fh = fopen($rawInput, 'r');
-        while ($row = fgetcsv($fh)) {
-            $recs[$row[$idFieldName]] = $row;
+
+        for ($i = 0; $row = fgetcsv($fh); $i++) {
+
+            if ($i == 0 && $this->hasHeaders) {
+                $headers = array_values($row);
+                continue;
+            }
+            elseif ($i == 0 && ! $this->hasHeaders) {
+                $headers = array_keys($row);
+            }
+
+            // If row is less than the number of columns (valid CSV apparently, but for array_combine)
+            if (count($row) < count($headers)) {
+                $row = array_merge($row, array_fill(count($row), count($headers) - count($row), ''));
+            }
+
+            $recs[$row[$idFieldName]] = array_combine($headers, array_values($row));
         }
+
         fclose($fh);
 
         return $recs;

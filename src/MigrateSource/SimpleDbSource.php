@@ -28,7 +28,7 @@ use Doctrine\Instantiator\Exception\InvalidArgumentException;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleDbSource implements SourceInterface, \IteratorAggregate
+class SimpleDbSource implements \IteratorAggregate, SourceInterface
 {
     /**
      * @var \PDO
@@ -109,7 +109,7 @@ class SimpleDbSource implements SourceInterface, \IteratorAggregate
         $stmt = $this->dbConn->prepare($this->singleQuery);
         $stmt->execute([$id]);
 
-        if ($row = $stmt->fetch([\PDO::FETCH_ASSOC])) {
+        if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return $row;
         }
         else {

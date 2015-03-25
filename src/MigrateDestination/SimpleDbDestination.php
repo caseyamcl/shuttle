@@ -69,8 +69,14 @@ class SimpleDbDestination implements DestinationInterface
      */
     function getRecord($id)
     {
-        $stmt = $this->dbConn->prepare("SELECT t.* FROM ? t WHERE t.? = ?");
-        $stmt->execute([$this->tableName, $this->idFieldName, $id]);
+        $sql = sprintf(
+            "SELECT t.* FROM %s t WHERE t.%s = ?",
+            $this->tableName,
+            $this->idFieldName
+        );
+
+        $stmt = $this->dbConn->prepare($sql);
+        $stmt->execute([$id]);
 
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return $row;
@@ -93,16 +99,18 @@ class SimpleDbDestination implements DestinationInterface
     function saveRecord(array $recordData)
     {
         $query = sprintf(
-            "INSERT INTO %s SET (%s) VALUES (%s)",
+            "INSERT INTO %s (%s) VALUES (%s)",
             $this->tableName,
             implode(', ', array_keys($recordData)),
-            array_fill(0, count($recordData), '?')
+            implode(', ', array_fill(0, count($recordData), '?'))
         );
 
         $stmt = $this->dbConn->prepare($query);
         $stmt->execute(array_values($recordData));
 
-        return $this->dbConn->lastInsertId();
+        return (isset($recordData[$this->idFieldName]))
+            ? $recordData[$this->idFieldName]
+            : (string) $this->dbConn->lastInsertId();
     }
 
     // ---------------------------------------------------------------
@@ -115,8 +123,10 @@ class SimpleDbDestination implements DestinationInterface
      */
     function deleteRecord($id)
     {
-        $stmt = $this->dbConn->prepare("DELETE FROM ? WHERE ? = ?");
-        $stmt->execute([$this->tableName, $this->idFieldName, $id]);
+        $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idFieldName);
+        $stmt = $this->dbConn->prepare($sql);
+
+        $stmt->execute([$id]);
         return (bool) $stmt->rowCount();
     }
 }

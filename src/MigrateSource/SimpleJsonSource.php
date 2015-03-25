@@ -25,7 +25,7 @@ use ConveyorBelt\Service\Migrator\SourceInterface;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleJsonSource implements SourceInterface, \IteratorAggregate
+class SimpleJsonSource implements \IteratorAggregate, SourceInterface
 {
     /**
      * @var array  Array of arrays
@@ -83,7 +83,7 @@ class SimpleJsonSource implements SourceInterface, \IteratorAggregate
      */
     function listRecordIds()
     {
-        return array_keys($this->recs);
+        return array_map('strval', array_keys($this->recs));
     }
 
     // ---------------------------------------------------------------

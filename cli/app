@@ -14,6 +14,6 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // Base Directory
 $baseDir = Phar::running(false)
     ? dirname(Phar::running(false))
-    : __DIR__;
+    : __DIR__ . '/../';
 
 ConveyorBelt\CliApp\App::main($baseDir);

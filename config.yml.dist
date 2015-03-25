@@ -1,0 +1,46 @@
+#
+# Conveyor Belt CLI App Configuration
+#
+# Copy this file either to the ConveyorBelt working directory (same as this file),
+# or to "~/.conveyorbelt/config.yml", or to "/etc/conveyorbelt.conf"
+#
+# And, make appropriate changes for your environment
+# ---------------------------------------------------------------------------------
+
+#
+# Setup Optional Log
+#
+# Comment out or set to false/null for no log
+#
+log: /tmp/ticketmove.log
+
+#
+# Status Tracking Database Configuration
+#
+# Use Built-In (sqlite) by specifying the path, or
+# specify your own connection string and table name to use.
+#
+# If using your own 'connstring' and 'table', comment out the 'path'
+# parameter
+#
+statusdb:
+    path: ~/.conveyorbelt_tracking
+    # connstring: sqlite:///statusdb/migrate_status.sqlite
+    # table:  data_migrate
+
+#
+# Migrators
+#
+# If you create migrators and place them into, you can use the Short Class Name
+# (e.g. ')
+#
+migrators:
+
+
+#
+# Optionally include an external bootstrap file to pull in autoloaders
+# for additional libraries for integration with third-party applications.
+#
+# Change this to "bootstrap: /full/path/to/bootstrap.php"
+#
+bootstrap: false

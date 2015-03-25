@@ -1,6 +1,7 @@
 # If requiring this library as a dependency, ignore CLI-stand alone stuff
 /cli         export-ignore
 /dist        export-ignore
+/migrators   export-ignore
 
 # Ignore Dev Stuff
 /tests            export-ignore

@@ -15,6 +15,11 @@
   "autoload": {
     "psr-4": {
       "ConveyorBelt\\": "src/",
+      "ConveyorBeltMigrator\\": "migrators/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "ConveyorBeltTest\\": "tests/"
     }
   }

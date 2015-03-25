@@ -5,7 +5,7 @@
 cli/statusdb/!.gitkeep
 
 # Configuration
-cli/config/config.yml
+config.yml
 
 # Composer stuff
 vendor/

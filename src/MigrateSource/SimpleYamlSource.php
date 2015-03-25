@@ -16,6 +16,8 @@
 
 namespace ConveyorBelt\MigrateSource;
 
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -26,11 +28,19 @@ use Symfony\Component\Yaml\Yaml;
 class SimpleYamlSource extends SimpleJsonSource
 {
     /**
+     * @var Parser
+     */
+    private $parser;
+
+    // ---------------------------------------------------------------
+
+    /**
      * @param string $rawData
      * @param string $idFieldName
      */
     public function __construct($rawData, $idFieldName = '')
     {
+        $this->parser = new Parser();
         parent::__construct($rawData, $idFieldName);
     }
 
@@ -40,7 +50,13 @@ class SimpleYamlSource extends SimpleJsonSource
     {
         $arr = [];
 
-        foreach (Yaml::parse($rawInput) as $key => $val) {
+        $parsed = Yaml::parse($rawInput, true);
+
+        if ( ! is_array($parsed)) {
+            throw new ParseException("Invalid YAML: " . $parsed);
+        }
+
+        foreach ($parsed as $key => $val) {
             $id = $idFieldName ? $val[$idFieldName] : $key;
             $arr[$id] = $val;
         }
