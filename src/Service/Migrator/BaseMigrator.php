@@ -16,8 +16,7 @@
 
 namespace ConveyorBelt\Service\Migrator;
 
-use ConveyorBelt\Service\Migrator\Destination\DestinationInterface;
-use ConveyorBelt\Service\Migrator\Source\SourceInterface;
+use ConveyorBelt\Service\Migrator\Event\MigrateResult;
 
 /**
  * Base Migrator
@@ -132,7 +131,7 @@ abstract class BaseMigrator implements MigratorInterface
      * Migrate a single record
      *
      * @param string $oldRecId Record ID in the old system
-     * @return MigrateResult
+     * @return string  New Record ID
      */
     public function migrate($oldRecId)
     {
@@ -145,7 +144,7 @@ abstract class BaseMigrator implements MigratorInterface
     /**
      * Revert a single record
      *
-     * @param $newRecId
+     * @param string $newRecId
      */
     public function revert($newRecId)
     {
