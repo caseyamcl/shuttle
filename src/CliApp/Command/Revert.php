@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\CliApp\Command;
+namespace Shuttle\CliApp\Command;
 
-use ConveyorBelt\Service\Migrator\Events;
-use ConveyorBelt\Service\Migrator\MigrateFailedResult;
-use ConveyorBelt\Service\Migrator\MigratorInterface;
+use Shuttle\Service\Migrator\Events;
+use Shuttle\Service\Migrator\MigrateFailedResult;
+use Shuttle\Service\Migrator\MigratorInterface;
 
 
 /**

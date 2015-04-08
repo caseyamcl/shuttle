@@ -14,9 +14,9 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
-use ConveyorBelt\Service\Migrator\Event\MigrateResult;
+use Shuttle\Service\Migrator\Event\MigrateResult;
 
 /**
  * Base Migrator

@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,14 +14,14 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
-use ConveyorBelt\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Service\Migrator\Exception\MissingRecordException;
 
 /**
  * Interface DestinationInterface
  *
- * @package ConveyorBelt\Service\Migrator\Destination
+ * @package Shuttle\Service\Migrator\Destination
  */
 interface DestinationInterface
 {

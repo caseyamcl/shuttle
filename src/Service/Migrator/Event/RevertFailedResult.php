@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator\Event;
+namespace Shuttle\Service\Migrator\Event;
 
 class RevertFailedResult extends MigrateFailedResult
 {

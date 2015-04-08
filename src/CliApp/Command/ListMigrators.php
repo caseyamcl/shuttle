@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\CliApp\Command;
+namespace Shuttle\CliApp\Command;
 
-use ConveyorBelt\Service\Migrator\MigratorCollection;
-use ConveyorBelt\Service\Migrator\MigratorInterface;
-use ConveyorBelt\Service\Recorder\RecorderInterface;
+use Shuttle\Service\Migrator\MigratorCollection;
+use Shuttle\Service\Migrator\MigratorInterface;
+use Shuttle\Service\Recorder\RecorderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;

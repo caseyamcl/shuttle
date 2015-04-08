@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,10 +14,10 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltTest\Service\Migrator;
+namespace ShuttleTest\Service\Migrator;
 
 
-use ConveyorBelt\Service\Migrator\DestinationInterface;
+use Shuttle\Service\Migrator\DestinationInterface;
 
 abstract class AbstractDestinationInterfaceTest extends \PHPUnit_Framework_TestCase
 {
@@ -59,7 +59,7 @@ abstract class AbstractDestinationInterfaceTest extends \PHPUnit_Framework_TestC
 
     public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
     {
-        $this->setExpectedException('\ConveyorBelt\Service\Migrator\Exception\MissingRecordException');
+        $this->setExpectedException('\Shuttle\Service\Migrator\Exception\MissingRecordException');
         $obj = $this->getDestObj();
         $obj->getRecord($this->getNonExistentRecordId());
     }

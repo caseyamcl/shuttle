@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,12 +14,12 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltTest\MigrateSource;
+namespace ShuttleTest\MigrateSource;
 
 
-use ConveyorBelt\MigrateSource\SimpleDbSource;
-use ConveyorBelt\Service\Migrator\SourceInterface;
-use ConveyorBeltTest\Service\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\MigrateSource\SimpleDbSource;
+use Shuttle\Service\Migrator\SourceInterface;
+use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 /**
  * Simple DB Test
@@ -42,7 +42,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
             self::markTestSkipped('No SQLite PDO Available');
         }
 
-        $path = sys_get_temp_dir() . '/conveyorbelt.db.test.sqlite';
+        $path = sys_get_temp_dir() . '/Shuttle.db.test.sqlite';
         self::$dbConn = new \PDO('sqlite:' . $path);
 
         self::$dbConn->query("CREATE TABLE items (
@@ -58,7 +58,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
 
     public static function tearDownAfterClass()
     {
-        unlink(sys_get_temp_dir() . '/conveyorbelt.db.test.sqlite');
+        unlink(sys_get_temp_dir() . '/Shuttle.db.test.sqlite');
         parent::tearDownAfterClass();
 
     }

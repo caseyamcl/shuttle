@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\MigrateSource;
+namespace Shuttle\MigrateSource;
 
 
-use ConveyorBelt\Service\Migrator\Exception\MissingRecordException;
-use ConveyorBelt\Service\Migrator\SourceInterface;
+use Shuttle\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Service\Migrator\SourceInterface;
 
 /**
  * Simple JSON Source

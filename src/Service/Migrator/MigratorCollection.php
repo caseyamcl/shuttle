@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
 use ArrayIterator, Countable;
 

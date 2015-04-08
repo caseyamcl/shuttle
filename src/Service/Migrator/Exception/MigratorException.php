@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator\Exception;
+namespace Shuttle\Service\Migrator\Exception;
 
 
 class MigratorException extends \RuntimeException

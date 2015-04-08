@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\MigrateDestination;
+namespace Shuttle\MigrateDestination;
 
 
-use ConveyorBelt\Service\Migrator\DestinationInterface;
-use ConveyorBelt\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Service\Migrator\DestinationInterface;
+use Shuttle\Service\Migrator\Exception\MissingRecordException;
 
 /**
  * Class SimpleDbDestination

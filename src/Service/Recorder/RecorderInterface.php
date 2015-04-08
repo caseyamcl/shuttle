@@ -14,14 +14,14 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Recorder;
+namespace Shuttle\Service\Recorder;
 
 /**
  * Recorder Interface
  *
  * Tracks migration state for records
  *
- * @package ConveyorBelt\Service\Recorder
+ * @package Shuttle\Service\Recorder
  */
 interface RecorderInterface
 {

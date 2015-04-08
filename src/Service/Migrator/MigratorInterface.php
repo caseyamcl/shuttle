@@ -14,12 +14,12 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
 /**
  * Migrator Interface
  *
- * @package ConveyorBelt\Service\Migrator
+ * @package Shuttle\Service\Migrator
  */
 interface MigratorInterface
 {

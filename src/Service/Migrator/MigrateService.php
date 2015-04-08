@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,13 +14,13 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
-use ConveyorBelt\Service\Migrator\Event\MigrateFailedResult;
-use ConveyorBelt\Service\Migrator\Event\MigrateResult;
-use ConveyorBelt\Service\Migrator\Event\RevertFailedResult;
-use ConveyorBelt\Service\Migrator\Event\RevertResult;
-use ConveyorBelt\Service\Recorder\RecorderInterface;
+use Shuttle\Service\Migrator\Event\MigrateFailedResult;
+use Shuttle\Service\Migrator\Event\MigrateResult;
+use Shuttle\Service\Migrator\Event\RevertFailedResult;
+use Shuttle\Service\Migrator\Event\RevertResult;
+use Shuttle\Service\Recorder\RecorderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 

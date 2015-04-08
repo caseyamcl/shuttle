@@ -14,10 +14,10 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltMigrator\Example;
+namespace ShuttleMigrator\Example;
 
-use ConveyorBelt\Service\Migrator\Exception\MissingRecordException;
-use ConveyorBelt\Service\Migrator\SourceInterface;
+use Shuttle\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Service\Migrator\SourceInterface;
 
 /**
  * Example Source

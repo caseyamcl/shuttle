@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltTest\Recorder;
+namespace ShuttleTest\Recorder;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use ConveyorBelt\Service\Recorder\Recorder;
+use Shuttle\Service\Recorder\Recorder;
 
 /**
  * Recorder Test
@@ -40,7 +40,7 @@ class RecorderTest extends \PHPUnit_Framework_TestCase
 
         $this->dbConn = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
-            'path' => sys_get_temp_dir() . '/conveyorbelt_test.sqlite'
+            'path' => sys_get_temp_dir() . '/Shuttle_test.sqlite'
         ]);
     }
 
@@ -48,7 +48,7 @@ class RecorderTest extends \PHPUnit_Framework_TestCase
 
     protected function tearDown()
     {
-        unlink(sys_get_temp_dir() . '/conveyorbelt_test.sqlite');
+        unlink(sys_get_temp_dir() . '/Shuttle_test.sqlite');
         parent::tearDown();
     }
 
@@ -57,7 +57,7 @@ class RecorderTest extends \PHPUnit_Framework_TestCase
     public function testInstantiateSucceeds()
     {
         $obj = new Recorder($this->dbConn);
-        $this->assertInstanceOf('\ConveyorBelt\Service\Recorder\Recorder', $obj);
+        $this->assertInstanceOf('\Shuttle\Service\Recorder\Recorder', $obj);
     }
 
     // ---------------------------------------------------------------

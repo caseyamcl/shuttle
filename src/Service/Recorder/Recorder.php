@@ -14,12 +14,12 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Recorder;
+namespace Shuttle\Service\Recorder;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOException;
 use Doctrine\DBAL\Schema\Schema;
-use ConveyorBelt\Helper\DoctrineColumnIterator;
+use Shuttle\Helper\DoctrineColumnIterator;
 
 /**
  * DBAL Table-Based Recorder

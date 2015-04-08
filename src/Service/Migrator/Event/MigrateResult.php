@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator\Event;
+namespace Shuttle\Service\Migrator\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 

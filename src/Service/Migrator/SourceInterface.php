@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,14 +14,14 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
-use ConveyorBelt\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Service\Migrator\Exception\MissingRecordException;
 
 /**
  * Source Interface
  *
- * @package ConveyorBelt\Service\Migrator\Source
+ * @package Shuttle\Service\Migrator\Source
  */
 interface SourceInterface extends \Traversable, \Countable
 {

@@ -14,15 +14,15 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\CliApp;
+namespace Shuttle\CliApp;
 
 use Cilex\Application as CilexApp;
 use Cilex\Provider\ConfigServiceProvider;
 use Cilex\Provider\DoctrineServiceProvider;
 use Cilex\Provider\MonologServiceProvider;
-use ConveyorBelt\Provider\MigratorProvider;
-use ConveyorBelt\Service\Migrator\MigratorInterface;
-use ConveyorBelt\Service\Recorder\Recorder;
+use Shuttle\Provider\MigratorProvider;
+use Shuttle\Service\Migrator\MigratorInterface;
+use Shuttle\Service\Recorder\Recorder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use TaskTracker\Subscriber\Psr3Logger;
 use TaskTracker\TrackerFactory;
@@ -34,7 +34,7 @@ use TaskTracker\TrackerFactory;
  */
 class App
 {
-    const NAME    = 'Conveyor Belt - Data Migration Utility';
+    const NAME    = 'Shuttle - Data Migration Utility';
     const VERSION = '1.0';
 
     // ---------------------------------------------------------------
@@ -151,7 +151,7 @@ class App
         if (isset($app['config']['log'])) {
             $app->register(new MonologServiceProvider(), [
                 'monolog.logfile' => $app['config']['log'],
-                'monolog.name'    => 'conveyorbelt'
+                'monolog.name'    => 'Shuttle'
             ]);
         }
 

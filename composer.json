@@ -1,5 +1,6 @@
 {
-  "name": "fsurcc/ticketmove",
+  "name": "caseyamcl/shuttle",
+  "description": "Data Migration Tool - Get Data from Here to There",
   "require": {
     "php"                     : ">=5.5",
     "doctrine/dbal"           : "~2.5",
@@ -14,13 +15,13 @@
   },
   "autoload": {
     "psr-4": {
-      "ConveyorBelt\\": "src/",
-      "ConveyorBeltMigrator\\": "migrators/"
+      "Shuttle\\": "src/",
+      "ShuttleMigrator\\": "migrators/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "ConveyorBeltTest\\": "tests/"
+      "ShuttleTest\\": "tests/"
     }
   }
 }

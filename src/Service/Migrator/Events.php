@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
 
 final class Events
@@ -22,10 +22,10 @@ final class Events
     /**
      * Migrate event dispatched when migrator has completed
      */
-    const MIGRATE = 'conveyorbelt.migrate';
+    const MIGRATE = 'Shuttle.migrate';
 
     /**
      * Revert event
      */
-    const REVERT = 'conveyorbelt.revert';
+    const REVERT = 'Shuttle.revert';
 }

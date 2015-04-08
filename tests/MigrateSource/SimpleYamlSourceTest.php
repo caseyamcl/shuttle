@@ -1,6 +1,6 @@
 <?php
 /**
- * conveyorbelt
+ * Shuttle
  *
  * @license ${LICENSE_LINK}
  * @link ${PROJECT_URL_LINK}
@@ -14,11 +14,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltTest\MigrateSource;
+namespace ShuttleTest\MigrateSource;
 
-use ConveyorBelt\MigrateSource\SimpleYamlSource;
-use ConveyorBelt\Service\Migrator\SourceInterface;
-use ConveyorBeltTest\Service\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\MigrateSource\SimpleYamlSource;
+use Shuttle\Service\Migrator\SourceInterface;
+use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 /**
  * Yaml Source Test

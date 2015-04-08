@@ -14,14 +14,14 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Provider;
+namespace Shuttle\Provider;
 
 use Cilex\Application;
 use Cilex\ServiceProviderInterface;
-use ConveyorBelt\Migrator\StaffMemberMigrator;
-use ConveyorBelt\Service\Migrator\MigratorCollection;
-use ConveyorBelt\Service\Migrator\MigratorFactory;
-use ConveyorBelt\Service\Migrator\MigratorService;
+use Shuttle\Migrator\StaffMemberMigrator;
+use Shuttle\Service\Migrator\MigratorCollection;
+use Shuttle\Service\Migrator\MigratorFactory;
+use Shuttle\Service\Migrator\MigratorService;
 
 /**
  * Class MigratorProvider
@@ -44,7 +44,7 @@ class MigratorProvider implements ServiceProviderInterface
     public function register(Application $app)
     {
         $app['migrator.default_ns'] = $app->share(function() {
-            return '\ConveyorBelt\Migrator';
+            return '\Shuttle\Migrator';
         });
 
         // ~~~~

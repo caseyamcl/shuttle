@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Helper;
+namespace Shuttle\Helper;
 
 use Doctrine\DBAL\Driver\ResultStatement;
 

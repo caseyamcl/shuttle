@@ -14,9 +14,9 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBeltMigrator\Example;
+namespace ShuttleMigrator\Example;
 
-use ConveyorBelt\Service\Migrator\BaseMigrator;
+use Shuttle\Service\Migrator\BaseMigrator;
 
 /**
  * Class ExampleMigrator

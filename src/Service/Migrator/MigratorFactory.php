@@ -14,10 +14,10 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\Service\Migrator;
+namespace Shuttle\Service\Migrator;
 
 use Doctrine\DBAL\Connection;
-use ConveyorBelt\Service\Recorder\RecorderInterface;
+use Shuttle\Service\Recorder\RecorderInterface;
 use RuntimeException;
 
 /**

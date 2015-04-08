@@ -14,12 +14,12 @@
  * ------------------------------------------------------------------
  */
 
-namespace ConveyorBelt\CliApp\Command;
+namespace Shuttle\CliApp\Command;
 
-use ConveyorBelt\Service\Migrator\Event\MigrateResultInterface;
-use ConveyorBelt\Service\Migrator\Events;
-use ConveyorBelt\Service\Migrator\MigrateService;
-use ConveyorBelt\Service\Migrator\MigratorInterface;
+use Shuttle\Service\Migrator\Event\MigrateResultInterface;
+use Shuttle\Service\Migrator\Events;
+use Shuttle\Service\Migrator\MigrateService;
+use Shuttle\Service\Migrator\MigratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
