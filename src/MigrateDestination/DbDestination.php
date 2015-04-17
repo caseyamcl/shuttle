@@ -45,6 +45,23 @@ class DbDestination implements DestinationInterface
     // ---------------------------------------------------------------
 
     /**
+     * Build from DSN
+     *
+     * @param string $dsn
+     * @param string $username
+     * @param string $password
+     * @param string $tableName
+     * @param string $idFieldName
+     * @return static
+     */
+    public static function build($dsn, $username, $password, $tableName, $idFieldName)
+    {
+        return new static(new \PDO($dsn, $username, $password), $tableName, $idFieldName);
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
      * Constructor
      *
      * @param \PDO    $dbConn
