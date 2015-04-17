@@ -27,7 +27,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use TaskTracker\Subscriber\SymfonyConsoleLog;
 use TaskTracker\Subscriber\SymfonyConsoleProgress;
-use TaskTracker\Tracker;
 use TaskTracker\TrackerFactory;
 
 /**
@@ -64,13 +63,33 @@ class Migrate extends Command
     public function __construct(MigrateService $migrateService, $migratorName = '', TrackerFactory $trackerFactory = null)
     {
         $this->migrateService = $migrateService;
-        $this->trackerFactory = $trackerFactory ?: new TrackerFactory();
+        $this->setTrackerFactory($trackerFactory ?: new TrackerFactory());
 
         if ($migratorName) {
             $this->migrator = $migrateService->getMigrators()->get($migratorName);
         }
 
         parent::__construct();
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
+     * @return TrackerFactory
+     */
+    public function getTrackerFactory()
+    {
+        return $this->trackerFactory;
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
+     * @param TrackerFactory $trackerFactory
+     */
+    public function setTrackerFactory(TrackerFactory $trackerFactory)
+    {
+        $this->trackerFactory = $trackerFactory;
     }
 
     // ---------------------------------------------------------------
