@@ -25,7 +25,7 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleYamlSource extends SimpleJsonSource
+class YamlSource extends JsonSource
 {
     /**
      * @var Parser

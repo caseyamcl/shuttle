@@ -25,7 +25,7 @@ use Shuttle\Service\Migrator\SourceInterface;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleJsonSource implements \IteratorAggregate, SourceInterface
+class JsonSource implements \IteratorAggregate, SourceInterface
 {
     /**
      * @var array  Array of arrays

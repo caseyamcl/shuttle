@@ -17,11 +17,11 @@
 namespace Shuttle\MigrateSource;
 
 /**
- * Class SimpleCSVSource
+ * Class CsvSource
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleCSVSource extends SimpleJsonSource
+class CsvSource extends JsonSource
 {
     /**
      * @var bool

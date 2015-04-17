@@ -21,11 +21,11 @@ use Shuttle\Service\Migrator\DestinationInterface;
 use Shuttle\Service\Migrator\Exception\MissingRecordException;
 
 /**
- * Class SimpleDbDestination
+ * Class dbDestination
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleDbDestination implements DestinationInterface
+class dbDestination implements DestinationInterface
 {
     /**
      * @var \PDO

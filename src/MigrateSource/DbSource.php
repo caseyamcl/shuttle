@@ -28,7 +28,7 @@ use Doctrine\Instantiator\Exception\InvalidArgumentException;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class SimpleDbSource implements \IteratorAggregate, SourceInterface
+class DbSource implements \IteratorAggregate, SourceInterface
 {
     /**
      * @var \PDO
@@ -53,12 +53,35 @@ class SimpleDbSource implements \IteratorAggregate, SourceInterface
     // ---------------------------------------------------------------
 
     /**
+     * Build from DSN (DB Connection String)
+     *
+     * @param string $dbConnString
+     * @param string $username
+     * @param string $password
+     * @param string $countQuery
+     * @param string $listQuery
+     * @param string $singleQuery
+     * @return static
+     */
+    public static function build($dbConnString, $username, $password, $countQuery, $listQuery, $singleQuery)
+    {
+        return new static(
+            new \PDO($dbConnString, $username, $password),
+            $countQuery,
+            $listQuery,
+            $singleQuery
+        );
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
      * Constructor
      *
      * @param \PDO   $dbConn       Database connection
-     * @param string $countQuery   Should return a single row, single column with number of records
-     * @param string $listQuery    Should not take any parameters and return a single-column list of IDs
-     * @param string $singleQuery  Should take one parameter (the ID) and return a single record as an associative array
+     * @param string $countQuery   Should accept no parameters and return a single row, single column with number of records
+     * @param string $listQuery    Should accept no parameters and return a single-column list of IDs
+     * @param string $singleQuery  Should accept one parameter, the ID (placeholder is a '?'), and return a single record
      */
     public function __construct(\PDO $dbConn, $countQuery, $listQuery, $singleQuery)
     {
