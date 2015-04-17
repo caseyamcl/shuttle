@@ -121,7 +121,7 @@ class Shuttle
     // ---------------------------------------------------------------
 
     /**
-     * @return Service\Migrator\MigratorCollection
+     * @return Service\Migrator\MigratorCollection|MigratorInterface[]
      */
     public function getMigrators()
     {
@@ -143,8 +143,8 @@ class Shuttle
 
         if ($onePerMigrator == true) {
             foreach ($this->getMigrators() as $mig) {
-                $cmds[] = new ConsoleCmd\Migrate($this->getMigrateService(), $mig);
-                $cmds[] = new ConsoleCmd\Revert($this->getMigrateService(), $mig);
+                $cmds[] = new ConsoleCmd\Migrate($this->getMigrateService(), $mig->getSlug());
+                $cmds[] = new ConsoleCmd\Revert($this->getMigrateService(), $mig->getSlug());
             }
         }
         else {
