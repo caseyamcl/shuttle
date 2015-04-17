@@ -17,7 +17,7 @@
 namespace ShuttleTest\MigrateDestination;
 
 
-use Shuttle\MigrateDestination\SimpleDbDestination;
+use Shuttle\MigrateDestination\DbTableDestination;
 use Shuttle\Service\Migrator\DestinationInterface;
 use ShuttleTest\Service\Migrator\AbstractDestinationInterfaceTest;
 
@@ -68,7 +68,7 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
      */
     protected function getDestObj()
     {
-        return new SimpleDbDestination($this->dbConn, 'items', 'id');
+        return new DbTableDestination($this->dbConn, 'items', 'id');
     }
 
     /**

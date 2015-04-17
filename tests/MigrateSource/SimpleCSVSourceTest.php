@@ -16,7 +16,7 @@
 
 namespace ShuttleTest\MigrateSource;
 
-use Shuttle\MigrateSource\SimpleCSVSource;
+use Shuttle\MigrateSource\CsvSource;
 use Shuttle\Service\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
@@ -64,7 +64,7 @@ class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
             ? __DIR__ . '/../Fixture/files/source_header_row.csv'
             : __DIR__ . '/../Fixture/files/source.csv';
 
-        return new SimpleCSVSource($source, 4, $hasHeaderRow);
+        return new CsvSource($source, 4, $hasHeaderRow);
     }
 
     /**

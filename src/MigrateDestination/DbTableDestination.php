@@ -21,11 +21,11 @@ use Shuttle\Service\Migrator\DestinationInterface;
 use Shuttle\Service\Migrator\Exception\MissingRecordException;
 
 /**
- * Class DbDestination
+ * Class DbTableDestination
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class DbDestination implements DestinationInterface
+class DbTableDestination implements DestinationInterface
 {
     /**
      * @var \PDO
@@ -40,7 +40,7 @@ class DbDestination implements DestinationInterface
     /**
      * @var string
      */
-    private $idFieldName;
+    private $idColumn;
 
     // ---------------------------------------------------------------
 
@@ -51,12 +51,12 @@ class DbDestination implements DestinationInterface
      * @param string $username
      * @param string $password
      * @param string $tableName
-     * @param string $idFieldName
+     * @param string $idColumn
      * @return static
      */
-    public static function build($dsn, $username, $password, $tableName, $idFieldName)
+    public static function build($dsn, $username, $password, $tableName, $idColumn)
     {
-        return new static(new \PDO($dsn, $username, $password), $tableName, $idFieldName);
+        return new static(new \PDO($dsn, $username, $password), $tableName, $idColumn);
     }
 
     // ---------------------------------------------------------------
@@ -66,13 +66,13 @@ class DbDestination implements DestinationInterface
      *
      * @param \PDO    $dbConn
      * @param string  $tableName
-     * @param string  $idFieldName
+     * @param string  $idColumn
      */
-    public function __construct(\PDO $dbConn, $tableName, $idFieldName)
+    public function __construct(\PDO $dbConn, $tableName, $idColumn = 'id')
     {
-        $this->dbConn      = $dbConn;
-        $this->tableName   = $tableName;
-        $this->idFieldName = $idFieldName;
+        $this->dbConn    = $dbConn;
+        $this->tableName = $tableName;
+        $this->idColumn  = $idColumn;
     }
 
     // ---------------------------------------------------------------
@@ -89,7 +89,7 @@ class DbDestination implements DestinationInterface
         $sql = sprintf(
             "SELECT t.* FROM %s t WHERE t.%s = ?",
             $this->tableName,
-            $this->idFieldName
+            $this->idColumn
         );
 
         $stmt = $this->dbConn->prepare($sql);
@@ -125,8 +125,8 @@ class DbDestination implements DestinationInterface
         $stmt = $this->dbConn->prepare($query);
         $stmt->execute(array_values($recordData));
 
-        return (isset($recordData[$this->idFieldName]))
-            ? $recordData[$this->idFieldName]
+        return (isset($recordData[$this->idColumn]))
+            ? $recordData[$this->idColumn]
             : (string) $this->dbConn->lastInsertId();
     }
 
@@ -140,7 +140,7 @@ class DbDestination implements DestinationInterface
      */
     function deleteRecord($id)
     {
-        $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idFieldName);
+        $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idColumn);
         $stmt = $this->dbConn->prepare($sql);
 
         $stmt->execute([$id]);

@@ -1,9 +1,0 @@
-{
-    "directories": ["src", "vendor"],
-    "bootstrap": "distbuild.php",
-    "files": ["cli/run.php"],
-    "main": "cli/run.php",
-    "output": "dist/ticketmove.phar",
-    "stub": true,
-    "chmod": "0755"
-}

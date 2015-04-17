@@ -17,7 +17,7 @@
 namespace ShuttleTest\MigrateSource;
 
 
-use Shuttle\MigrateSource\SimpleJsonSource;
+use Shuttle\MigrateSource\JsonSource;
 use Shuttle\Service\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
@@ -28,7 +28,7 @@ class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
      */
     protected function getSourceObj()
     {
-        return new SimpleJsonSource(file_get_contents(__DIR__ . '/../Fixture/files/source.json'), 'id');
+        return new JsonSource(file_get_contents(__DIR__ . '/../Fixture/files/source.json'), 'id');
     }
 
     /**

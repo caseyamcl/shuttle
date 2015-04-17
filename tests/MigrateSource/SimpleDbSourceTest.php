@@ -17,7 +17,7 @@
 namespace ShuttleTest\MigrateSource;
 
 
-use Shuttle\MigrateSource\SimpleDbSource;
+use Shuttle\MigrateSource\DbSource;
 use Shuttle\Service\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
@@ -68,7 +68,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
      */
     protected function getSourceObj()
     {
-        return new SimpleDbSource(
+        return new DbSource(
             self::$dbConn,
             "SELECT COUNT(i.id) FROM items i",
             "SELECT i.* FROM items i",

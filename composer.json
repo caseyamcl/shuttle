@@ -2,13 +2,11 @@
   "name": "caseyamcl/shuttle",
   "description": "Data Migration Tool - Get Data from Here to There",
   "require": {
-    "php"                     : ">=5.5",
-    "doctrine/dbal"           : "~2.5",
-    "cilex/cilex"             : "~1.1",
+    "php"                     : ">=5.4",
     "caseyamcl/tasktracker"   : "~2.0",
     "symfony/yaml"            : "~2.6",
-    "symfony/event-dispatcher": "~2.6",
-    "monolog/monolog"         : "~1.9"
+    "doctrine/dbal"           : "~2.5",
+    "symfony/event-dispatcher": "~2.6"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.5"

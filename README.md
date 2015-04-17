@@ -4,7 +4,7 @@ A Data Migration Tool - Get Data from Here to There!
 
 ## Overview
 
-Shuttle is a command-line tool and set of PHP libraries to facilitate
+Shuttle is a PHP library and command-line tool to facilitate
 moving data from one place (a database, web service, spreadsheet, text file,
 etc) to another.  This tool was developed to provide a general-purpose
 implementation of the concept behind the [Drupal Migrate Module](https://www.drupal.org/project/migrate).
@@ -16,4 +16,3 @@ as many times as you wish.
 
 ## Basic Usage
 
-left off here..

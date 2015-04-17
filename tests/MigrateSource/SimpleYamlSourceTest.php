@@ -16,7 +16,7 @@
 
 namespace ShuttleTest\MigrateSource;
 
-use Shuttle\MigrateSource\SimpleYamlSource;
+use Shuttle\MigrateSource\YamlSource;
 use Shuttle\Service\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
@@ -30,7 +30,7 @@ class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
     public function testMalformedYamlSourceThrowsException()
     {
         $this->setExpectedException('Symfony\Component\Yaml\Exception\ParseException');
-        $obj = new SimpleYamlSource('abcasdf---@(#*1230230--2-349u0h8dsfa', 'id');
+        $obj = new YamlSource('abcasdf---@(#*1230230--2-349u0h8dsfa', 'id');
     }
 
     /**
@@ -38,7 +38,7 @@ class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
      */
     protected function getSourceObj()
     {
-        return new SimpleYamlSource(file_get_contents(__DIR__ . '/../Fixture/files/source.yml'), 'id');
+        return new YamlSource(file_get_contents(__DIR__ . '/../Fixture/files/source.yml'), 'id');
     }
 
     /**
