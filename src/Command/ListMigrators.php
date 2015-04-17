@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\CliApp\Command;
+namespace Shuttle\Command;
 
 use Shuttle\Service\Migrator\MigratorCollection;
 use Shuttle\Service\Migrator\MigratorInterface;

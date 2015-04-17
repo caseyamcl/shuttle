@@ -14,7 +14,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\CliApp\Command;
+namespace Shuttle\Command;
 
 use Shuttle\Service\Migrator\Event\MigrateResultInterface;
 use Shuttle\Service\Migrator\Events;

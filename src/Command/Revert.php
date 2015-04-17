@@ -14,12 +14,10 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\CliApp\Command;
+namespace Shuttle\Command;
 
 use Shuttle\Service\Migrator\Events;
-use Shuttle\Service\Migrator\MigrateFailedResult;
 use Shuttle\Service\Migrator\MigratorInterface;
-
 
 /**
  * Revert Command
