@@ -39,6 +39,8 @@ class MigratorCollection implements \IteratorAggregate, \Countable
      */
     public function __construct($migrators = [])
     {
+        $this->migrators = [];
+
         foreach ($migrators as $migrator) {
             $this->add($migrator);
         }
