@@ -197,8 +197,8 @@ class MigrateService
             return new MigrateResult(
                 $migrator->getSlug(),
                 $sourceRecId,
-                $destRecId,
                 MigrateResult::PROCESSED,
+                $destRecId,
                 sprintf("Migrated (type %s) with id %s to destination record: %s", $migrator->getSlug(), $sourceRecId, $destRecId)
             );
         }
@@ -225,8 +225,8 @@ class MigrateService
             return new RevertResult(
                 $migrator->getSlug(),
                 $sourceRecId,
-                $destRecId,
                 $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
+                $destRecId,
                 sprintf(
                     "%s (type %s) with destination id %s (source id: %s)",
                     ($isDeleted ? 'reverted' : 'skipped'),
