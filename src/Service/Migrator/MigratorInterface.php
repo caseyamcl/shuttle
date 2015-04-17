@@ -49,6 +49,11 @@ interface MigratorInterface
     function getNumRecords();
 
     /**
+     * @return array|\Traversable|string[]
+     */
+    function listSourceIds();
+
+    /**
      * Migrate a single record
      *
      * @param string $oldRecId  Record ID in the old system

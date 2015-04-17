@@ -71,17 +71,17 @@ class MigratorFactory
      * Build a new
      * @param string $className  Fully-qualified class-name
      * @param array  $params     Parameters
-     * @return BaseMigrator
+     * @return Migrator
      */
     public function build($className, array $params = [])
     {
         $className = $this->resolveClassName($className);
 
-        if ( ! is_a($className, __NAMESPACE__ . "\\BaseMigrator", true)) {
+        if ( ! is_a($className, __NAMESPACE__ . "\\Migrator", true)) {
             throw new RuntimeException(sprintf(
                 "%s can only build objects that subclass: %s",
                 get_called_class(),
-                __NAMESPACE__ . "\\BaseMigrator"
+                __NAMESPACE__ . "\\Migrator"
             ));
         }
 

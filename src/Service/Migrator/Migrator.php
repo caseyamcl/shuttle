@@ -16,14 +16,12 @@
 
 namespace Shuttle\Service\Migrator;
 
-use Shuttle\Service\Migrator\Event\MigrateResult;
-
 /**
  * Base Migrator
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-abstract class BaseMigrator implements MigratorInterface
+class Migrator implements MigratorInterface
 {
     /**
      * @var string
@@ -57,9 +55,10 @@ abstract class BaseMigrator implements MigratorInterface
      */
     public function __construct($slug, SourceInterface $source, DestinationInterface $destination, $description = '')
     {
-        $this->slug        = $slug;
         $this->source      = $source;
         $this->destination = $destination;
+
+        $this->setSlug($slug);
         $this->setDescription($description);
     }
 
@@ -81,6 +80,18 @@ abstract class BaseMigrator implements MigratorInterface
     public function getDescription()
     {
         return $this->description;
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
+     * Set Slug
+     *
+     * @param string $slug
+     */
+    protected function setSlug($slug)
+    {
+        $this->slug = $slug;
     }
 
     // ---------------------------------------------------------------
@@ -149,6 +160,16 @@ abstract class BaseMigrator implements MigratorInterface
     public function revert($newRecId)
     {
         $this->destination->deleteRecord($newRecId);
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
+     * @return array|\Traversable|string[]
+     */
+    function listSourceIds()
+    {
+        return $this->source->listRecordIds();
     }
 
     // ---------------------------------------------------------------
