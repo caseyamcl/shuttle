@@ -13,8 +13,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Shuttle\\": "src/",
-      "ShuttleMigrator\\": "migrators/"
+      "Shuttle\\": "src/"
     }
   },
   "autoload-dev": {
