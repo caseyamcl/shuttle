@@ -4,15 +4,77 @@ A Data Migration Tool - Get Data from Here to There!
 
 ## Overview
 
-Shuttle is a PHP library and command-line tool to facilitate
-moving data from one place (a database, web service, spreadsheet, text file,
-etc) to another.  This tool was developed to provide a general-purpose
-implementation of the concept behind the [Drupal Migrate Module](https://www.drupal.org/project/migrate).
+Shuttle is a PHP library to facilitate moving data from one place 
+(a database, web service, spreadsheet, text file, etc) to another.  
+This tool was developed to provide a general-purpose implementation of the concept 
+behind the [Drupal Migrate Module](https://www.drupal.org/project/migrate).
 
-In short, this library allows you to migrate records from a given source,
-transform it as necessary, and dump it into a destination.  Shuttle will
-keep track of record IDs as they are migrated and allow you to revert and re-migrate
-as many times as you wish.
+This library allows you to migrate records from a given source, transform it as necessary,
+and dump it into a destination.  Shuttle will keep track of record IDs as they are migrated,
+and will allow you to revert and re-migrate your records as needed.
 
-## Basic Usage
+If you are looking for a standalone CLI tool to move records, check out the [Shuttle Tool](#).
 
+## Installation
+
+Install via Composer:
+
+    composer require caseyamcl/shuttle ~0.1
+
+## Sources
+
+## Creating your Own Source
+
+## Destinations
+
+## Creating Your Own Destination
+
+## Creating a Migrator
+
+To migrate a set of data, you need three components:
+
+* A Source, represented by a `MigrateSource` class
+* A Destination, represented by a `MigrateDestination` class
+* A Migrator, represented by a `Migrator` class
+
+Shuttle includes several built-in source and destination classes.  The documentation is below.
+
+To migrate data, you need to create a class that extends the Migrator class and override the constructor:
+
+    use Shuttle\Service\Migrator\Migrator;
+    
+    class MyMigrator extends Migrator
+    {
+        public function __construct()
+        {
+            $slug        = 'mydata';
+            $description = 'Migrate some Data';
+            $source      = SomeSourceClass();
+            $destination = SomeDestinationClass();
+        
+            parent::__construct($slug, $description, $source, $destination);
+        }
+    }
+    
+## Custom Mapping Logic
+
+Override the `Migrator::prepare` method to provide custom logic during migration.
+
+## Using the Console Commands
+
+If your application uses Symfony Console component, you can add console commands to your app for listing migrators, 
+migrating, and reverting records.
+  
+There are two ways to expose `migrate` and `revert` commands in your application.
+
+1. Create a single command and let the user specify the migrator by its name as a CLI argument
+2. Create a separate command for each migrator
+
+### Creating a Single Command
+
+### Creating a Separate Command for Each Migrator
+
+## Tracking Migrations using Events
+
+Shuttle uses the [Symfony Event Dispatcher](#) library to dispatch events as records are migrated or reverted.
+You can create event listeners to report on progress or log these events if you wish.
