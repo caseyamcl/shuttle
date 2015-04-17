@@ -27,6 +27,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use TaskTracker\Subscriber\SymfonyConsoleLog;
 use TaskTracker\Subscriber\SymfonyConsoleProgress;
+use TaskTracker\Tracker;
 use TaskTracker\TrackerFactory;
 
 /**
@@ -56,14 +57,14 @@ class Migrate extends Command
     /**
      * Constructor
      *
-     * @param TrackerFactory $trackerFactory
-     * @param MigrateService $migrateService
-     * @param string         $migratorName
+     * @param MigrateService $migrateService  Migrate service
+     * @param string         $migratorName    Optionally provide migrator name (if not provided, a CLI argument is available)
+     * @param TrackerFactory $trackerFactory  Optionally provide a Task Tracker Factory
      */
-    public function __construct(TrackerFactory $trackerFactory, MigrateService $migrateService, $migratorName = '')
+    public function __construct(MigrateService $migrateService, $migratorName = '', TrackerFactory $trackerFactory = null)
     {
         $this->migrateService = $migrateService;
-        $this->trackerFactory = $trackerFactory;
+        $this->trackerFactory = $trackerFactory ?: new TrackerFactory();
 
         if ($migratorName) {
             $this->migrator = $migrateService->getMigrators()->get($migratorName);
