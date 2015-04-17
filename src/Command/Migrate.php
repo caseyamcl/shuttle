@@ -134,6 +134,8 @@ class Migrate extends Command
             : new SymfonyConsoleProgress($output);
         $tracker = $this->trackerFactory->buildTracker($numItems, [$handler]);
 
+        $tracker->start();
+
         // Register callback for Tracker to report on progress
         $this->migrateService->getDispatcher()->addListener($this->getEventListenName(), function(MigrateResultInterface $event) use ($tracker) {
             $tracker->tick($event->getStatus(), $event->getMessage(), ['result_obj' => $event]);
