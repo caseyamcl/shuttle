@@ -91,15 +91,17 @@ class DefaultDatabaseBuilder
      */
     public function getDefaultConnection()
     {
-        // Get the Database URL
-        $dbUrl = sprintf(
-            'sqlite://%s%s%s',
+        $dbFullPath = sprintf(
+            "%s%s%s.sqlite",
             rtrim($this->dbPath, DIRECTORY_SEPARATOR),
             DIRECTORY_SEPARATOR,
             $this->appSlug
         );
 
-        return DriverManager::getConnection(['url' => $dbUrl]);
+        return DriverManager::getConnection([
+            'path' => $dbFullPath,
+            'driver' => 'pdo_sqlite'
+        ]);
     }
 
     // ---------------------------------------------------------------
