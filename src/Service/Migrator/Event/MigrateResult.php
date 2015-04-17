@@ -83,7 +83,6 @@ class MigrateResult extends Event implements MigrateResultInterface
         $this->oldId   = $oldId;
         $this->newId   = $newId;
         $this->message = $message;
-
     }
 
     // ---------------------------------------------------------------

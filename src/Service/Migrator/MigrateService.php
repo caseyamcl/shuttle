@@ -183,8 +183,8 @@ class MigrateService
             return new MigrateResult(
                 $migrator->getSlug(),
                 $sourceRecId,
-                $this->recorder->getNewId($migrator->getSlug(), $sourceRecId),
                 MigrateResult::SKIPPED,
+                $this->recorder->getNewId($migrator->getSlug(), $sourceRecId),
                 sprintf("Record (type %s) with id %s is already migrated", $migrator->getSlug(), $sourceRecId)
             );
         }
