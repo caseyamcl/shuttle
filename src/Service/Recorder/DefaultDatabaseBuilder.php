@@ -65,8 +65,8 @@ class DefaultDatabaseBuilder
      */
     public function __construct($appSlug = 'shttl', $dbPath = self::AUTO)
     {
-        if ( ! function_exists('sqlite_open')) {
-            throw new RuntimeException("Cannot build tracking database without SQLite Extension.  Install PHP SQLite Extension to fix this.");
+        if ( ! class_exists('\SQLite3')) {
+            throw new RuntimeException("Cannot build tracking database without SQLite3 Extension.  Install PHP SQLite3 Extension to fix this.");
         }
 
         if ($dbPath && ! is_dir($dbPath)) {
