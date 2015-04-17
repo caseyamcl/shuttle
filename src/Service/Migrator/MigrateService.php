@@ -59,7 +59,7 @@ class MigrateService
     {
         $this->recorder   = $recorder;
         $this->dispatcher = $dispatcher;
-        $this->migrators  = $migrators;
+        $this->migrators  = $migrators ?: new MigratorCollection();
     }
 
     // ---------------------------------------------------------------
