@@ -33,7 +33,7 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
     /**
      * @var string
      */
-    private $msg;
+    protected $msg;
 
     /**
      * @var \Exception
@@ -43,13 +43,13 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
     // ---------------------------------------------------------------
 
     /**
-     * @param string     $destRecId
+     * @param string     $recId
      * @param string     $msg
      * @param \Exception $e
      */
-    public function __construct($destRecId, $msg, \Exception $e = null)
+    public function __construct($recId, $msg, \Exception $e = null)
     {
-        $this->recId       = $destRecId;
+        $this->recId       = $recId;
         $this->msg         = $msg;
         $this->exception   = $e;
     }
@@ -67,7 +67,7 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
      */
     public function getMessage()
     {
-        return "(new ID: {$this->recId}): " . $this->msg;
+        return "(Source ID: {$this->getRecId()}): " . $this->msg;
     }
 
     /**

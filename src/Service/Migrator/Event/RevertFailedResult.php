@@ -22,4 +22,12 @@ class RevertFailedResult extends MigrateFailedResult
     {
         parent::__construct($destRecId, $msg, $e);
     }
+
+    /**
+     * @return string
+     */
+    public function getMessage()
+    {
+        return "(Destination ID: {$this->getRecId()}): " . $this->msg;
+    }
 }

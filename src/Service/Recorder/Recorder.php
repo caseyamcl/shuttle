@@ -172,10 +172,10 @@ class Recorder implements RecorderInterface
         $table->addColumn('timestamp', 'integer', ['unsigned' => true, 'notnull' => true]);
 
         // Only add PK if not SQLITE (SQLITE does it automatically)
-        if ($this->dbConn->getDriver()->getName() != 'pdo_sqlite') {
-            $table->addColumn('rowid', 'integer', ['unsigned' => true, 'notnull' => true, 'autoincrement' => true]);
-            $table->setPrimaryKey(['rowid']);
-        }
+        //if ($this->dbConn->getDriver()->getName() != 'pdo_sqlite') {
+        $table->addColumn('rowid', 'integer', ['unsigned' => true, 'notnull' => true, 'autoincrement' => true]);
+        $table->setPrimaryKey(['rowid']);
+        //}
 
         $table->addIndex(['old_id']);
         $table->addIndex(['new_id']);
