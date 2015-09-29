@@ -67,7 +67,7 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
      */
     public function getMessage()
     {
-        return "(old ID: {$this->sourceRecId}): " . $this->msg;
+        return "(new ID: {$this->recId}): " . $this->msg;
     }
 
     /**
