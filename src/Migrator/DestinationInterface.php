@@ -31,7 +31,7 @@ interface DestinationInterface
      * @return array  Record, represented as array
      * @throws MissingItemException
      */
-    function getItem(string $destinationId): array;
+    public function getItem(string $destinationId): array;
 
     /**
      * Save a record
@@ -41,7 +41,7 @@ interface DestinationInterface
      * @param array $recordData
      * @return string  The ID of the inserted record
      */
-    function saveItem(array $recordData): string;
+    public function saveItem(array $recordData): string;
 
 
     /**
@@ -50,5 +50,5 @@ interface DestinationInterface
      * @param string $destinationId
      * @return bool  If a record existed to be deleted, returns TRUE, else FALSE
      */
-    function deleteItem(string $destinationId): bool;
+    public function deleteItem(string $destinationId): bool;
 }

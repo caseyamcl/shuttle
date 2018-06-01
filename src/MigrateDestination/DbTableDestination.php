@@ -76,7 +76,7 @@ class DbTableDestination implements DestinationInterface
      * @return array  Record, represented as array
      * @throws MissingItemException
      */
-    function getItem(string $destinationId): array
+    public function getItem(string $destinationId): array
     {
         $sql = sprintf("SELECT t.* FROM %s t WHERE t.%s = ?", $this->tableName, $this->idColumn);
 
@@ -98,7 +98,7 @@ class DbTableDestination implements DestinationInterface
      * @param array $recordData
      * @return string  The ID of the inserted record
      */
-    function saveItem(array $recordData): string
+    public function saveItem(array $recordData): string
     {
         $query = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
@@ -121,7 +121,7 @@ class DbTableDestination implements DestinationInterface
      * @param string $destinationId
      * @return bool
      */
-    function deleteItem(string $destinationId): bool
+    public function deleteItem(string $destinationId): bool
     {
         $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idColumn);
         $stmt = $this->dbConn->prepare($sql);

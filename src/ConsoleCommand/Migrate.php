@@ -48,7 +48,8 @@ class Migrate extends Command
      * Constructor
      *
      * @param MigrateService $migrateService  Migrate service
-     * @param string         $migratorName    Optionally provide migrator name (if not provided, a CLI argument is available)
+     * @param string         $migratorName    Optionally provide migrator name
+     *                                        (if not provided, a CLI argument is made available to the user)
      */
     public function __construct(MigrateService $migrateService, $migratorName = '')
     {
@@ -67,11 +68,26 @@ class Migrate extends Command
             $this->setName(static::ACTION_NAME . ':' . $this->migrator->getSlug());
             $this->setDescription(ucfirst(static::ACTION_NAME) . " " . $this->migrator->getSlug());
         } else {
-            $this->addArgument('migrator', InputArgument::REQUIRED, 'The name (slug) of the migrator to ' . static::ACTION_NAME);
+            $this->addArgument(
+                'migrator',
+                InputArgument::REQUIRED,
+                'The name (slug) of the migrator to ' . static::ACTION_NAME
+            );
         }
 
-        $this->addOption('ids', 'i', InputOption::VALUE_REQUIRED, 'Optionally indicate a comma-separated list of IDs from source to ' . static::ACTION_NAME);
-        $this->addOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Optionally set a limit');
+        $this->addOption(
+            'ids',
+            'i',
+            InputOption::VALUE_REQUIRED,
+            'Optionally indicate a comma-separated list of IDs from source to ' . static::ACTION_NAME
+        );
+
+        $this->addOption(
+            'limit',
+            'l',
+            InputOption::VALUE_REQUIRED,
+            'Optionally set a limit'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -136,7 +152,8 @@ class Migrate extends Command
 
         // Final report
         $output->writeln(sprintf(
-            "\n%s Finished for %s: <info>%s</info> processed (<fg=yellow>%s</fg=yellow> skipped / <fg=red>%s</fg=red> failed)",
+            "\n%s Finished for %s: <info>%s</info> processed"
+            . "(<fg=yellow>%s</fg=yellow> skipped / <fg=red>%s</fg=red> failed)",
             ucfirst(static::ACTION_NAME),
             $migrator->getSlug(),
             number_format($processLog[MigrateResultInterface::PROCESSED]),

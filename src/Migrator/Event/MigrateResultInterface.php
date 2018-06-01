@@ -24,10 +24,10 @@ interface MigrateResultInterface
     /**
      * @return int  (-1 skipped; 0 failed; 1 success)
      */
-    function getStatus(): int;
+    public function getStatus(): int;
 
     /**
      * @return string
      */
-    function getMessage(): string;
+    public function getMessage(): string;
 }

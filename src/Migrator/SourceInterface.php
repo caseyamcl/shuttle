@@ -27,12 +27,12 @@ interface SourceInterface extends \Traversable, \Countable
     /**
      * @return iterable|string[]  Get a list of record IDs in the source
      */
-    function listItemIds(): iterable;
+    public function listItemIds(): iterable;
 
     /**
      * @param string $id  The item ID to get
      * @return array  The item, represented as key/value associative array
      * @throws MissingItemException
      */
-    function getItem(string $id): array;
+    public function getItem(string $id): array;
 }

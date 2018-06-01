@@ -153,7 +153,7 @@ class Migrator implements MigratorInterface
     /**
      * @return array|string[]
      */
-    function listSourceIds(): iterable
+    public function listSourceIds(): iterable
     {
         return $this->source->listItemIds();
     }

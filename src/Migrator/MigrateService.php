@@ -185,7 +185,12 @@ class MigrateService
                 $sourceRecId,
                 MigrateResult::PROCESSED,
                 $destRecId,
-                sprintf("Migrated (type %s) with id %s to destination record: %s", $migrator->getSlug(), $sourceRecId, $destRecId)
+                sprintf(
+                    "Migrated (type %s) with id %s to destination record: %s",
+                    $migrator->getSlug(),
+                    $sourceRecId,
+                    $destRecId
+                )
             );
         } catch (\RuntimeException $e) {
             return new MigrateFailedResult($sourceRecId, $e->getMessage(), $e);

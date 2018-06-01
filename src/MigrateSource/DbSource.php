@@ -55,9 +55,9 @@ class DbSource implements \IteratorAggregate, SourceInterface
      * @param string $dsn         PDO-compatible DSN
      * @param string $username    Database username
      * @param string $password    Database password
-     * @param string $countQuery  Should accept no parameters and return a single row, single column with number of items
-     * @param string $listQuery   Should accept no parameters and return a single-column list of item IDs
-     * @param string $singleQuery Should accept one parameter, the ID (placeholder is a '?'), and return a single item
+     * @param string $countQuery  Should accept no params and return a single row, single column with number of items
+     * @param string $listQuery   Should accept no params and return a single-column list of item IDs
+     * @param string $singleQuery Should accept one param, the ID (placeholder is a '?'), and return a single item
      * @return static
      */
     public static function build(
@@ -80,9 +80,9 @@ class DbSource implements \IteratorAggregate, SourceInterface
      * Constructor
      *
      * @param \PDO   $dbConn       Database connection
-     * @param string $countQuery   Should accept no parameters and return a single row, single column with number of records
-     * @param string $listQuery    Should accept no parameters and return a single-column list of IDs
-     * @param string $singleQuery  Should accept one parameter, the ID (placeholder is a '?'), and return a single record
+     * @param string $countQuery   Should accept no params and return a single row, single column with number of records
+     * @param string $listQuery    Should accept no params and return a single-column list of IDs
+     * @param string $singleQuery  Should accept one param, the ID (placeholder is a '?'), and return a single record
      */
     public function __construct(\PDO $dbConn, string $countQuery, string $listQuery, string $singleQuery)
     {
@@ -93,7 +93,10 @@ class DbSource implements \IteratorAggregate, SourceInterface
 
         // Sanity check
         if (substr_count($this->singleQuery, '?') != 1) {
-            throw new InvalidArgumentException("The single record query should include a single parameter placeholder ('?' symbol) to represent the ID");
+            throw new InvalidArgumentException(
+                "The single record query should include a single parameter "
+                . "placeholder ('?' symbol) to represent the ID"
+            );
         }
     }
 
@@ -107,7 +110,7 @@ class DbSource implements \IteratorAggregate, SourceInterface
     /**
      * @return iterable|string[]  Get a list of item IDs in the source
      */
-    function listItemIds(): iterable
+    public function listItemIds(): iterable
     {
         $stmt = $this->dbConn->prepare($this->listQuery);
         $stmt->execute();
@@ -117,7 +120,7 @@ class DbSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    function getItem(string $id): array
+    public function getItem(string $id): array
     {
         $stmt = $this->dbConn->prepare($this->singleQuery);
         $stmt->execute([$id]);

@@ -34,45 +34,45 @@ class MigratorFactory
     /**
      * @var Connection
      */
-    private $newDbConn;
+    private $destinationDbConnection;
 
     /**
      * @var Connection
      */
-    private $oldDbConn;
+    private $sourceDbConnection;
 
     /**
-     * @var array
+     * @var array|string[]
      */
-    private $searchNs;
-
-    // ---------------------------------------------------------------
+    private $searchNamespaces;
 
     /**
      * Constructor
      *
-     * @param Connection        $oldDbConn
-     * @param Connection        $newDbConn
+     * @param Connection        $sourceDbConnection
+     * @param Connection        $destinationDbConnection
      * @param RecorderInterface $recorder
      * @param array             $searchNamespaces  Provide a list of namespaces, so that short class names can be used
      */
-    public function __construct(Connection $oldDbConn, Connection $newDbConn, RecorderInterface $recorder, array $searchNamespaces = [])
-    {
-        $this->oldDbConn = $oldDbConn;
-        $this->newDbConn = $newDbConn;
-        $this->recorder  = $recorder;
-        $this->searchNs  = $searchNamespaces;
+    public function __construct(
+        Connection $sourceDbConnection,
+        Connection $destinationDbConnection,
+        RecorderInterface $recorder,
+        array $searchNamespaces = []
+    ) {
+        $this->sourceDbConnection = $sourceDbConnection;
+        $this->destinationDbConnection = $destinationDbConnection;
+        $this->recorder = $recorder;
+        $this->searchNamespaces  = $searchNamespaces;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Build a new
      * @param string $className  Fully-qualified class-name
      * @param array  $params     Parameters
-     * @return Migrator
+     * @return MigratorInterface
      */
-    public function build($className, array $params = [])
+    public function build(string $className, array $params = []): MigratorInterface
     {
         $className = $this->resolveClassName($className);
 
@@ -84,19 +84,17 @@ class MigratorFactory
             ));
         }
 
-        return new $className($this->oldDbConn, $this->newDbConn, $this->recorder, $params);
+        return new $className($this->sourceDbConnection, $this->destinationDbConnection, $this->recorder, $params);
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Resolve Class Name
      *
-     * @param $className
+     * @param string $className
      * @return string
      * @throws \RuntimeException  If class not found
      */
-    private function resolveClassName($className)
+    private function resolveClassName(string $className): string
     {
         // If the class name exists as given, return it..
         if (class_exists($className)) {
@@ -106,7 +104,7 @@ class MigratorFactory
         $searched = [];
 
         // If default namespaces provided, loop through in order until one works
-        foreach ($this->searchNs as $ns) {
+        foreach ($this->searchNamespaces as $ns) {
             $fqNs = "\\" . trim($ns, "\\") . "\\" . ltrim($className, "\\");
             $searched[] = $fqNs;
             if (class_exists($fqNs)) {

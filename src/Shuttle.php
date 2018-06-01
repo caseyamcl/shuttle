@@ -45,7 +45,8 @@ class Shuttle
      *
      * @param string $appSlug A unique alphanum-dash name for this instance of Shuttle
      * @param RecorderInterface $recorder Optionally specify a custom recorder/tracker
-     * @param EventDispatcherInterface $dispatcher Optionally inject your own Event Dispatcher instead of constructing a new one
+     * @param EventDispatcherInterface $dispatcher Optionally inject your own Event Dispatcher instead of
+     *                                             constructing a new one
      */
     public function __construct(
         string $appSlug,

@@ -120,10 +120,18 @@ class Recorder implements RecorderInterface
     {
         // Check and throw exception manually, since indexes seem to be failing silently.. (?)
         if ($this->findDestinationId($type, $sourceId)) {
-            throw new \PDOException(sprintf("Integrity violation (app layer):  Duplicate key for %s.oldId: %s", $type, $sourceId));
+            throw new \PDOException(sprintf(
+                "Integrity violation (app layer):  Duplicate key for %s.oldId: %s",
+                $type,
+                $sourceId
+            ));
         }
         if ($this->findSourceId($type, $destinationId)) {
-            throw new \PDOException(sprintf("Integrity violation (app layer):  Duplicate key for %s.newId: %s", $type, $destinationId));
+            throw new \PDOException(sprintf(
+                "Integrity violation (app layer):  Duplicate key for %s.newId: %s",
+                $type,
+                $destinationId
+            ));
         }
 
         $this->dbConn->insert($this->tableName, [

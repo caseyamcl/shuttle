@@ -47,8 +47,10 @@ class DefaultDatabaseBuilder
      * @param string $dbPath   Optionally use a custom directory to store the SQLite database
      * @return Connection  Connection to the SQLiteDatabase
      */
-    public static function buildDefaultDatabaseConnection(string $appSlug = 'shttl', string $dbPath = self::AUTO): Connection
-    {
+    public static function buildDefaultDatabaseConnection(
+        string $appSlug = 'shttl',
+        string $dbPath = self::AUTO
+    ): Connection {
         $that = new static($appSlug, $dbPath);
         return $that->getDefaultConnection();
     }
@@ -62,10 +64,16 @@ class DefaultDatabaseBuilder
     public function __construct(string $appSlug = 'shttl', string $dbPath = self::AUTO)
     {
         if (! class_exists('Doctrine\DBAL\Connection')) {
-            throw new RuntimeException("Cannot build tracking database without Doctrine DBAL library.  Install with `composer require doctrine/dbal`");
+            throw new RuntimeException(
+                "Cannot build tracking database without Doctrine DBAL library."
+                . " Install with `composer require doctrine/dbal`"
+            );
         }
         if (! class_exists('\SQLite3')) {
-            throw new RuntimeException("Cannot build tracking database without SQLite3 Extension.  Install PHP SQLite3 Extension to fix this.");
+            throw new RuntimeException(
+                "Cannot build tracking database without SQLite3 Extension."
+                . " Install PHP SQLite3 Extension to fix this."
+            );
         }
 
         if ($dbPath && ! is_dir($dbPath)) {

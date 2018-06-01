@@ -25,32 +25,32 @@ interface MigratorInterface
     /**
      * @return string  A unique identifier for the type of record being migrated
      */
-    function getSlug(): string;
+    public function getSlug(): string;
 
     /**
      * @return string  A description of the records being migrated
      */
-    function getDescription(): string;
+    public function getDescription(): string;
 
     /**
      * @return SourceInterface
      */
-    function getSource(): SourceInterface;
+    public function getSource(): SourceInterface;
 
     /**
      * @return DestinationInterface
      */
-    function getDestination(): DestinationInterface;
+    public function getDestination(): DestinationInterface;
 
     /**
      * @return int  Number of records in the source
      */
-    function countSourceItems(): int;
+    public function countSourceItems(): int;
 
     /**
      * @return iterable|string[]
      */
-    function listSourceIds(): iterable;
+    public function listSourceIds(): iterable;
 
     /**
      * Migrate a single record
@@ -58,7 +58,7 @@ interface MigratorInterface
      * @param string $sourceRecordId  Record ID in the old system
      * @return string  The new Record ID
      */
-    function migrate(string $sourceRecordId): string;
+    public function migrate(string $sourceRecordId): string;
 
     /**
      * Revert a single record
@@ -66,5 +66,5 @@ interface MigratorInterface
      * @param string $destinationRecordId
      * @return bool  If the record was actually deleted, return TRUE, else FALSE
      */
-    function revert(string $destinationRecordId): bool;
+    public function revert(string $destinationRecordId): bool;
 }

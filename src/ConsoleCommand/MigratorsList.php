@@ -59,8 +59,21 @@ class MigratorsList extends Command
     {
         $this->setName('migrators:list');
         $this->setDescription('List available migrators');
-        $this->addOption('nostatus', 's', InputOption::VALUE_NONE, 'Omit migrations status (speeds up execution)');
-        $this->addOption('format', 'f', InputOption::VALUE_REQUIRED, "Output format ('table', 'cols', or 'json', 'jsonpretty'). Defaults to 'table'", 'table');
+
+        $this->addOption(
+            'nostatus',
+            's',
+            InputOption::VALUE_NONE,
+            'Omit migrations status (speeds up execution)'
+        );
+
+        $this->addOption(
+            'format',
+            'f',
+            InputOption::VALUE_REQUIRED,
+            "Output format ('table', 'cols', or 'json', 'jsonpretty'). Defaults to 'table'",
+            'table'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

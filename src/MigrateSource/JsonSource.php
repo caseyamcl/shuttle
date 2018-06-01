@@ -71,12 +71,12 @@ class JsonSource implements \IteratorAggregate, SourceInterface
     /**
      * @return array|iterable|string[]  Get a list of item IDs in the source
      */
-    function listItemIds(): iterable
+    public function listItemIds(): iterable
     {
         return array_map('strval', array_keys($this->items));
     }
 
-    function getItem(string $id): array
+    public function getItem(string $id): array
     {
         if (array_key_exists($id, $this->items)) {
             return $this->items[$id];
@@ -85,7 +85,7 @@ class JsonSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    function getIterator()
+    public function getIterator()
     {
         return new \ArrayIterator($this->listItemIds());
     }

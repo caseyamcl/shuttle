@@ -38,7 +38,9 @@ class YamlSource extends JsonSource
     public function __construct($rawJsonData, $idFieldName = '')
     {
         if (! class_exists('Symfony\Component\Yaml\Parser')) {
-            throw new \RuntimeException("Yaml source requires Symfony YAML dependency (`composer require symfony/yaml`)");
+            throw new \RuntimeException(
+                "Yaml source requires Symfony YAML dependency (`composer require symfony/yaml`)"
+            );
         }
 
         $this->parser = new Parser();
