@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,7 +13,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator\Event;
+namespace Shuttle\Migrator\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
@@ -25,11 +24,6 @@ use Symfony\Component\EventDispatcher\Event;
  */
 class MigrateResult extends Event implements MigrateResultInterface
 {
-    const SKIPPED   = -1;
-    const PROCESSED = 1;
-
-    // ---------------------------------------------------------------
-
     /**
      * @var string
      */
@@ -61,36 +55,39 @@ class MigrateResult extends Event implements MigrateResultInterface
      * Constructor
      *
      * @param string $type
-     * @param string $oldId
-     * @param string $newId
+     * @param string $sourceId
+     * @param string $destinationId
      * @param int    $status
      * @param string $message
      */
-    public function __construct($type, $oldId, $status, $newId = '', $message = '')
-    {
-        // Status
-        if ( ! in_array($status, [self::SKIPPED, self::PROCESSED])) {
+    public function __construct(
+        string $type,
+        string $sourceId,
+        int    $status,
+        string $destinationId = '',
+        string $message = ''
+    ) {
+        // Ensure valid status
+        if (! in_array($status, [self::SKIPPED, self::PROCESSED])) {
             throw new \InvalidArgumentException("Invalid status: " . $status);
         }
-        $this->status = $status;
 
         // Check logic
-        if (empty($newId) && $status !== self::SKIPPED) {
+        if (empty($destinationId) && $status !== self::SKIPPED) {
             throw new \InvalidArgumentException("New ID cannot be empty unless status is skipped");
         }
 
+        $this->status  = $status;
         $this->type    = $type;
-        $this->oldId   = $oldId;
-        $this->newId   = $newId;
+        $this->oldId   = $sourceId;
+        $this->newId   = $destinationId;
         $this->message = $message;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -98,7 +95,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return string
      */
-    public function getOldId()
+    public function getOldId(): string
     {
         return $this->oldId;
     }
@@ -106,7 +103,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return string
      */
-    public function getNewId()
+    public function getNewId(): string
     {
         return $this->newId;
     }
@@ -114,7 +111,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return int
      */
-    public function getStatus()
+    public function getStatus(): int
     {
         return $this->status;
     }
@@ -122,7 +119,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return string
      */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
@@ -130,7 +127,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return bool
      */
-    public function isMigrated()
+    public function isMigrated(): string
     {
         return $this->status == self::PROCESSED;
     }
@@ -138,7 +135,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return bool
      */
-    public function isSkipped()
+    public function isSkipped(): bool
     {
         return $this->status == self::SKIPPED;
     }

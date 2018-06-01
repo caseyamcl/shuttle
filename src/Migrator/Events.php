@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,18 +13,17 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator;
-
+namespace Shuttle\Migrator;
 
 final class Events
 {
     /**
      * Migrate event dispatched when migrator has completed
      */
-    const MIGRATE = 'Shuttle.migrate';
+    const MIGRATE = 'shuttle.migrate';
 
     /**
      * Revert event
      */
-    const REVERT = 'Shuttle.revert';
+    const REVERT = 'shuttle.revert';
 }

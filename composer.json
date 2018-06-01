@@ -1,24 +1,52 @@
 {
   "name": "caseyamcl/shuttle",
+  "type": "library",
   "description": "Data Migration Tool - Get Data from Here to There",
+  "license": "MIT",
+  "homepage": "https://github.com/caseyamcl/shuttle",
+  "keywords": [
+    "caseyamcl",
+    "shuttle",
+    "data",
+    "migrate"
+  ],
+  "authors": [
+    {
+      "name": "Casey McLaughlin",
+      "email": "caseyamcl@gmail.com",
+      "homepage": "https://caseymclaughlin.com",
+      "role": "Developer"
+    }
+  ],
   "require": {
-    "php"                     : ">=5.4",
-    "caseyamcl/tasktracker"   : "~2.0",
-    "symfony/yaml"            : "~2.6",
-    "doctrine/dbal"           : "~2.5",
-    "symfony/event-dispatcher": "~2.6"
+    "php": "^7.1",
+    "symfony/event-dispatcher": "^2.6|^3.0|^4.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "~4.5"
+    "phpunit/phpunit": "^7.0",
+    "squizlabs/php_codesniffer": "^2.3",
+
+    "doctrine/dbal": "^2.5",
+    "symfony/yaml": "^3.4|^4.0",
+    "symfony/console": "^3.4|^4.0"
   },
   "autoload": {
-    "psr-4": {
-      "Shuttle\\": "src/"
-    }
+    "psr-4": {"Shuttle\\": "src/"}
   },
   "autoload-dev": {
-    "psr-4": {
-      "ShuttleTest\\": "tests/"
-    }
+    "psr-4": {"ShuttleTest\\": "tests/"}
+  },
+  "suggest": {
+    "doctrine/dbal": "Allows using the default recorder (rather than having to code your own)",
+    "symfony/yaml": "Allows use of the Yaml migration source class",
+    "symfony/console": "Allows use of the bundled console commands"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests"
+  },
+  "config": {
+    "sort-packages": true
   }
 }

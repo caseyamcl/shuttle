@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,7 +13,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator\Event;
+namespace Shuttle\Migrator\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
@@ -40,40 +39,38 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
      */
     private $exception;
 
-    // ---------------------------------------------------------------
-
     /**
-     * @param string     $recId
-     * @param string     $msg
+     * @param string     $sourceId
+     * @param string     $message
      * @param \Exception $e
      */
-    public function __construct($recId, $msg, \Exception $e = null)
+    public function __construct(string $sourceId, string $message, \Exception $e = null)
     {
-        $this->recId       = $recId;
-        $this->msg         = $msg;
-        $this->exception   = $e;
+        $this->recId     = $sourceId;
+        $this->msg       = $message;
+        $this->exception = $e;
     }
 
     /**
      * @return int
      */
-    public function getStatus()
+    public function getStatus(): int
     {
-        return 0;
+        return self::FAILED;
     }
 
     /**
      * @return string
      */
-    public function getMessage()
+    public function getMessage(): string
     {
-        return "(Source ID: {$this->getRecId()}): " . $this->msg;
+        return "(Source ID: {$this->getRecordId()}): " . $this->msg;
     }
 
     /**
      * @return \Exception
      */
-    public function getException()
+    public function getException(): \Exception
     {
         return $this->exception;
     }
@@ -81,7 +78,7 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
     /**
      * @return string
      */
-    public function getRecId()
+    public function getRecordId(): string
     {
         return $this->recId;
     }

@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,9 +15,8 @@
 
 namespace Shuttle\MigrateSource;
 
-
-use Shuttle\Service\Migrator\Exception\MissingRecordException;
-use Shuttle\Service\Migrator\SourceInterface;
+use Shuttle\Migrator\Exception\MissingItemException;
+use Shuttle\Migrator\SourceInterface;
 
 /**
  * Simple JSON Source
@@ -28,24 +26,20 @@ use Shuttle\Service\Migrator\SourceInterface;
 class JsonSource implements \IteratorAggregate, SourceInterface
 {
     /**
-     * @var array  Array of arrays
+     * @var array|array[]  Array of arrays
      */
-    private $recs;
-
-    // ---------------------------------------------------------------
+    private $items;
 
     /**
      * Constructor
      *
-     * @param string $rawData
+     * @param string $rawJsonData
      * @param string $idFieldName  If empty, assume key/value arrangement
      */
-    public function __construct($rawData, $idFieldName = '')
+    public function __construct(string $rawJsonData, string $idFieldName = '')
     {
-        $this->recs = $this->decodeInput($rawData, $idFieldName);
+        $this->items = $this->decodeInput($rawJsonData, $idFieldName);
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Decode Input
@@ -66,46 +60,33 @@ class JsonSource implements \IteratorAggregate, SourceInterface
         return $arr;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return int
      */
     public function count()
     {
-        return $this->count($this->recs);
+        return count($this->items);
     }
-
-    // ---------------------------------------------------------------
 
     /**
-     * @return string[]  Get a list of record IDs in the source
+     * @return array|iterable|string[]  Get a list of item IDs in the source
      */
-    function listRecordIds()
+    function listItemIds(): iterable
     {
-        return array_map('strval', array_keys($this->recs));
+        return array_map('strval', array_keys($this->items));
     }
 
-    // ---------------------------------------------------------------
-
-    /**
-     * @param string $id
-     * @return array Record, represented as key/value associative array
-     */
-    function getRecord($id)
+    function getItem(string $id): array
     {
-        if (array_key_exists($id, $this->recs)) {
-            return $this->recs[$id];
-        }
-        else {
-            throw new MissingRecordException("Could not find record with ID: " . $id);
+        if (array_key_exists($id, $this->items)) {
+            return $this->items[$id];
+        } else {
+            throw new MissingItemException("Could not find record with ID: " . $id);
         }
     }
-
-    // ---------------------------------------------------------------
 
     function getIterator()
     {
-        return new \ArrayIterator($this->listRecordIds());
+        return new \ArrayIterator($this->listItemIds());
     }
 }

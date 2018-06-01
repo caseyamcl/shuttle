@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,8 +15,8 @@
 
 namespace Shuttle\MigrateSource;
 
-use Shuttle\Service\Migrator\SourceInterface;
-use Shuttle\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Migrator\SourceInterface;
+use Shuttle\Migrator\Exception\MissingItemException;
 use Doctrine\Instantiator\Exception\InvalidArgumentException;
 
 /**
@@ -50,30 +49,32 @@ class DbSource implements \IteratorAggregate, SourceInterface
      */
     private $singleQuery;
 
-    // ---------------------------------------------------------------
-
     /**
      * Build from DSN (DB Connection String)
      *
-     * @param string $dbConnString
-     * @param string $username
-     * @param string $password
-     * @param string $countQuery
-     * @param string $listQuery
-     * @param string $singleQuery
+     * @param string $dsn         PDO-compatible DSN
+     * @param string $username    Database username
+     * @param string $password    Database password
+     * @param string $countQuery  Should accept no parameters and return a single row, single column with number of items
+     * @param string $listQuery   Should accept no parameters and return a single-column list of item IDs
+     * @param string $singleQuery Should accept one parameter, the ID (placeholder is a '?'), and return a single item
      * @return static
      */
-    public static function build($dbConnString, $username, $password, $countQuery, $listQuery, $singleQuery)
-    {
+    public static function build(
+        string $dsn,
+        string $username,
+        string $password,
+        string $countQuery,
+        string $listQuery,
+        string $singleQuery
+    ) {
         return new static(
-            new \PDO($dbConnString, $username, $password),
+            new \PDO($dsn, $username, $password),
             $countQuery,
             $listQuery,
             $singleQuery
         );
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Constructor
@@ -83,7 +84,7 @@ class DbSource implements \IteratorAggregate, SourceInterface
      * @param string $listQuery    Should accept no parameters and return a single-column list of IDs
      * @param string $singleQuery  Should accept one parameter, the ID (placeholder is a '?'), and return a single record
      */
-    public function __construct(\PDO $dbConn, $countQuery, $listQuery, $singleQuery)
+    public function __construct(\PDO $dbConn, string $countQuery, string $listQuery, string $singleQuery)
     {
         $this->dbConn      = $dbConn;
         $this->countQuery  = $countQuery;
@@ -96,24 +97,17 @@ class DbSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    // ---------------------------------------------------------------
-
-    /**
-     * @return int
-     */
-    public function count()
+    public function count(): int
     {
         $stmt = $this->dbConn->prepare($this->countQuery);
         $stmt->execute();
         return $stmt->fetchColumn(0);
     }
 
-    // ---------------------------------------------------------------
-
     /**
-     * @return string[]  Get a list of record IDs in the source
+     * @return iterable|string[]  Get a list of item IDs in the source
      */
-    function listRecordIds()
+    function listItemIds(): iterable
     {
         $stmt = $this->dbConn->prepare($this->listQuery);
         $stmt->execute();
@@ -123,28 +117,23 @@ class DbSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    /**
-     * @return array|array[]  Array of records, represented as arrays
-     * @throws MissingRecordException
-     */
-    function getRecord($id)
+    function getItem(string $id): array
     {
         $stmt = $this->dbConn->prepare($this->singleQuery);
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return $row;
-        }
-        else {
-            throw new MissingRecordException("Could not find record with ID: " . $id);
+        } else {
+            throw new MissingItemException("Could not find record with ID: " . $id);
         }
     }
 
     /**
-     * @return string[]
+     * @return iterable|string[]
      */
     public function getIterator()
     {
-        return $this->listRecordIds();
+        return $this->listItemIds();
     }
 }

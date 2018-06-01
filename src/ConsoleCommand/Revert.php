@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,10 +13,10 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Command;
+namespace Shuttle\ConsoleCommand;
 
-use Shuttle\Service\Migrator\Events;
-use Shuttle\Service\Migrator\MigratorInterface;
+use Shuttle\Migrator\Events;
+use Shuttle\Migrator\MigratorInterface;
 
 /**
  * Revert Command
@@ -26,31 +25,21 @@ use Shuttle\Service\Migrator\MigratorInterface;
  */
 class Revert extends Migrate
 {
+    const ACTION_NAME = 'revert';
+
     /**
      * @param MigratorInterface $migrator
      * @return int
      */
-    protected function getRecCount(MigratorInterface $migrator)
+    protected function getRecCount(MigratorInterface $migrator): int
     {
         return $this->migrateService->getRecorder()->getMigratedCount($migrator->getSlug());
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return string
      */
-    protected function getActionName()
-    {
-        return "revert";
-    }
-
-    // ---------------------------------------------------------------
-
-    /**
-     * @return string
-     */
-    protected function getEventListenName()
+    protected function getEventListenName(): string
     {
         return Events::REVERT;
     }

@@ -1,5 +1,6 @@
-# IDE stuff
+# IDE/Development stuff
 .idea
+build
 
 # Tracker DB
 cli/statusdb/!.gitkeep

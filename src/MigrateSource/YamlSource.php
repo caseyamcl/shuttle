@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -32,19 +31,19 @@ class YamlSource extends JsonSource
      */
     private $parser;
 
-    // ---------------------------------------------------------------
-
     /**
-     * @param string $rawData
+     * @param string $rawJsonData
      * @param string $idFieldName
      */
-    public function __construct($rawData, $idFieldName = '')
+    public function __construct($rawJsonData, $idFieldName = '')
     {
-        $this->parser = new Parser();
-        parent::__construct($rawData, $idFieldName);
-    }
+        if (! class_exists('Symfony\Component\Yaml\Parser')) {
+            throw new \RuntimeException("Yaml source requires Symfony YAML dependency (`composer require symfony/yaml`)");
+        }
 
-    // ---------------------------------------------------------------
+        $this->parser = new Parser();
+        parent::__construct($rawJsonData, $idFieldName);
+    }
 
     protected function decodeInput($rawInput, $idFieldName)
     {
@@ -52,7 +51,7 @@ class YamlSource extends JsonSource
 
         $parsed = Yaml::parse($rawInput, true);
 
-        if ( ! is_array($parsed)) {
+        if (! is_array($parsed)) {
             throw new ParseException("Invalid YAML: " . $parsed);
         }
 
@@ -63,5 +62,4 @@ class YamlSource extends JsonSource
 
         return $arr;
     }
-
 }

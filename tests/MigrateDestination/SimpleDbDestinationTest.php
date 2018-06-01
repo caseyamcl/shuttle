@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,9 +15,8 @@
 
 namespace ShuttleTest\MigrateDestination;
 
-
 use Shuttle\MigrateDestination\DbTableDestination;
-use Shuttle\Service\Migrator\DestinationInterface;
+use Shuttle\Migrator\DestinationInterface;
 use ShuttleTest\Service\Migrator\AbstractDestinationInterfaceTest;
 
 /**
@@ -33,8 +31,6 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
      */
     protected $dbConn;
 
-    // ---------------------------------------------------------------
-
     public function setUp()
     {
         parent::setUp();
@@ -47,10 +43,9 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
         $this->dbConn = new \PDO('sqlite:' . $path);
 
         $this->dbConn->query("CREATE TABLE items (
-               id INT PRIMARY KEY     NOT NULL,
-               name           TEXT    NOT NULL
-            );"
-        );
+               id   INT PRIMARY KEY  NOT NULL,
+               name TEXT             NOT NULL
+            );");
 
         $this->dbConn->query("INSERT INTO items (id, name) VALUES (100, 'bob')");
         $this->dbConn->query("INSERT INTO items (id, name) VALUES (200, 'sally')");
@@ -66,7 +61,7 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
     /**
      * @return DestinationInterface
      */
-    protected function getDestObj()
+    protected function getDestObj(): DestinationInterface
     {
         return new DbTableDestination($this->dbConn, 'items', 'id');
     }
@@ -74,15 +69,15 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId()
+    protected function getExistingRecordId(): string
     {
-        return 200;
+        return '200';
     }
 
     /**
      * @return array key/value pairs for record to add
      */
-    protected function getNewRecordData()
+    protected function getNewRecordData(): array
     {
         return ['id' => '400', 'name' => 'joe'];
     }
@@ -90,8 +85,8 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
     /**
      * @return string
      */
-    protected function getNonExistentRecordId()
+    protected function getNonExistentRecordId(): string
     {
-        return 900;
+        return '900';
     }
 }

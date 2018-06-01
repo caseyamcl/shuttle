@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,9 +15,8 @@
 
 namespace ShuttleTest\MigrateSource;
 
-
 use Shuttle\MigrateSource\JsonSource;
-use Shuttle\Service\Migrator\SourceInterface;
+use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
@@ -26,7 +24,7 @@ class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return SourceInterface
      */
-    protected function getSourceObj()
+    protected function getSourceObj(): SourceInterface
     {
         return new JsonSource(file_get_contents(__DIR__ . '/../Fixture/files/source.json'), 'id');
     }
@@ -34,7 +32,7 @@ class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId()
+    protected function getExistingRecordId(): string
     {
         return '45';
     }
@@ -42,7 +40,7 @@ class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getNonExistentRecordId()
+    protected function getNonExistentRecordId(): string
     {
         return '10000';
     }

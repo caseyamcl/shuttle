@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,9 +13,9 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator;
+namespace Shuttle\Migrator;
 
-use Shuttle\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Migrator\Exception\MissingItemException;
 
 /**
  * Interface DestinationInterface
@@ -28,11 +27,11 @@ interface DestinationInterface
     /**
      * Get record
      *
-     * @param string $id
+     * @param string $destinationId  The destination ID
      * @return array  Record, represented as array
-     * @throws MissingRecordException
+     * @throws MissingItemException
      */
-    function getRecord($id);
+    function getItem(string $destinationId): array;
 
     /**
      * Save a record
@@ -42,14 +41,14 @@ interface DestinationInterface
      * @param array $recordData
      * @return string  The ID of the inserted record
      */
-    function saveRecord(array $recordData);
+    function saveItem(array $recordData): string;
 
 
     /**
      * Remove a record
      *
-     * @param string $id
+     * @param string $destinationId
      * @return bool  If a record existed to be deleted, returns TRUE, else FALSE
      */
-    function deleteRecord($id);
+    function deleteItem(string $destinationId): bool;
 }

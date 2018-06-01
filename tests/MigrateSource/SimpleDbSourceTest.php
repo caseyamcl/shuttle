@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,9 +15,8 @@
 
 namespace ShuttleTest\MigrateSource;
 
-
 use Shuttle\MigrateSource\DbSource;
-use Shuttle\Service\Migrator\SourceInterface;
+use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 /**
@@ -48,8 +46,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
         self::$dbConn->query("CREATE TABLE items (
                id INT PRIMARY KEY     NOT NULL,
                name           TEXT    NOT NULL
-            );"
-        );
+            );");
 
         self::$dbConn->query("INSERT INTO items (id, name) VALUES (100, 'bob')");
         self::$dbConn->query("INSERT INTO items (id, name) VALUES (200, 'sally')");
@@ -60,13 +57,12 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
     {
         unlink(sys_get_temp_dir() . '/Shuttle.db.test.sqlite');
         parent::tearDownAfterClass();
-
     }
 
     /**
      * @return SourceInterface
      */
-    protected function getSourceObj()
+    protected function getSourceObj(): SourceInterface
     {
         return new DbSource(
             self::$dbConn,
@@ -79,7 +75,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId()
+    protected function getExistingRecordId(): string
     {
         return '200';
     }
@@ -87,7 +83,7 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getNonExistentRecordId()
+    protected function getNonExistentRecordId(): string
     {
         return '900';
     }

@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,17 +13,21 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator\Event;
+namespace Shuttle\Migrator\Event;
 
 interface MigrateResultInterface
 {
+    const SKIPPED   = -1;
+    const FAILED    = 0;
+    const PROCESSED = 1;
+
     /**
      * @return int  (-1 skipped; 0 failed; 1 success)
      */
-    function getStatus();
+    function getStatus(): int;
 
     /**
      * @return string
      */
-    function getMessage();
+    function getMessage(): string;
 }

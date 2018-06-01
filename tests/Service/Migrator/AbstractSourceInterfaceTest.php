@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,38 +15,41 @@
 
 namespace ShuttleTest\Service\Migrator;
 
-use Shuttle\Service\Migrator\SourceInterface;
+use PHPUnit\Framework\TestCase;
+use Shuttle\Migrator\SourceInterface;
 
 /**
  * Class AbstractSourceInterfaceTest
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-abstract class AbstractSourceInterfaceTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractSourceInterfaceTest extends TestCase
 {
     public function testListRecordIdsReturnsTraversableListOfStrings()
     {
         $obj = $this->getSourceObj();
-        $ids = $obj->listRecordIds();
+        $ids = $obj->listItemIds();
 
-        $this->assertTrue(is_array($ids) OR $ids instanceof \Traversable);
+        $this->assertTrue(is_array($ids) or $ids instanceof \Traversable);
         $this->assertContainsOnly('string', $ids);
     }
 
     public function testGetRecordReturnsNonEmptyArrayForExistingRecord()
     {
         $obj = $this->getSourceObj();
-        $rec = $obj->getRecord($this->getExistingRecordId());
+        $rec = $obj->getItem($this->getExistingRecordId());
 
         $this->assertInternalType('array', $rec);
         $this->assertNotEmpty($rec);
     }
 
+    /**
+     * @expectedException \Shuttle\Migrator\Exception\MissingItemException
+     */
     public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
     {
-        $this->setExpectedException('\Shuttle\Service\Migrator\Exception\MissingRecordException');
         $obj = $this->getSourceObj();
-        $obj->getRecord($this->getNonExistentRecordId());
+        $obj->getItem($this->getNonExistentRecordId());
     }
 
     // ---------------------------------------------------------------
@@ -55,15 +57,15 @@ abstract class AbstractSourceInterfaceTest extends \PHPUnit_Framework_TestCase
     /**
      * @return SourceInterface
      */
-    abstract protected function getSourceObj();
+    abstract protected function getSourceObj(): SourceInterface;
 
     /**
      * @return string
      */
-    abstract protected function getExistingRecordId();
+    abstract protected function getExistingRecordId(): string;
 
     /**
      * @return string
      */
-    abstract protected function getNonExistentRecordId();
+    abstract protected function getNonExistentRecordId(): string;
 }

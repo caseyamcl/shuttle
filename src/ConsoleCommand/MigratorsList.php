@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,11 +13,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Command;
+namespace Shuttle\ConsoleCommand;
 
-use Shuttle\Service\Migrator\MigratorCollection;
-use Shuttle\Service\Migrator\MigratorInterface;
-use Shuttle\Service\Recorder\RecorderInterface;
+use Shuttle\Migrator\MigratorCollection;
+use Shuttle\Migrator\MigratorInterface;
+use Shuttle\Recorder\RecorderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,8 +41,6 @@ class MigratorsList extends Command
      */
     private $recorder;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
@@ -58,23 +55,18 @@ class MigratorsList extends Command
         $this->recorder  = $recorder;
     }
 
-    // ---------------------------------------------------------------
-
     protected function configure()
     {
         $this->setName('migrators:list');
         $this->setDescription('List available migrators');
-        $this->addOption('nostatus', 's', InputOption::VALUE_NONE,     'Omit migrations status (speeds up execution)');
-        $this->addOption('format',   'f', InputOption::VALUE_REQUIRED, "Output format ('table', 'cols', or 'json', 'jsonpretty'). Defaults to 'table'", 'table');
+        $this->addOption('nostatus', 's', InputOption::VALUE_NONE, 'Omit migrations status (speeds up execution)');
+        $this->addOption('format', 'f', InputOption::VALUE_REQUIRED, "Output format ('table', 'cols', or 'json', 'jsonpretty'). Defaults to 'table'", 'table');
     }
-
-    // ---------------------------------------------------------------
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $list = array();
         foreach ($this->migrators as $migrator) {
-
             $row = array(
                 'slug'        => $migrator->getSlug(),
                 'description' => $migrator->getDescription()
@@ -107,8 +99,6 @@ class MigratorsList extends Command
         }
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param OutputInterface $output
      * @param array           $recs
@@ -131,28 +121,21 @@ class MigratorsList extends Command
         $table->render();
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param OutputInterface $output
      * @param array           $recs
      */
-    private function outCols(OutputInterface $output, array $recs)
+    private function outCols(OutputInterface $output, array $recs): void
     {
-        $table = new Table($output);
-        $table->getStyle('compact');
-        $table->addRows($recs);
-        $table->render();
+        (new Table($output))->setStyle('compact')->addRows($recs)->render();
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * @param OutputInterface $output
      * @param array           $recs
      * @param bool            $pretty
      */
-    private function outJson(OutputInterface $output, array $recs, $pretty = false)
+    private function outJson(OutputInterface $output, array $recs, $pretty = false): void
     {
         $jsonString = ($pretty) ? json_encode($recs, JSON_PRETTY_PRINT) : json_encode($recs);
         $output->writeln($jsonString);

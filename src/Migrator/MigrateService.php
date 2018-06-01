@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,13 +13,14 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator;
+namespace Shuttle\Migrator;
 
-use Shuttle\Service\Migrator\Event\MigrateFailedResult;
-use Shuttle\Service\Migrator\Event\MigrateResult;
-use Shuttle\Service\Migrator\Event\RevertFailedResult;
-use Shuttle\Service\Migrator\Event\RevertResult;
-use Shuttle\Service\Recorder\RecorderInterface;
+use Shuttle\Migrator\Event\MigrateFailedResult;
+use Shuttle\Migrator\Event\MigrateResult;
+use Shuttle\Migrator\Event\MigrateResultInterface;
+use Shuttle\Migrator\Event\RevertFailedResult;
+use Shuttle\Migrator\Event\RevertResult;
+use Shuttle\Recorder\RecorderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -46,8 +46,6 @@ class MigrateService
      */
     private $migrators;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
@@ -55,44 +53,39 @@ class MigrateService
      * @param EventDispatcherInterface $dispatcher
      * @param MigratorCollection       $migrators
      */
-    public function __construct(RecorderInterface $recorder, EventDispatcherInterface $dispatcher, MigratorCollection $migrators = null)
-    {
+    public function __construct(
+        RecorderInterface $recorder,
+        EventDispatcherInterface $dispatcher,
+        MigratorCollection $migrators = null
+    ) {
         $this->recorder   = $recorder;
         $this->dispatcher = $dispatcher;
         $this->migrators  = $migrators ?: new MigratorCollection();
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return EventDispatcherInterface
      */
-    public function getDispatcher()
+    public function getDispatcher(): EventDispatcherInterface
     {
         return $this->dispatcher;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return MigratorCollection
      */
-    public function getMigrators()
+    public function getMigrators(): MigratorCollection
     {
         return $this->migrators;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return RecorderInterface
      */
-    public function getRecorder()
+    public function getRecorder(): RecorderInterface
     {
         return $this->recorder;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Migrate records
@@ -102,18 +95,17 @@ class MigrateService
      * @param array  $ids   Optionally limit to specified IDs of source records
      * @return int Number of records attempted
      */
-    public function migrate($type, $limit = 0, array $ids = [])
+    public function migrate($type, $limit = 0, array $ids = []): int
     {
         $migrator = $this->getMigrators()->get($type);
 
         $iterator = ( ! empty($ids))
             ? new \ArrayIterator($ids)
-            : $migrator->getSource()->listRecordIds();
+            : $migrator->getSource()->listItemIds();
 
         $count = 0;
 
         foreach ($iterator as $sourceRecId) {
-
             // Get out if we are limiting records
             if ($limit && $count > $limit) {
                 break;
@@ -126,8 +118,6 @@ class MigrateService
         return $count;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Revert migrated records
      *
@@ -136,25 +126,23 @@ class MigrateService
      * @param array  $ids Optionally limit to specified IDs of source records (yes, SOURCE records)
      * @return int Number of records attempted
      */
-    public function revert($type, $limit = 0, array $ids = [])
+    public function revert($type, $limit = 0, array $ids = []): int
     {
         $migrator = $this->getMigrators()->get($type);
 
-        if ( ! empty($ids)) {
+        if (! empty($ids)) {
             $newIds = [];
             foreach ($ids as $sourceId) {
-                $newIds[] = $this->recorder->getNewId($type, $sourceId);
+                $newIds[] = $this->recorder->findDestinationId($type, $sourceId);
             }
             $iterator = new \ArrayIterator($newIds);
-        }
-        else {
-            $iterator = $this->recorder->getNewIds($type);
+        } else {
+            $iterator = $this->recorder->listDestinationIds($type);
         }
 
         $count = 0;
 
         foreach ($iterator as $destRecId) {
-
             // Get out if we are limiting records
             if ($limit && $count > $limit) {
                 break;
@@ -167,16 +155,14 @@ class MigrateService
         return $count;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Do Migration
      *
      * @param MigratorInterface $migrator
      * @param string            $sourceRecId
-     * @return MigrateResult
+     * @return MigrateResultInterface
      */
-    protected function doMigrate(MigratorInterface $migrator, $sourceRecId)
+    protected function doMigrate(MigratorInterface $migrator, $sourceRecId): MigrateResultInterface
     {
         // If already migrated, skip
         if ($this->recorder->isMigrated($migrator->getSlug(), $sourceRecId)) {
@@ -184,7 +170,7 @@ class MigrateService
                 $migrator->getSlug(),
                 $sourceRecId,
                 MigrateResult::SKIPPED,
-                $this->recorder->getNewId($migrator->getSlug(), $sourceRecId),
+                $this->recorder->findDestinationId($migrator->getSlug(), $sourceRecId),
                 sprintf("Record (type %s) with id %s is already migrated", $migrator->getSlug(), $sourceRecId)
             );
         }
@@ -201,43 +187,39 @@ class MigrateService
                 $destRecId,
                 sprintf("Migrated (type %s) with id %s to destination record: %s", $migrator->getSlug(), $sourceRecId, $destRecId)
             );
-        }
-        catch (\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             return new MigrateFailedResult($sourceRecId, $e->getMessage(), $e);
         }
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param MigratorInterface $migrator
-     * @param string            $destRecId
+     * @param string            $destinationId
      * @return RevertResult
      */
-    protected function doRevert(MigratorInterface $migrator, $destRecId)
+    protected function doRevert(MigratorInterface $migrator, string $destinationId): MigrateResultInterface
     {
         try {
-            $isDeleted   = $migrator->getDestination()->deleteRecord($destRecId);
-            $sourceRecId = $this->recorder->getOldId($migrator->getSlug(), $destRecId);
+            $isDeleted   = $migrator->getDestination()->deleteItem($destinationId);
+            $sourceRecId = $this->recorder->findSourceId($migrator->getSlug(), $destinationId);
 
-            $this->recorder->removeMigratedMark($migrator->getSlug(), $destRecId);
+            $this->recorder->removeMigratedMark($migrator->getSlug(), $destinationId);
 
             return new RevertResult(
                 $migrator->getSlug(),
                 $sourceRecId,
                 $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
-                $destRecId,
+                $destinationId,
                 sprintf(
                     "%s (type %s) with destination id %s (source id: %s)",
                     ($isDeleted ? 'reverted' : 'skipped'),
                     $migrator->getSlug(),
-                    $destRecId,
+                    $destinationId,
                     $sourceRecId
                 )
             );
-        }
-        catch (\RuntimeException $e) {
-            return new RevertFailedResult($destRecId, $e->getMessage(), $e);
+        } catch (\RuntimeException $e) {
+            return new RevertFailedResult($destinationId, $e->getMessage(), $e);
         }
     }
 }

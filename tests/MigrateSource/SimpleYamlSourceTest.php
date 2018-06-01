@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -17,7 +16,7 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\YamlSource;
-use Shuttle\Service\Migrator\SourceInterface;
+use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 /**
@@ -27,16 +26,18 @@ use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
  */
 class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
 {
+    /**
+     * @expectedException \Symfony\Component\Yaml\Exception\ParseException
+     */
     public function testMalformedYamlSourceThrowsException()
     {
-        $this->setExpectedException('Symfony\Component\Yaml\Exception\ParseException');
         $obj = new YamlSource('abcasdf---@(#*1230230--2-349u0h8dsfa', 'id');
     }
 
     /**
      * @return SourceInterface
      */
-    protected function getSourceObj()
+    protected function getSourceObj(): SourceInterface
     {
         return new YamlSource(file_get_contents(__DIR__ . '/../Fixture/files/source.yml'), 'id');
     }
@@ -44,16 +45,16 @@ class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId()
+    protected function getExistingRecordId(): string
     {
-        return 350;
+        return '350';
     }
 
     /**
      * @return string
      */
-    protected function getNonExistentRecordId()
+    protected function getNonExistentRecordId(): string
     {
-        return 4600;
+        return '4600';
     }
 }

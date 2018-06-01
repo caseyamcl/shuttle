@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,7 +13,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator;
+namespace Shuttle\Migrator;
 
 /**
  * Base Migrator
@@ -43,8 +42,6 @@ class Migrator implements MigratorInterface
      */
     private $destination;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
@@ -53,8 +50,12 @@ class Migrator implements MigratorInterface
      * @param DestinationInterface $destination
      * @param string               $description
      */
-    public function __construct($slug, SourceInterface $source, DestinationInterface $destination, $description = '')
-    {
+    public function __construct(
+        string $slug,
+        SourceInterface $source,
+        DestinationInterface $destination,
+        $description = ''
+    ) {
         $this->source      = $source;
         $this->destination = $destination;
 
@@ -62,117 +63,100 @@ class Migrator implements MigratorInterface
         $this->setDescription($description);
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return string  A unique identifier for the type of record being migrated
      */
-    public function getSlug()
+    public function getSlug(): string
     {
         return $this->slug;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return string  A description of the records being migrated
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Set Slug
      *
      * @param string $slug
+     * @return Migrator
      */
-    protected function setSlug($slug)
+    protected function setSlug($slug): Migrator
     {
         $this->slug = $slug;
+        return $this;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Set Description
      *
      * @param string $description
+     * @return Migrator
      */
-    protected function setDescription($description)
+    protected function setDescription($description): Migrator
     {
         $this->description = (string) $description;
+        return $this;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * @return SourceInterface
      */
-    public function getSource()
+    public function getSource(): SourceInterface
     {
         return $this->source;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return DestinationInterface
      */
-    public function getDestination()
+    public function getDestination(): DestinationInterface
     {
         return $this->destination;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return int  Number of records in the source
      */
-    public function getNumRecords()
+    public function countSourceItems(): int
     {
         return $this->source->count();
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Migrate a single record
      *
-     * @param string $oldRecId Record ID in the old system
+     * @param string $sourceRecordId Record ID in the old system
      * @return string  New Record ID
      */
-    public function migrate($oldRecId)
+    public function migrate(string $sourceRecordId): string
     {
-        $oldRec = $this->source->getRecord($oldRecId);
-        return (string) $this->destination->saveRecord($this->prepare($oldRec));
+        $sourceItem = $this->source->getItem($sourceRecordId);
+        return $this->destination->saveItem($this->prepare($sourceItem));
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Revert a single record
      *
-     * @param string $newRecId
+     * @param string $destinationRecordId
+     * @return bool
      */
-    public function revert($newRecId)
+    public function revert(string $destinationRecordId): bool
     {
-        $this->destination->deleteRecord($newRecId);
+        $this->destination->deleteItem($destinationRecordId);
     }
-
-    // ---------------------------------------------------------------
 
     /**
-     * @return array|\Traversable|string[]
+     * @return array|string[]
      */
-    function listSourceIds()
+    function listSourceIds(): iterable
     {
-        return $this->source->listRecordIds();
+        return $this->source->listItemIds();
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Transform/validate record
@@ -180,7 +164,7 @@ class Migrator implements MigratorInterface
      * @param array $record
      * @return array
      */
-    protected function prepare(array $record)
+    protected function prepare(array $record): array
     {
         // By default, do nothing to the record..
         return $record;

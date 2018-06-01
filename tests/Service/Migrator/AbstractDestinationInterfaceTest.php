@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,18 +15,18 @@
 
 namespace ShuttleTest\Service\Migrator;
 
+use PHPUnit\Framework\TestCase;
+use Shuttle\Migrator\DestinationInterface;
 
-use Shuttle\Service\Migrator\DestinationInterface;
-
-abstract class AbstractDestinationInterfaceTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractDestinationInterfaceTest extends TestCase
 {
     public function testSaveRecordSavesTheRecord()
     {
         $obj = $this->getDestObj();
         $recordData = $this->getNewRecordData();
-        $newId = $obj->saveRecord($recordData);
+        $newId = $obj->saveItem($recordData);
 
-        $newRec = $obj->getRecord($newId);
+        $newRec = $obj->getItem($newId);
 
         $this->assertInternalType('array', $newRec);
         $this->assertNotEmpty($newRec);
@@ -37,31 +36,33 @@ abstract class AbstractDestinationInterfaceTest extends \PHPUnit_Framework_TestC
     {
         $obj = $this->getDestObj();
         $recordData = $this->getNewRecordData();
-        $newId = $obj->saveRecord($recordData);
+        $newId = $obj->saveItem($recordData);
 
-        $this->assertTrue($obj->deleteRecord($newId));
+        $this->assertTrue($obj->deleteItem($newId));
     }
 
     public function testDeleteRecordReturnsFalseForDeletingNonExistentRecord()
     {
         $obj = $this->getDestObj();
-        $this->assertFalse($obj->deleteRecord($this->getNonExistentRecordId()));
+        $this->assertFalse($obj->deleteItem($this->getNonExistentRecordId()));
     }
 
     public function testGetRecordReturnsNonEmptyArrayForExistingRecord()
     {
         $obj = $this->getDestObj();
-        $rec = $obj->getRecord($this->getExistingRecordId());
+        $rec = $obj->getItem($this->getExistingRecordId());
 
         $this->assertInternalType('array', $rec);
         $this->assertNotEmpty($rec);
     }
 
+    /**
+     * @expectedException \Shuttle\Migrator\Exception\MissingItemException
+     */
     public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
     {
-        $this->setExpectedException('\Shuttle\Service\Migrator\Exception\MissingRecordException');
         $obj = $this->getDestObj();
-        $obj->getRecord($this->getNonExistentRecordId());
+        $obj->getItem($this->getNonExistentRecordId());
     }
 
     // ---------------------------------------------------------------
@@ -69,20 +70,20 @@ abstract class AbstractDestinationInterfaceTest extends \PHPUnit_Framework_TestC
     /**
      * @return DestinationInterface
      */
-    abstract protected function getDestObj();
+    abstract protected function getDestObj(): DestinationInterface;
 
     /**
      * @return string
      */
-    abstract protected function getExistingRecordId();
+    abstract protected function getExistingRecordId(): string;
 
     /**
      * @return array key/value pairs for record to add
      */
-    abstract protected function getNewRecordData();
+    abstract protected function getNewRecordData(): array;
 
     /**
      * @return string
      */
-    abstract protected function getNonExistentRecordId();
+    abstract protected function getNonExistentRecordId(): string;
 }

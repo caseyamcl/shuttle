@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -35,8 +34,6 @@ class DoctrineColumnIterator extends \IteratorIterator
      */
     private $columnName;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
@@ -52,8 +49,6 @@ class DoctrineColumnIterator extends \IteratorIterator
         $this->columnName = $columnName;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Returns the specified column from the current record
      *
@@ -62,20 +57,19 @@ class DoctrineColumnIterator extends \IteratorIterator
      *
      * @return string
      */
-    public function current()
+    public function current(): string
     {
         $val = parent::current();
 
         if ($val && array_key_exists($this->columnName, $val)) {
             return (string) $val[$this->columnName];
-        }
-        elseif ($val) {
+        } elseif ($val) {
             throw new \RuntimeException(sprintf(
                 "Error retrieving '%s' column from record: ",
-                $this->columnName, json_encode($val)
+                $this->columnName,
+                json_encode($val)
             ));
-        }
-        else {
+        } else {
             return $val;
         }
     }

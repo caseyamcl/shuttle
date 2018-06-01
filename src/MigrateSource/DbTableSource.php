@@ -2,10 +2,9 @@
 /**
  * shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -26,19 +25,22 @@ class DbTableSource extends DbSource
     /**
      * Build from DSN
      *
-     * @param string $dbConnString
+     * @param string $dsn
      * @param string $username
      * @param string $password
      * @param string $tableName
      * @param string $idColumn
      * @return static
      */
-    public static function build($dbConnString, $username, $password, $tableName, $idColumn = 'id')
-    {
-        return new static(new \PDO($dbConnString, $username, $password), $tableName, $idColumn);
+    public static function build(
+        string $dsn,
+        string $username,
+        string $password,
+        string $tableName,
+        string $idColumn = 'id'
+    ) {
+        return new static(new \PDO($dsn, $username, $password), $tableName, $idColumn);
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Constructor
@@ -47,7 +49,7 @@ class DbTableSource extends DbSource
      * @param string $tableName  The name of the table
      * @param string $idColumn   The ID column in the table (defaults to 'id')
      */
-    public function __construct(\PDO $dbConn, $tableName, $idColumn = 'id')
+    public function __construct(\PDO $dbConn, string $tableName, string $idColumn = 'id')
     {
         $countQuery  = sprintf('SELECT COUNT(t.%s) FROM %s t', $idColumn, $tableName);
         $listQuery   = sprintf('SELECT t.%s FROM %s t', $idColumn, $tableName);

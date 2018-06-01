@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -28,8 +27,6 @@ class CsvSource extends JsonSource
      */
     private $hasHeaders;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
@@ -43,8 +40,6 @@ class CsvSource extends JsonSource
         parent::__construct($csvSourceUri, $idFieldName);
     }
 
-    // ---------------------------------------------------------------
-
     protected function decodeInput($rawInput, $idFieldName)
     {
         $headers = [];
@@ -53,12 +48,10 @@ class CsvSource extends JsonSource
         $fh = fopen($rawInput, 'r');
 
         for ($i = 0; $row = fgetcsv($fh); $i++) {
-
             if ($i == 0 && $this->hasHeaders) {
                 $headers = array_values($row);
                 continue;
-            }
-            elseif ($i == 0 && ! $this->hasHeaders) {
+            } elseif ($i == 0 && ! $this->hasHeaders) {
                 $headers = array_keys($row);
             }
 

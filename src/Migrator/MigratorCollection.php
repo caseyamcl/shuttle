@@ -1,11 +1,10 @@
 <?php
 /**
- * ticketmove
+ * Shuttle Library
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,30 +13,29 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Migrator;
+namespace Shuttle\Migrator;
 
-use ArrayIterator, Countable;
+use ArrayIterator;
+use Countable;
 
 /**
  * Class MigratorCollection
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class MigratorCollection implements \IteratorAggregate, \Countable
+class MigratorCollection implements \IteratorAggregate, Countable
 {
     /**
      * @var array|MigratorInterface[]
      */
     private $migrators;
 
-    // ---------------------------------------------------------------
-
     /**
      * Constructor
      *
-     * @param MigratorInterface[] $migrators
+     * @param iterable|MigratorInterface[] $migrators
      */
-    public function __construct($migrators = [])
+    public function __construct(iterable $migrators = [])
     {
         $this->migrators = [];
 
@@ -46,58 +44,48 @@ class MigratorCollection implements \IteratorAggregate, \Countable
         }
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param string $name
      * @return bool
      */
-    public function has($name)
+    public function has($name): bool
     {
         return array_key_exists($name, $this->migrators);
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param MigratorInterface $migrator
      */
-    public function add(MigratorInterface $migrator)
+    public function add(MigratorInterface $migrator): void
     {
         $this->migrators[$migrator->getSlug()] = $migrator;
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * @param string $name
      * @return MigratorInterface
      */
-    public function get($name)
+    public function get($name): MigratorInterface
     {
-        if ( ! $this->has($name)) {
+        if (! $this->has($name)) {
             throw new \InvalidArgumentException("No migrator exists with slug/name: " . $name);
         }
 
         return $this->migrators[$name];
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return ArrayIterator|MigratorInterface[]
      */
-    public function getIterator()
+    public function getIterator(): \Iterator
     {
         return new ArrayIterator($this->migrators);
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->migrators);
     }

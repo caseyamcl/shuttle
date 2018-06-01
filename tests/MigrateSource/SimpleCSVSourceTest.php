@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -17,7 +16,7 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\CsvSource;
-use Shuttle\Service\Migrator\SourceInterface;
+use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
 
 class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
@@ -26,39 +25,33 @@ class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
     public function testWithoutHeaderRowReturnsRecordsWithNumericalKeys()
     {
         $obj = $this->getSourceObj(false);
-        $rec = $obj->getRecord(350);
+        $rec = $obj->getItem(350);
 
         $this->assertContainsOnly('int', array_keys($rec));
     }
 
-    // ---------------------------------------------------------------
-
     public function testWithHeaderRowReturnsRecordsWithExpectedKeys()
     {
         $obj = $this->getSourceObj(true);
-        $rec = $obj->getRecord(350);
+        $rec = $obj->getItem(350);
 
         $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($rec));
     }
 
-    // ---------------------------------------------------------------
-
     public function testGetRecordIsTolerantOfMismatchedColumnNumbers()
     {
         $obj = $this->getSourceObj(true);
-        $rec = $obj->getRecord(450); // 450 in source_header_row.csv is missing the last column
+        $rec = $obj->getItem(450); // 450 in source_header_row.csv is missing the last column
 
         $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($rec));
         $this->assertEmpty($rec['State']);
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * @param bool $hasHeaderRow
      * @return SourceInterface
      */
-    protected function getSourceObj($hasHeaderRow = false)
+    protected function getSourceObj($hasHeaderRow = false): SourceInterface
     {
         $source = $hasHeaderRow
             ? __DIR__ . '/../Fixture/files/source_header_row.csv'
@@ -70,16 +63,16 @@ class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId()
+    protected function getExistingRecordId(): string
     {
-        return 350;
+        return '350';
     }
 
     /**
      * @return string
      */
-    protected function getNonExistentRecordId()
+    protected function getNonExistentRecordId(): string
     {
-        return 5000;
+        return '5000';
     }
 }

@@ -2,10 +2,9 @@
 /**
  * shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -14,8 +13,9 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Service\Recorder;
+namespace Shuttle\Recorder;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use RuntimeException;
 
@@ -40,22 +40,18 @@ class DefaultDatabaseBuilder
      */
     private $appSlug;
 
-    // ---------------------------------------------------------------
-
     /**
      * Build Default Database Connection
      *
      * @param string $appSlug  Unique alphanumeric 'slug' for the application
      * @param string $dbPath   Optionally use a custom directory to store the SQLite database
-     * @return \Doctrine\DBAL\Connection  Connection to the SQLiteDatabase
+     * @return Connection  Connection to the SQLiteDatabase
      */
-    public static function buildDefaultDatabaseConnection($appSlug = 'shttl', $dbPath = self::AUTO)
+    public static function buildDefaultDatabaseConnection(string $appSlug = 'shttl', string $dbPath = self::AUTO): Connection
     {
         $that = new static($appSlug, $dbPath);
         return $that->getDefaultConnection();
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Constructor
@@ -63,9 +59,12 @@ class DefaultDatabaseBuilder
      * @param string $appSlug  Unique alphanumeric 'slug' for the application
      * @param string $dbPath   Optionally use a custom directory to store the SQLite database
      */
-    public function __construct($appSlug = 'shttl', $dbPath = self::AUTO)
+    public function __construct(string $appSlug = 'shttl', string $dbPath = self::AUTO)
     {
-        if ( ! class_exists('\SQLite3')) {
+        if (! class_exists('Doctrine\DBAL\Connection')) {
+            throw new RuntimeException("Cannot build tracking database without Doctrine DBAL library.  Install with `composer require doctrine/dbal`");
+        }
+        if (! class_exists('\SQLite3')) {
             throw new RuntimeException("Cannot build tracking database without SQLite3 Extension.  Install PHP SQLite3 Extension to fix this.");
         }
 
@@ -76,27 +75,20 @@ class DefaultDatabaseBuilder
         $this->dbPath  = $dbPath ?: $this->buildDefaultPath();
         $this->appSlug = $appSlug;
 
-        if ( ! is_writable(dirname($this->dbPath))) {
+        if (! is_writable(dirname($this->dbPath))) {
             throw new RuntimeException("Tracker/recorder database path not writable: " . $this->dbPath);
         }
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Get Default Database Connection
      *
-     * @return \Doctrine\DBAL\Connection
+     * @return Connection
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getDefaultConnection()
+    public function getDefaultConnection(): Connection
     {
-        $dbFullPath = sprintf(
-            "%s%s%s.sqlite",
-            rtrim($this->dbPath, DIRECTORY_SEPARATOR),
-            DIRECTORY_SEPARATOR,
-            $this->appSlug
-        );
+        $dbFullPath = sprintf("%s/%s.sqlite", rtrim($this->dbPath, DIRECTORY_SEPARATOR), $this->appSlug);
 
         return DriverManager::getConnection([
             'path' => $dbFullPath,
@@ -104,22 +96,18 @@ class DefaultDatabaseBuilder
         ]);
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Build Default Path
      *
      * @return string  Full path to SQLite Database
      */
-    protected function buildDefaultPath()
+    protected function buildDefaultPath(): string
     {
         // Auto-determine the path for the the SQLITE database
-        $dirPath = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
-            ? sprintf('%s\AppData\Local\.shttl', $_SERVER['HOME'])
-            : sprintf("%s/.shttl", $_SERVER['HOME']);
+        $dirPath = sprintf('%s/.shttl', $_SERVER['HOME']);
 
         // Auto-create the path if it does not already exist
-        if ( ! file_exists($dirPath) OR ! is_dir($dirPath)) {
+        if (! file_exists($dirPath) or ! is_dir($dirPath)) {
             mkdir($dirPath, 0700);
         }
 

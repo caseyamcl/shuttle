@@ -2,10 +2,9 @@
 /**
  * Shuttle
  *
- * @license ${LICENSE_LINK}
- * @link ${PROJECT_URL_LINK}
- * @version ${VERSION}
- * @package ${PACKAGE_NAME}
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/caseyamcl/phpoaipmh
+ * @package caseyamcl/shuttle
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
@@ -16,9 +15,8 @@
 
 namespace Shuttle\MigrateDestination;
 
-
-use Shuttle\Service\Migrator\DestinationInterface;
-use Shuttle\Service\Migrator\Exception\MissingRecordException;
+use Shuttle\Migrator\DestinationInterface;
+use Shuttle\Migrator\Exception\MissingItemException;
 
 /**
  * Class DbTableDestination
@@ -42,8 +40,6 @@ class DbTableDestination implements DestinationInterface
      */
     private $idColumn;
 
-    // ---------------------------------------------------------------
-
     /**
      * Build from DSN
      *
@@ -54,12 +50,10 @@ class DbTableDestination implements DestinationInterface
      * @param string $idColumn
      * @return static
      */
-    public static function build($dsn, $username, $password, $tableName, $idColumn)
+    public static function build(string $dsn, string $username, string $password, string $tableName, string $idColumn)
     {
         return new static(new \PDO($dsn, $username, $password), $tableName, $idColumn);
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Constructor
@@ -68,42 +62,33 @@ class DbTableDestination implements DestinationInterface
      * @param string  $tableName
      * @param string  $idColumn
      */
-    public function __construct(\PDO $dbConn, $tableName, $idColumn = 'id')
+    public function __construct(\PDO $dbConn, string $tableName, string $idColumn = 'id')
     {
         $this->dbConn    = $dbConn;
         $this->tableName = $tableName;
         $this->idColumn  = $idColumn;
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Get record
      *
-     * @param string $id
+     * @param string $destinationId
      * @return array  Record, represented as array
-     * @throws MissingRecordException
+     * @throws MissingItemException
      */
-    function getRecord($id)
+    function getItem(string $destinationId): array
     {
-        $sql = sprintf(
-            "SELECT t.* FROM %s t WHERE t.%s = ?",
-            $this->tableName,
-            $this->idColumn
-        );
+        $sql = sprintf("SELECT t.* FROM %s t WHERE t.%s = ?", $this->tableName, $this->idColumn);
 
         $stmt = $this->dbConn->prepare($sql);
-        $stmt->execute([$id]);
+        $stmt->execute([$destinationId]);
 
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return $row;
-        }
-        else {
-            throw new MissingRecordException("Could not find record with ID: " . $id);
+        } else {
+            throw new MissingItemException("Could not find record with ID: " . $destinationId);
         }
     }
-
-    // ---------------------------------------------------------------
 
     /**
      * Save a record
@@ -113,7 +98,7 @@ class DbTableDestination implements DestinationInterface
      * @param array $recordData
      * @return string  The ID of the inserted record
      */
-    function saveRecord(array $recordData)
+    function saveItem(array $recordData): string
     {
         $query = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
@@ -130,20 +115,18 @@ class DbTableDestination implements DestinationInterface
             : (string) $this->dbConn->lastInsertId();
     }
 
-    // ---------------------------------------------------------------
-
     /**
      * Remove a record
      *
-     * @param string $id
+     * @param string $destinationId
      * @return bool
      */
-    function deleteRecord($id)
+    function deleteItem(string $destinationId): bool
     {
         $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idColumn);
         $stmt = $this->dbConn->prepare($sql);
 
-        $stmt->execute([$id]);
+        $stmt->execute([$destinationId]);
         return (bool) $stmt->rowCount();
     }
 }
