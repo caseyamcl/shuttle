@@ -4,6 +4,19 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## UNRELEASED
+
+### Added
+- The `DoctrineDestination` pre-installed destination to support migrating to Doctrine ORM, ODM, etc.
+
+### Changed
+- Breaking: Changed `DestinationInteface::getItem()` to `DestinationInterface::hasItem()`
+- Removed array type hint from `DestinationInterface` to support more diverse destinations 
+- Minor tweaks to code style and comments
+
+### Removed
+- The `MigratorFactory` class (possibly to be refactored later)
+
 ## [0.2] - 2018-06-01
 
 ### Added
