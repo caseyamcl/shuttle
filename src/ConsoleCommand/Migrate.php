@@ -131,7 +131,7 @@ class Migrate extends Command
                 $processLog['total']++;
                 $processLog[$event->getStatus()]++;
 
-                $map = [$event::FAILED = 'FAIL', $event::PROCESSED = 'SAVE', $event::SKIPPED = 'SKIP'];
+                $map = [$event::FAILED => 'FAIL', $event::PROCESSED => 'SAVE', $event::SKIPPED => 'SKIP'];
                 $output->writeln(sprintf(
                     ' * [%d/%d] %s: %s',
                     $processLog['total'],
