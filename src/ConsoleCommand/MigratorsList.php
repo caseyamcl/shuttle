@@ -86,7 +86,7 @@ class MigratorsList extends Command
             );
 
             if ($input->getOption('nostatus') == false) {
-                $row['num_source_recs'] = $migrator->getSource()->count();
+                $row['num_source_recs'] = $migrator->countSourceItems();
                 $row['num_migrated']    = $this->recorder->getMigratedCount($migrator->getSlug());
             }
 
