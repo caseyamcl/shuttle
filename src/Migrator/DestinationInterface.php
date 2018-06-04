@@ -15,8 +15,6 @@
 
 namespace Shuttle\Migrator;
 
-use Shuttle\Migrator\Exception\MissingItemException;
-
 /**
  * Interface DestinationInterface
  *
@@ -25,24 +23,22 @@ use Shuttle\Migrator\Exception\MissingItemException;
 interface DestinationInterface
 {
     /**
-     * Get record
+     * Does the destination contain the given record?
      *
      * @param string $destinationId  The destination ID
-     * @return array  Record, represented as array
-     * @throws MissingItemException
+     * @return bool  Record, represented as array
      */
-    public function getItem(string $destinationId): array;
+    public function hasItem(string $destinationId): bool;
 
     /**
      * Save a record
      *
      * Create or update the record
      *
-     * @param array $recordData
+     * @param mixed $recordData
      * @return string  The ID of the inserted record
      */
-    public function saveItem(array $recordData): string;
-
+    public function saveItem($recordData): string;
 
     /**
      * Remove a record
