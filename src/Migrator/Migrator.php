@@ -155,7 +155,6 @@ class Migrator implements MigratorInterface
         return $this->destination->saveItem($record);
     }
 
-
     /**
      * Revert a single record
      *

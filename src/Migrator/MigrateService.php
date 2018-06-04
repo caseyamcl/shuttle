@@ -16,6 +16,7 @@
 namespace Shuttle\Migrator;
 
 use Shuttle\Migrator\Event\MigrateFailedResult;
+use Shuttle\Migrator\Event\MigratePrePersistEvent;
 use Shuttle\Migrator\Event\MigratePrePrepareEvent;
 use Shuttle\Migrator\Event\MigrateResult;
 use Shuttle\Migrator\Event\MigrateResultInterface;
@@ -184,7 +185,7 @@ class MigrateService
             $destinationItem = $migrator->prepareSourceItem($sourceItem);
             $this->getDispatcher()->dispatch(
                 Events::PRE_PERSIST,
-                new MigratePrePrepareEvent($migrator->getSlug(), $sourceItemId, $destinationItem)
+                new MigratePrePersistEvent($migrator->getSlug(), $sourceItemId, $destinationItem)
             );
 
             $destinationItemId = $migrator->persistDestinationItem($destinationItem);
