@@ -4,32 +4,46 @@ A Data Migration Tool - Get Data from Here to There!
 
 ## Overview
 
-Shuttle is a PHP library to facilitate moving data from one place 
-(a database, web service, spreadsheet, text file, etc) to another.  
-This tool was developed to provide a general-purpose implementation of the concept 
-behind the [Drupal Migrate Module](https://www.drupal.org/project/migrate).
+Shuttle is a PHP library to facilitate moving data from one place (a database, web service, spreadsheet, text file, etc)
+to another.  This tool was developed to provide a general-purpose implementation of the concept behind the 
+[Drupal Migrate Module](https://www.drupal.org/project/migrate).
 
-This library allows you to migrate records from a given source, transform it as necessary,
-and dump it into a destination.  Shuttle will keep track of record IDs as they are migrated,
-and will allow you to revert and re-migrate your records as needed.
+This library allows you to migrate records from a given source, transform it as necessary, and dump it into a 
+destination.  Shuttle will keep track of record IDs as they are migrated, and will allow you to revert and re-migrate 
+your records as needed.
 
-If you are looking for a standalone CLI tool to move records, check out the [Shuttle Tool](#).
+It provides a quick way to get started for 80% of use cases, but also provides advanced capabilities for more complex
+workloads.
 
 ## Installation
 
 Install via Composer:
 
-    composer require caseyamcl/shuttle ~0.1
+    composer require caseyamcl/shuttle
 
-## Sources
+## Quick concepts
 
-## Creating your Own Source
+To migrate data, you need four things:
 
-## Destinations
+* A **source**: Shuttle defines a `SourceInterface`.  You can use one of the built-in sources in the
+  `Shuttle\MigrateSource` namespace or create your own:
+    * `CsvSource` - Comma-separated values source (stream/resource or file path)
+    * `DbTableSource` - Retrieve source items from a table in a database
+    * `DbSource` - Use database queries to retrieve source items
+    * `JsonSource` - Retrieve source items from a JSON string
+    * `YamlSource` - Retrieve source items from a YAML string
+* A **destination**: Shuttle defines a `DestinationInterface`.  You can use the built-in 
+    `Shuttle\MigrateDestination\DbTableDestination` or create your own.
+* An set of **items** in the source to migrate.  These are typically database rows, CSV rows, JSON records, or
+  something similar.  In Shuttle, the data must have a unique identifier and be represented as an array.
+* A **recorder**: This is the mechanism that keeps track of source items and destination items.  It maps source item 
+  IDs and destination item IDs so that items are migrated only once and can be reverted.
 
-## Creating Your Own Destination
+## Migrate from one database to another
 
-## Creating a Migrator
+If you're migrating from one database to another, you can use the bundled `DbSource` and `DbDestination`
+
+
 
 To migrate a set of data, you need three components:
 
@@ -76,5 +90,6 @@ There are two ways to expose `migrate` and `revert` commands in your application
 
 ## Tracking Migrations using Events
 
-Shuttle uses the [Symfony Event Dispatcher](#) library to dispatch events as records are migrated or reverted.
-You can create event listeners to report on progress or log these events if you wish.
+Shuttle uses the [Symfony Event Dispatcher](https://symfony.com/doc/current/components/event_dispatcher.html) library 
+to dispatch events as records are migrated or reverted. You can create event listeners to report on progress or log 
+these events if you wish.
