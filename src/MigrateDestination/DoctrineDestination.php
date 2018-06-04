@@ -43,10 +43,11 @@ class DoctrineDestination implements DestinationInterface
     /**
      * DoctrineDestination constructor.
      *
-     * @param ObjectManager $manager
-     * @param string $className
-     * @param string $idFieldName
-     * @param bool $autoFlush TRUE to persist each record immediately
+     * @param ObjectManager $manager  A Doctrine object manager (EntityManager, DocumentManager, etc)
+     * @param string $className       The Doctrine class
+     * @param string $idFieldName     The field to use to track IDs (must be unique); leave NULL to use Doctrine's
+     *                                ID field (i.e. the field you set in the mapping data as '@Id')
+     * @param bool $autoFlush         Set to TRUE to persist each record immediately; false
      */
     public function __construct(
         ObjectManager $manager,
