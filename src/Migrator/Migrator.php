@@ -142,7 +142,8 @@ class Migrator implements MigratorInterface
      */
     public function prepareSourceItem(array $source)
     {
-        return $this->prepare($source);
+        // By default, do nothing to the record..
+        return $source;
     }
 
     /**
@@ -163,7 +164,7 @@ class Migrator implements MigratorInterface
      */
     public function revert(string $destinationRecordId): bool
     {
-        $this->destination->deleteItem($destinationRecordId);
+        return $this->destination->deleteItem($destinationRecordId);
     }
 
     /**
@@ -172,17 +173,5 @@ class Migrator implements MigratorInterface
     public function listSourceIds(): iterable
     {
         return $this->source->listItemIds();
-    }
-
-    /**
-     * Transform/validate record
-     *
-     * @param array $record
-     * @return array
-     */
-    protected function prepare(array $record): array
-    {
-        // By default, do nothing to the record..
-        return $record;
     }
 }
