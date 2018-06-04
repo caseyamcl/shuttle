@@ -23,7 +23,7 @@ namespace Shuttle\Migrator;
 interface MigratorInterface
 {
     /**
-     * @return string  A unique identifier for the type of record being migrated
+     * @return string  A machine-friendly identifier for the type of record being migrated (e.g. 'posts', 'authors'...)
      */
     public function getSlug(): string;
 
