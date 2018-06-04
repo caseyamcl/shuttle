@@ -23,12 +23,11 @@
     "symfony/event-dispatcher": "^2.6|^3.0|^4.0"
   },
   "require-dev": {
+    "doctrine/dbal": "^2.5",
     "phpunit/phpunit": "^7.0",
     "squizlabs/php_codesniffer": "^2.3",
-
-    "doctrine/dbal": "^2.5",
-    "symfony/yaml": "^3.4|^4.0",
-    "symfony/console": "^3.4|^4.0"
+    "symfony/console": "^3.4|^4.0",
+    "symfony/yaml": "^3.4|^4.0"
   },
   "autoload": {
     "psr-4": {"Shuttle\\": "src/"}
