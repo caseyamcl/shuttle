@@ -4,6 +4,7 @@ namespace Shuttle\MigrateDestination;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Util\ClassUtils;
 use Shuttle\Migrator\DestinationInterface;
 use Shuttle\Migrator\Exception\MissingItemException;
 
@@ -13,6 +14,7 @@ use Shuttle\Migrator\Exception\MissingItemException;
  */
 class DoctrineDestination implements DestinationInterface
 {
+    const AUTO = null;
     /**
      * @var ObjectManager
      */
@@ -34,18 +36,29 @@ class DoctrineDestination implements DestinationInterface
     private $metadata;
 
     /**
+     * @var string
+     */
+    private $idFieldName;
+
+    /**
      * DoctrineDestination constructor.
      *
      * @param ObjectManager $manager
      * @param string $className
-     * @param bool $autoFlush  TRUE to persist each record immediately
+     * @param string $idFieldName
+     * @param bool $autoFlush TRUE to persist each record immediately
      */
-    public function __construct(ObjectManager $manager, string $className, bool $autoFlush = true)
-    {
+    public function __construct(
+        ObjectManager $manager,
+        string $className,
+        string $idFieldName = self::AUTO,
+        bool $autoFlush = true
+    ) {
         $this->manager = $manager;
         $this->className = $className;
         $this->autoFlush = $autoFlush;
         $this->metadata = $manager->getClassMetadata($className);
+        $this->idFieldName = $idFieldName;
     }
 
     /**
@@ -65,14 +78,22 @@ class DoctrineDestination implements DestinationInterface
      *
      * Create or update the record
      *
-     * @param object $recordData  An entity
+     * @param object $recordData An entity
      * @return string  The ID of the inserted record
      */
     public function saveItem($recordData): string
     {
         $this->manager->persist($recordData);
         $this->manager->flush();
-        return implode('', $this->metadata->getIdentifierValues($recordData));
+
+        // Get the field from the entity/object
+        if ($this->idFieldName) {
+            $reflection = ClassUtils::newReflectionObject($recordData)->getProperty($this->idFieldName);
+            $reflection->setAccessible(true);
+            return $reflection->getValue($recordData);
+        } else {
+            return implode('', $this->metadata->getIdentifierValues($recordData));
+        }
     }
 
     /**
