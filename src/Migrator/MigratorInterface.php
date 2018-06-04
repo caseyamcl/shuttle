@@ -33,16 +33,6 @@ interface MigratorInterface
     public function getDescription(): string;
 
     /**
-     * @return SourceInterface
-     */
-    public function getSource(): SourceInterface;
-
-    /**
-     * @return DestinationInterface
-     */
-    public function getDestination(): DestinationInterface;
-
-    /**
      * @return int  Number of records in the source
      */
     public function countSourceItems(): int;
@@ -53,12 +43,22 @@ interface MigratorInterface
     public function listSourceIds(): iterable;
 
     /**
-     * Migrate a single record
-     *
-     * @param string $sourceRecordId  Record ID in the old system
-     * @return string  The new Record ID
+     * @param string $sourceId
+     * @return array
      */
-    public function migrate(string $sourceRecordId): string;
+    public function getItemFromSource(string $sourceId): array;
+
+    /**
+     * @param array $source
+     * @return mixed
+     */
+    public function prepareSourceItem(array $source);
+
+    /**
+     * @param mixed $record
+     * @return string
+     */
+    public function persistDestinationItem($record): string;
 
     /**
      * Revert a single record

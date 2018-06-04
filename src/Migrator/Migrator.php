@@ -128,16 +128,32 @@ class Migrator implements MigratorInterface
     }
 
     /**
-     * Migrate a single record
-     *
-     * @param string $sourceRecordId Record ID in the old system
-     * @return string  New Record ID
+     * @param string $sourceId
+     * @return array
      */
-    public function migrate(string $sourceRecordId): string
+    public function getItemFromSource(string $sourceId): array
     {
-        $sourceItem = $this->source->getItem($sourceRecordId);
-        return $this->destination->saveItem($this->prepare($sourceItem));
+        return $this->getSource()->getItem($sourceId);
     }
+
+    /**
+     * @param array $source
+     * @return mixed
+     */
+    public function prepareSourceItem(array $source)
+    {
+        return $this->prepare($source);
+    }
+
+    /**
+     * @param mixed $record
+     * @return string
+     */
+    public function persistDestinationItem($record): string
+    {
+        return $this->destination->saveItem($record);
+    }
+
 
     /**
      * Revert a single record

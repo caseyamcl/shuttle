@@ -16,6 +16,7 @@
 namespace Shuttle\Migrator;
 
 use Shuttle\Migrator\Event\MigrateFailedResult;
+use Shuttle\Migrator\Event\MigratePrePrepareEvent;
 use Shuttle\Migrator\Event\MigrateResult;
 use Shuttle\Migrator\Event\MigrateResultInterface;
 use Shuttle\Migrator\Event\RevertFailedResult;
@@ -159,41 +160,54 @@ class MigrateService
      * Do Migration
      *
      * @param MigratorInterface $migrator
-     * @param string            $sourceRecId
+     * @param string            $sourceItemId
      * @return MigrateResultInterface
      */
-    protected function doMigrate(MigratorInterface $migrator, $sourceRecId): MigrateResultInterface
+    protected function doMigrate(MigratorInterface $migrator, $sourceItemId): MigrateResultInterface
     {
         // If already migrated, skip
-        if ($this->recorder->isMigrated($migrator->getSlug(), $sourceRecId)) {
+        if ($this->recorder->isMigrated($migrator->getSlug(), $sourceItemId)) {
             return new MigrateResult(
                 $migrator->getSlug(),
-                $sourceRecId,
+                $sourceItemId,
                 MigrateResult::SKIPPED,
-                $this->recorder->findDestinationId($migrator->getSlug(), $sourceRecId),
-                sprintf("Record (type %s) with id %s is already migrated", $migrator->getSlug(), $sourceRecId)
+                $this->recorder->findDestinationId($migrator->getSlug(), $sourceItemId),
+                sprintf("Item (type %s) with id %s is already migrated", $migrator->getSlug(), $sourceItemId)
             );
         }
 
         // Get the new record ID
         try {
-            $destRecId = $migrator->migrate($sourceRecId);
-            $this->recorder->markMigrated($migrator->getSlug(), $sourceRecId, $destRecId);
+            $sourceItem = $migrator->getItemFromSource($sourceItemId);
+            $this->getDispatcher()->dispatch(
+                Events::PRE_PREPARE,
+                new MigratePrePrepareEvent($migrator->getSlug(), $sourceItemId, $sourceItem)
+            );
+
+
+            $destinationItem = $migrator->prepareSourceItem($sourceItem);
+            $this->getDispatcher()->dispatch(
+                Events::PRE_PERSIST,
+                new MigratePrePrepareEvent($migrator->getSlug(), $sourceItemId, $destinationItem)
+            );
+
+            $destinationItemId = $migrator->persistDestinationItem($destinationItem);
+            $this->recorder->markMigrated($migrator->getSlug(), $sourceItemId, $destinationItemId);
 
             return new MigrateResult(
                 $migrator->getSlug(),
-                $sourceRecId,
+                $sourceItemId,
                 MigrateResult::PROCESSED,
-                $destRecId,
+                $destinationItemId,
                 sprintf(
-                    "Migrated (type %s) with id %s to destination record: %s",
+                    "Migrated (type %s) with id %s to destination with ID: %s",
                     $migrator->getSlug(),
-                    $sourceRecId,
-                    $destRecId
+                    $sourceItemId,
+                    $destinationItemId
                 )
             );
         } catch (\RuntimeException $e) {
-            return new MigrateFailedResult($sourceRecId, $e->getMessage(), $e);
+            return new MigrateFailedResult($sourceItemId, $e->getMessage(), $e);
         }
     }
 
@@ -216,7 +230,7 @@ class MigrateService
                 $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
                 $destinationId,
                 sprintf(
-                    "%s (type %s) with destination id %s (source id: %s)",
+                    "%s (type %s) with destination ID %s (source id: %s)",
                     ($isDeleted ? 'reverted' : 'skipped'),
                     $migrator->getSlug(),
                     $destinationId,

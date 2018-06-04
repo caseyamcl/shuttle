@@ -168,7 +168,7 @@ class Migrate extends Command
      */
     protected function getRecCount(MigratorInterface $migrator): int
     {
-        return $migrator->getSource()->count();
+        return $migrator->countSourceItems();
     }
 
     /**

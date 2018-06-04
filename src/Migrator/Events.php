@@ -23,7 +23,17 @@ final class Events
     const MIGRATE = 'shuttle.migrate';
 
     /**
-     * Revert event
+     * Revert event dispatched when revert has completed
      */
     const REVERT = 'shuttle.revert';
+
+    /**
+     * Pre-prepare event dispatched after retrieving source item, but before preparing it for destination
+     */
+    const PRE_PREPARE = 'shuttle.pre_prepare';
+
+    /**
+     * Pre-persist event dispatched after preparing item for destination, but before saving it
+     */
+    const PRE_PERSIST = 'shuttle.pre_persist';
 }
