@@ -170,20 +170,21 @@ class Recorder implements RecorderInterface
 
         $schema = new Schema();
         $table = $schema->createTable($tableName);
-        $table->addColumn('type', 'string', ['length'   => 32,   'notnull' => true]);
-        $table->addColumn('old_id', 'string', ['length'   => 32,   'notnull' => true]);
-        $table->addColumn('new_id', 'string', ['length'   => 32,   'notnull' => true]);
+        $table->addColumn('type',      'string',  ['length'   => 32,   'notnull' => true]);
+        $table->addColumn('old_id',    'string',  ['length'   => 32,   'notnull' => true]);
+        $table->addColumn('new_id',    'string',  ['length'   => 32,   'notnull' => true]);
         $table->addColumn('timestamp', 'integer', ['unsigned' => true, 'notnull' => true]);
 
-        // Only add PK if not SQLITE (SQLITE does it automatically)
-        //if ($this->dbConn->getDriver()->getName() != 'pdo_sqlite') {
-        $table->addColumn('rowid', 'integer', ['unsigned' => true, 'notnull' => true, 'autoincrement' => true]);
+        $table->addColumn(
+            'rowid',
+            'integer',
+            ['unsigned' => true, 'notnull' => true, 'autoincrement' => true]
+        );
         $table->setPrimaryKey(['rowid']);
-        //}
 
         $table->addIndex(['old_id']);
         $table->addIndex(['new_id']);
-        $table->addUniqueIndex(['type', 'old_id', 'new_id']);  // Why doesn't this get enforced loudly?
+        $table->addUniqueIndex(['type', 'old_id', 'new_id']);
 
         $queries = $schema->toSql($this->dbConn->getDatabasePlatform());
         foreach ($queries as $query) {
