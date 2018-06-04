@@ -23,7 +23,6 @@ use Shuttle\Migrator\Event\RevertFailedResult;
 use Shuttle\Migrator\Event\RevertResult;
 use Shuttle\Recorder\RecorderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Migrate Service
@@ -100,10 +99,7 @@ class MigrateService
     {
         $migrator = $this->getMigrators()->get($type);
 
-        $iterator = ( ! empty($ids))
-            ? new \ArrayIterator($ids)
-            : $migrator->getSource()->listItemIds();
-
+        $iterator = ( ! empty($ids)) ? new \ArrayIterator($ids) : $migrator->listSourceIds();
         $count = 0;
 
         foreach ($iterator as $sourceRecId) {
@@ -219,7 +215,8 @@ class MigrateService
     protected function doRevert(MigratorInterface $migrator, string $destinationId): MigrateResultInterface
     {
         try {
-            $isDeleted   = $migrator->getDestination()->deleteItem($destinationId);
+
+            $isDeleted  = $migrator->revert($destinationId);
             $sourceRecId = $this->recorder->findSourceId($migrator->getSlug(), $destinationId);
 
             $this->recorder->removeMigratedMark($migrator->getSlug(), $destinationId);
