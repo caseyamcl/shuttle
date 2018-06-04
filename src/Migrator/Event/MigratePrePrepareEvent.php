@@ -2,6 +2,8 @@
 
 namespace Shuttle\Migrator\Event;
 
+use Symfony\Component\EventDispatcher\Event;
+
 /**
  * MigratePrePrepareEvent
  *
@@ -11,7 +13,7 @@ namespace Shuttle\Migrator\Event;
  *
  * @package Shuttle\Migrator\Event
  */
-class MigratePrePrepareEvent
+class MigratePrePrepareEvent extends Event
 {
     /**
      * @var string
