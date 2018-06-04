@@ -73,21 +73,16 @@ class DbTableDestination implements DestinationInterface
      * Get record
      *
      * @param string $destinationId
-     * @return array  Record, represented as array
-     * @throws MissingItemException
+     * @return bool
      */
-    public function getItem(string $destinationId): array
+    public function hasItem(string $destinationId): bool
     {
         $sql = sprintf("SELECT t.* FROM %s t WHERE t.%s = ?", $this->tableName, $this->idColumn);
 
         $stmt = $this->dbConn->prepare($sql);
         $stmt->execute([$destinationId]);
 
-        if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            return $row;
-        } else {
-            throw new MissingItemException("Could not find record with ID: " . $destinationId);
-        }
+        return (bool) $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -98,8 +93,12 @@ class DbTableDestination implements DestinationInterface
      * @param array $recordData
      * @return string  The ID of the inserted record
      */
-    public function saveItem(array $recordData): string
+    public function saveItem($recordData): string
     {
+        if (! is_array($recordData)) {
+            throw new \InvalidArgumentException(get_called_class() . " expects record data to be an array");
+        }
+
         $query = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
             $this->tableName,
