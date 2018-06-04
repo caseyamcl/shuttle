@@ -65,9 +65,10 @@ class Migrate extends Command
     protected function configure()
     {
         if ($this->migrator) {
-            $this->setName(static::ACTION_NAME . ':' . $this->migrator->getSlug());
+            $this->setName('migrators:' . static::ACTION_NAME . ':' . $this->migrator->getSlug());
             $this->setDescription(ucfirst(static::ACTION_NAME) . " " . $this->migrator->getSlug());
         } else {
+            $this->setName('migrators:' . static::ACTION_NAME);
             $this->addArgument(
                 'migrator',
                 InputArgument::REQUIRED,
