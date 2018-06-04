@@ -26,10 +26,7 @@ abstract class AbstractDestinationInterfaceTest extends TestCase
         $recordData = $this->getNewRecordData();
         $newId = $obj->saveItem($recordData);
 
-        $newRec = $obj->getItem($newId);
-
-        $this->assertInternalType('array', $newRec);
-        $this->assertNotEmpty($newRec);
+        $this->assertTrue($obj->hasItem($newId));
     }
 
     public function testDeleteRecordReturnsTrueForDeletingRealRecord()
@@ -50,19 +47,13 @@ abstract class AbstractDestinationInterfaceTest extends TestCase
     public function testGetRecordReturnsNonEmptyArrayForExistingRecord()
     {
         $obj = $this->getDestObj();
-        $rec = $obj->getItem($this->getExistingRecordId());
-
-        $this->assertInternalType('array', $rec);
-        $this->assertNotEmpty($rec);
+        $this->assertTrue($obj->hasItem($this->getExistingRecordId()));
     }
 
-    /**
-     * @expectedException \Shuttle\Migrator\Exception\MissingItemException
-     */
-    public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
+    public function testHasRecordReturnsFalseForNonExistentRecord()
     {
         $obj = $this->getDestObj();
-        $obj->getItem($this->getNonExistentRecordId());
+        $this->assertFalse($obj->hasItem($this->getNonExistentRecordId()));
     }
 
     // ---------------------------------------------------------------
