@@ -43,24 +43,32 @@ class Migrator implements MigratorInterface
     private $destination;
 
     /**
+     * @var array|string[]
+     */
+    private $dependsOn;
+
+    /**
      * Constructor
      *
-     * @param string               $slug
-     * @param SourceInterface      $source
+     * @param string $slug
+     * @param SourceInterface $source
      * @param DestinationInterface $destination
-     * @param string               $description
+     * @param string $description
+     * @param array|string[] $dependsOn An array of slugs that should be migrated before this
      */
     public function __construct(
         string $slug,
         SourceInterface $source,
         DestinationInterface $destination,
-        $description = ''
+        $description = '',
+        array $dependsOn = []
     ) {
         $this->source      = $source;
         $this->destination = $destination;
 
         $this->setSlug($slug);
         $this->setDescription($description);
+        $this->dependsOn = $dependsOn;
     }
 
     /**
@@ -172,5 +180,15 @@ class Migrator implements MigratorInterface
     public function listSourceIds(): iterable
     {
         return $this->source->listItemIds();
+    }
+
+    /**
+     * Get other migrators that this migrator depends on
+     *
+     * @return array|string[]
+     */
+    public function getDependsOn(): array
+    {
+        return $this->dependsOn;
     }
 }

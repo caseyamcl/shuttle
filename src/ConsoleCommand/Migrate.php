@@ -71,10 +71,17 @@ class Migrate extends Command
             $this->setName('migrators:' . static::ACTION_NAME);
             $this->addArgument(
                 'migrator',
-                InputArgument::REQUIRED,
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'The name (slug) of the migrator to ' . static::ACTION_NAME
             );
         }
+
+        $this->addOption(
+            'all',
+            'a',
+            InputOption::VALUE_NONE,
+            "Migrate all (--ids/-i will be ignored and --limit/-l applies to each type)"
+        );
 
         $this->addOption(
             'ids',
@@ -97,7 +104,9 @@ class Migrate extends Command
         $migrator = $this->migrator ?: $this->migrateService->getMigrators()->get($input->getArgument('migrator'));
 
         // Read limit parameter
-        $limit  = $input->getOption('limit') ?: 0;
+        $limit = $input->getOption('limit') ?: 0;
+
+        // TODO: LEFT OFF HERE... ALLOW SPECIFYING MULTIPLE MIGRATORS, AND USE TYPESORT TO SORT THEM OUT BY DEPS
 
         // Read ID list parameter
         if ($input->getOption('ids')) {

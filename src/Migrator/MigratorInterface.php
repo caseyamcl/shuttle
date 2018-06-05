@@ -67,4 +67,11 @@ interface MigratorInterface
      * @return bool  If the record was actually deleted, return TRUE, else FALSE
      */
     public function revert(string $destinationRecordId): bool;
+
+    /**
+     * Get a list of migrator slugs that should be migrated before this one
+     *
+     * @return array|string[]
+     */
+    public function getDependsOn(): array;
 }

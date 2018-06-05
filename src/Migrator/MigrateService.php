@@ -101,7 +101,7 @@ class MigrateService
         $migrator = $this->getMigrators()->get($type);
 
         $iterator = ( ! empty($ids)) ? new \ArrayIterator($ids) : $migrator->listSourceIds();
-        $count = 0;
+        $count = 1;
 
         foreach ($iterator as $sourceRecId) {
             // Get out if we are limiting records
