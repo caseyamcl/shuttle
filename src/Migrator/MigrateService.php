@@ -142,7 +142,7 @@ class MigrateService
 
         foreach ($iterator as $destRecId) {
             // Get out if we are limiting records
-            if ($limit && $count > $limit) {
+            if ($limit && $count >= $limit) {
                 break;
             }
 

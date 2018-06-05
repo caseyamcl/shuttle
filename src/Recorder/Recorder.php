@@ -170,9 +170,9 @@ class Recorder implements RecorderInterface
 
         $schema = new Schema();
         $table = $schema->createTable($tableName);
-        $table->addColumn('type', 'string', ['length'   => 32, 'notnull' => true]);
-        $table->addColumn('old_id', 'string', ['length'   => 32, 'notnull' => true]);
-        $table->addColumn('new_id', 'string', ['length'   => 32, 'notnull' => true]);
+        $table->addColumn('type', 'string', ['length' => 64, 'notnull' => true]);
+        $table->addColumn('old_id', 'string', ['length' => 128, 'notnull' => true]);
+        $table->addColumn('new_id', 'string', ['length' => 128, 'notnull' => true]);
         $table->addColumn('timestamp', 'integer', ['unsigned' => true, 'notnull' => true]);
 
         $table->addColumn(
