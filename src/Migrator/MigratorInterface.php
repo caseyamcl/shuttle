@@ -71,7 +71,17 @@ interface MigratorInterface
     /**
      * Get a list of migrator slugs that should be migrated before this one
      *
+     * NOTE: This is not a comprehensive; it does not list transitive dependencies.  Use
+     * MigratorCollection::listDependencies() to determine all dependencies for a given migrator
+     *
      * @return array|string[]
      */
     public function getDependsOn(): array;
+
+    /**
+     * This should return the slug
+     *
+     * @return string
+     */
+    public function __toString(): string;
 }

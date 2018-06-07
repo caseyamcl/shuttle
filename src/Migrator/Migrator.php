@@ -54,7 +54,7 @@ class Migrator implements MigratorInterface
      * @param SourceInterface $source
      * @param DestinationInterface $destination
      * @param string $description
-     * @param array|string[] $dependsOn An array of slugs that should be migrated before this
+     * @param array|string[] $dependsOn  An array of slugs that should be migrated before this
      */
     public function __construct(
         string $slug,
@@ -185,10 +185,23 @@ class Migrator implements MigratorInterface
     /**
      * Get other migrators that this migrator depends on
      *
+     * NOTE: This is not a comprehensive; it does not list transitive dependencies.  Use
+     * MigratorCollection::listDependencies() to determine all dependencies for a given migrator
+     *
      * @return array|string[]
      */
     public function getDependsOn(): array
     {
         return $this->dependsOn;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSlug();
+    }
+
+
 }

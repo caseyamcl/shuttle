@@ -17,7 +17,7 @@ namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\DbSource;
 use Shuttle\Migrator\SourceInterface;
-use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
+use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
 
 /**
  * Simple DB Test

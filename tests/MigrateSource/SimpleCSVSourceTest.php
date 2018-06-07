@@ -17,7 +17,7 @@ namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\CsvSource;
 use Shuttle\Migrator\SourceInterface;
-use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
+use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
 
 class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
 {

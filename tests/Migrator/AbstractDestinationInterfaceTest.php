@@ -13,7 +13,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace ShuttleTest\Service\Migrator;
+namespace ShuttleTest\Migrator;
 
 use PHPUnit\Framework\TestCase;
 use Shuttle\Migrator\DestinationInterface;

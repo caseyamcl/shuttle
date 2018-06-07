@@ -17,7 +17,7 @@ namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\YamlSource;
 use Shuttle\Migrator\SourceInterface;
-use ShuttleTest\Service\Migrator\AbstractSourceInterfaceTest;
+use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
 
 /**
  * Yaml Source Test
@@ -31,7 +31,7 @@ class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
      */
     public function testMalformedYamlSourceThrowsException()
     {
-        $obj = new YamlSource('abcasdf---@(#*1230230--2-349u0h8dsfa', 'id');
+        new YamlSource('abcasdf---@(#*1230230--2-349u0h8dsfa', 'id');
     }
 
     /**
