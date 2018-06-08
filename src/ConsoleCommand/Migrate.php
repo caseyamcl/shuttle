@@ -147,8 +147,8 @@ class Migrate extends Command
             default:
                 $migratorSlugs = $input->getArgument('migrator');
                 $migrators = $input->getOption('dependencies')
-                    ? $this->migratorCollection->resolveDependencies($migratorSlugs)
-                    : $this->migratorCollection->getMultiple($migratorSlugs);
+                    ? call_user_func_array([$this->migratorCollection, 'resolveDependencies'], $migratorSlugs)
+                    : call_user_func_array([$this->migratorCollection, 'getMultiple'], $migratorSlugs);
         }
 
         // Setup item limit
