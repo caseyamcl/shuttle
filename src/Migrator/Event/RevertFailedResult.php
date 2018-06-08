@@ -15,17 +15,23 @@
 
 namespace Shuttle\Migrator\Event;
 
+/**
+ * Class RevertFailedResult
+ *
+ * @package Shuttle\Migrator\Event
+ */
 class RevertFailedResult extends MigrateFailedResult
 {
     /**
      * RevertFailedResult constructor.
-     * @param string $destinationId  Destination record ID
+     * @param string $migratorName
+     * @param string $destinationId Destination record ID
      * @param string $message
      * @param \Exception|null $e
      */
-    public function __construct(string $destinationId, string $message, \Exception $e = null)
+    public function __construct(string $migratorName, string $destinationId, string $message, \Exception $e = null)
     {
-        parent::__construct($destinationId, $message, $e);
+        parent::__construct($migratorName, $destinationId, $message, $e);
     }
 
     /**

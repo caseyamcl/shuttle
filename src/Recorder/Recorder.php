@@ -63,7 +63,7 @@ class Recorder implements RecorderInterface
 
     /**
      * @param string $type
-     * @return iterable
+     * @return iterable|string[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function listDestinationIds(string $type): iterable
@@ -71,6 +71,18 @@ class Recorder implements RecorderInterface
         $stmt = $this->dbConn->prepare("SELECT new_id FROM {$this->tableName} WHERE type = ?");
         $stmt->execute([$type]);
         return new DoctrineColumnIterator($stmt, 'new_id');
+    }
+
+    /**
+     * @param string $type
+     * @return iterable|string[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function listMigratedSourceIds(string $type): iterable
+    {
+        $stmt = $this->dbConn->prepare("SELECT old_id FROM {$this->tableName} WHERE type = ?");
+        $stmt->execute([$type]);
+        return new DoctrineColumnIterator($stmt, 'old_id');
     }
 
     /**

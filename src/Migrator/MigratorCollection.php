@@ -50,10 +50,12 @@ class MigratorCollection implements \IteratorAggregate, Countable
     }
 
     /**
+     * Does the specified migrator
+     *
      * @param string $name
      * @return bool
      */
-    public function has($name): bool
+    public function has(string $name): bool
     {
         return array_key_exists($name, $this->migrators);
     }
@@ -63,15 +65,18 @@ class MigratorCollection implements \IteratorAggregate, Countable
      */
     public function add(MigratorInterface $migrator): void
     {
-        $this->migrators[$migrator->getSlug()] = $migrator;
-        $this->sorter->add($migrator->getSlug(), $migrator->getDependsOn());
+        $this->migrators[$migrator->getName()] = $migrator;
+        $this->sorter->add($migrator->getName(), $migrator->getDependsOn());
     }
 
     /**
+     * Get a migrator bits name
+     *
      * @param string $name
      * @return MigratorInterface
+     * @throws \InvalidArgumentException  If invalid name specified
      */
-    public function get($name): MigratorInterface
+    public function get(string $name): MigratorInterface
     {
         if (! $this->has($name)) {
             throw new \InvalidArgumentException("No migrator exists with slug/name: " . $name);
@@ -81,7 +86,25 @@ class MigratorCollection implements \IteratorAggregate, Countable
     }
 
     /**
-     * @return ArrayIterator|MigratorInterface[]
+     * Get multiple migrators
+     *
+     * This does not not do any dependency resolution or sorting.  If you need to do that,
+     * use self::resolveDependencies()
+     *
+     * @param string[] $names
+     * @return \Iterator|MigratorInterface[]  An iterator of migrators in the same order of the supplied names
+     */
+    public function getMultiple(string ...$names): \Iterator
+    {
+        return new \ArrayIterator(array_map([$this, 'get'], $names));
+    }
+
+    /**
+     * Iterate over all migrators
+     *
+     * This returns migrators in dependency order.
+     *
+     * @return \Iterator|MigratorInterface[]  An iterator of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
@@ -91,6 +114,8 @@ class MigratorCollection implements \IteratorAggregate, Countable
     }
 
     /**
+     * Count migrators
+     *
      * @return int
      */
     public function count(): int
@@ -101,20 +126,23 @@ class MigratorCollection implements \IteratorAggregate, Countable
     /**
      * Resolve dependencies for a given migrator slug or instance
      *
-     * @param string|MigratorInterface $migrator The migrator or name of the migrator
+     * @param string[] $migrators  The migrator(s) or name(s) of the migrator(s)
      * @return iterable|MigratorInterface[]  A list of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function resolveDependencies(string $migrator): iterable
+    public function resolveDependencies(string ...$migrators): iterable
     {
-        if (! $migrator instanceof MigratorInterface) {
-            $migrator = $this->get($migrator);
-        }
-
         $sorter = new StringSort();
-        foreach ($this->iterateDependencies($migrator) as $dependency) {
-            $sorter->add($dependency->getSlug(), $dependency->getDependsOn());
+
+        foreach ($migrators as $migrator) {
+            if (! $migrator instanceof MigratorInterface) {
+                $migrator = $this->get($migrator);
+            }
+
+            foreach ($this->iterateDependencies($migrator) as $dependency) {
+                $sorter->add($dependency->getName(), $dependency->getDependsOn());
+            }
         }
 
         return array_map([$this, 'get'], $sorter->sort());
@@ -132,8 +160,8 @@ class MigratorCollection implements \IteratorAggregate, Countable
      */
     private function iterateDependencies(MigratorInterface $migrator, array $visited = [])
     {
-        if (! in_array($migrator->getSlug(), $visited)) {
-            $visited[] = $migrator->getSlug();
+        if (! in_array($migrator->getName(), $visited)) {
+            $visited[] = $migrator->getName();
             yield $migrator;
         }
 

@@ -41,6 +41,14 @@ interface RecorderInterface
     public function listDestinationIds(string $type): iterable;
 
     /**
+     * Get a list of source IDs for items that have been migrated (i.e. they have corresponding destination IDs)
+     *
+     * @param string $type
+     * @return iterable
+     */
+    public function listMigratedSourceIds(string $type): iterable;
+
+    /**
      * Determine if a source item has been migrated yet
      *
      * @param string $type

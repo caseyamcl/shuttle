@@ -50,14 +50,14 @@ class Migrator implements MigratorInterface
     /**
      * Constructor
      *
-     * @param string $slug
+     * @param string $name
      * @param SourceInterface $source
      * @param DestinationInterface $destination
      * @param string $description
      * @param array|string[] $dependsOn  An array of slugs that should be migrated before this
      */
     public function __construct(
-        string $slug,
+        string $name,
         SourceInterface $source,
         DestinationInterface $destination,
         $description = '',
@@ -66,7 +66,7 @@ class Migrator implements MigratorInterface
         $this->source      = $source;
         $this->destination = $destination;
 
-        $this->setSlug($slug);
+        $this->setName($name);
         $this->setDescription($description);
         $this->dependsOn = $dependsOn;
     }
@@ -74,7 +74,7 @@ class Migrator implements MigratorInterface
     /**
      * @return string  A unique identifier for the type of record being migrated
      */
-    public function getSlug(): string
+    public function getName(): string
     {
         return $this->slug;
     }
@@ -93,7 +93,7 @@ class Migrator implements MigratorInterface
      * @param string $slug
      * @return Migrator
      */
-    protected function setSlug($slug): Migrator
+    protected function setName($slug): Migrator
     {
         $this->slug = $slug;
         return $this;
@@ -169,7 +169,7 @@ class Migrator implements MigratorInterface
      * @param string $destinationRecordId
      * @return bool
      */
-    public function revert(string $destinationRecordId): bool
+    public function removeDestinationItem(string $destinationRecordId): bool
     {
         return $this->destination->deleteItem($destinationRecordId);
     }
@@ -177,7 +177,7 @@ class Migrator implements MigratorInterface
     /**
      * @return array|string[]
      */
-    public function listSourceIds(): iterable
+    public function getSourceIdIterator(): iterable
     {
         return $this->source->listItemIds();
     }
@@ -200,8 +200,6 @@ class Migrator implements MigratorInterface
      */
     public function __toString(): string
     {
-        return $this->getSlug();
+        return $this->getName();
     }
-
-
 }

@@ -25,7 +25,7 @@ interface MigratorInterface
     /**
      * @return string  A machine-friendly identifier for the type of record being migrated (e.g. 'posts', 'authors'...)
      */
-    public function getSlug(): string;
+    public function getName(): string;
 
     /**
      * @return string  A description of the records being migrated
@@ -40,7 +40,7 @@ interface MigratorInterface
     /**
      * @return iterable|string[]
      */
-    public function listSourceIds(): iterable;
+    public function getSourceIdIterator(): iterable;
 
     /**
      * @param string $sourceId
@@ -66,7 +66,7 @@ interface MigratorInterface
      * @param string $destinationRecordId
      * @return bool  If the record was actually deleted, return TRUE, else FALSE
      */
-    public function revert(string $destinationRecordId): bool;
+    public function removeDestinationItem(string $destinationRecordId): bool;
 
     /**
      * Get a list of migrator slugs that should be migrated before this one

@@ -17,9 +17,9 @@ namespace Shuttle\Migrator\Event;
 
 interface MigrateResultInterface
 {
-    const SKIPPED   = -1;
-    const FAILED    = 0;
-    const PROCESSED = 1;
+    public const SKIPPED   = -1;
+    public const FAILED    = 0;
+    public const PROCESSED = 1;
 
     /**
      * @return int  (-1 skipped; 0 failed; 1 success)
@@ -30,4 +30,9 @@ interface MigrateResultInterface
      * @return string
      */
     public function getMessage(): string;
+
+    /**
+     * @return string
+     */
+    public function getMigratorName(): string;
 }

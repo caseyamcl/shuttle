@@ -18,6 +18,8 @@ namespace Shuttle\ConsoleCommand;
 use Shuttle\Migrator\Event\MigrateResultInterface;
 use Shuttle\Migrator\Events;
 use Shuttle\Migrator\MigrateService;
+use Shuttle\Migrator\MigrateTracker;
+use Shuttle\Migrator\MigratorCollection;
 use Shuttle\Migrator\MigratorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -35,28 +37,35 @@ class Migrate extends Command
     const ACTION_NAME = 'migrate';
 
     /**
-     * @var MigratorInterface
-     */
-    protected $migrator;
-
-    /**
      * @var MigrateService
      */
     protected $migrateService;
 
     /**
+     * @var MigratorCollection
+     */
+    private $migratorCollection;
+
+    /**
+     * @var MigratorInterface|null
+     */
+    protected $migrator;
+
+    /**
      * Constructor
      *
-     * @param MigrateService $migrateService  Migrate service
-     * @param string         $migratorName    Optionally provide migrator name
+     * @param MigrateService $migrateService Migrate service
+     * @param MigratorCollection $migrators
+     * @param string $migrator Optionally provide migrator name
      *                                        (if not provided, a CLI argument is made available to the user)
      */
-    public function __construct(MigrateService $migrateService, $migratorName = '')
+    public function __construct(MigrateService $migrateService, MigratorCollection $migrators, string $migrator = '')
     {
         $this->migrateService = $migrateService;
+        $this->migratorCollection = $migrators;
 
-        if ($migratorName) {
-            $this->migrator = $migrateService->getMigrators()->get($migratorName);
+        if ($migrator) {
+            $this->migrator = $migrators->get((string) $migrator);
         }
 
         parent::__construct();
@@ -65,127 +74,175 @@ class Migrate extends Command
     protected function configure()
     {
         if ($this->migrator) {
-            $this->setName('migrators:' . static::ACTION_NAME . ':' . $this->migrator->getSlug());
-            $this->setDescription(ucfirst(static::ACTION_NAME) . " " . $this->migrator->getSlug());
+            $this->setName('migrators:' . static::ACTION_NAME . ':' . $this->migrator->getName());
+            $this->setDescription(ucfirst(static::ACTION_NAME) . " " . $this->migrator->getName());
         } else {
             $this->setName('migrators:' . static::ACTION_NAME);
             $this->addArgument(
                 'migrator',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
-                'The name (slug) of the migrator to ' . static::ACTION_NAME
+                'The name (slug) of the migrators to ' . static::ACTION_NAME
+            );
+
+            $this->addOption(
+                'all',
+                'a',
+                InputOption::VALUE_NONE,
+                "Process all migrators (--dependencies is automatically applied here)"
+            );
+
+            $this->addOption(
+                'dependencies',
+                'd',
+                InputOption::VALUE_NONE,
+                'Process dependencies for specified migrators'
+            );
+        }
+
+        if (static::ACTION_NAME !== Revert::ACTION_NAME) {
+            $this->addOption(
+                'clobber',
+                'c',
+                InputOption::VALUE_NONE,
+                'Clobber; remove previously migrated items and migrate all items'
             );
         }
 
         $this->addOption(
-            'all',
-            'a',
-            InputOption::VALUE_NONE,
-            "Migrate all (--ids/-i will be ignored and --limit/-l applies to each type)"
+            'limit',
+            'l',
+            InputOption::VALUE_REQUIRED,
+            'Set a limit on the number of items to ' . static::ACTION_NAME
         );
 
         $this->addOption(
             'ids',
             'i',
             InputOption::VALUE_REQUIRED,
-            'Optionally indicate a comma-separated list of IDs from source to ' . static::ACTION_NAME
-        );
-
-        $this->addOption(
-            'limit',
-            'l',
-            InputOption::VALUE_REQUIRED,
-            'Optionally set a limit'
+            'A comma-separated list of source IDs to ' . static::ACTION_NAME
         );
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     * @throws \MJS\TopSort\CircularDependencyException
+     * @throws \MJS\TopSort\ElementNotFoundException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Setup the migrator
-        $migrator = $this->migrator ?: $this->migrateService->getMigrators()->get($input->getArgument('migrator'));
+        // Setup a tracker
+        $tracker = $this->getNewTracker();
+        $this->migrateService->getDispatcher()->addSubscriber($tracker);
 
-        // Read limit parameter
-        $limit = $input->getOption('limit') ?: 0;
-
-        // TODO: LEFT OFF HERE... ALLOW SPECIFYING MULTIPLE MIGRATORS, AND USE TYPESORT TO SORT THEM OUT BY DEPS
-
-        // Read ID list parameter
-        if ($input->getOption('ids')) {
-            $idList   = array_filter(array_map('trim', explode(',', $input->getOption('ids'))));
-            $numItems = count($idList);
-        } else {
-            $idList   = [];
-            $numItems = $this->getRecCount($migrator);
+        // Setup migrators
+        switch (true) {
+            case $this->migrator:
+                $migrators = [$this->migrator];
+                break;
+            case $input->getOption('all'):
+                $migrators = $this->migratorCollection->getIterator();
+                break;
+            default:
+                $migratorSlugs = $input->getArgument('migrator');
+                $migrators = $input->getOption('dependencies')
+                    ? $this->migratorCollection->resolveDependencies($migratorSlugs)
+                    : $this->migratorCollection->getMultiple($migratorSlugs);
         }
 
-        // Output some info
-        $output->writeln(sprintf(
-            'Processing <info>%s</info> items from <info>%s</info> (%s)',
-            number_format($numItems),
-            $migrator->getSlug(),
-            $migrator->getDescription()
-        ));
+        // Setup item limit
+        $limit = (int) $input->getOption('limit') ?: 0;
 
-        // Register callback for Tracker to report on progress
-        $processLog = [
-            'total'                           => 0,
-            MigrateResultInterface::FAILED    => 0,
-            MigrateResultInterface::PROCESSED => 0,
-            MigrateResultInterface::SKIPPED   => 0
-        ];
+        // Read ID list parameter
+        $idList = ($input->getOption('ids'))
+            ? array_filter(array_map('trim', explode(',', $input->getOption('ids'))))
+            : [];
 
-        // Add listener to output a message for each record processed
-        $this->migrateService->getDispatcher()->addListener(
-            $this->getEventListenName(),
-            function (MigrateResultInterface $event) use ($output, $numItems, &$processLog) {
+        // Setup 'clobber' option
+        $clobber = $input->hasOption('clobber') ? $input->getOption('clobber') : false;
 
-                $processLog['total']++;
-                $processLog[$event->getStatus()]++;
+        /** @var MigratorInterface $migrator */
+        foreach ($migrators as $migrator) {
+            // Output some info
+            $output->writeln(sprintf(
+                'Processing items from <info>%s</info> (%s)',
+                $migrator->getName(),
+                $migrator->getDescription()
+            ));
 
-                $map = [$event::FAILED => 'FAIL', $event::PROCESSED => 'SAVE', $event::SKIPPED => 'SKIP'];
-                $output->writeln(sprintf(
-                    ' * [%d/%d] %s: %s',
-                    $processLog['total'],
-                    $numItems,
-                    $map[$event->getStatus()],
-                    $event->getMessage()
-                ));
+            // Do it..
+            if ((! $limit) or $tracker->getTotalCount() < $limit) {
+                foreach ($this->getActionIterator($migrator, $idList, $clobber) as $result) {
+                    if ($limit && $tracker->getTotalCount() >= $limit) {
+                        $output->writeln(sprintf(
+                            "Limit reached (%s).  No more items will be processed.",
+                            number_format($limit)
+                        ));
+                        break;
+                    }
+
+                    $this->logEvent($output, $result, $tracker->getTotalCount($migrator->getName()));
+                }
             }
-        );
 
-        // Do It!
-        call_user_func(
-            [$this->migrateService, static::ACTION_NAME],
-            $migrator->getSlug(),
-            $limit,
-            $idList
-        );
+            $output->writeln(sprintf(
+                'Finished <info>%s</info> %d total: <fg=green>%d</fg=green> processed'
+                . ' / <fg=yellow>%d</fg=yellow> skipped / <fg=red>%d</fg=red> failed',
+                $migrator->getName(),
+                number_format($tracker->getTotalCount($migrator->getName())),
+                number_format($tracker->getProcessedCount($migrator->getName())),
+                number_format($tracker->getSkippedCount($migrator->getName())),
+                number_format($tracker->getFailedCount($migrator->getName()))
+            ));
+        }
 
         // Final report
+        $output->writeln(''); // Skip a line
         $output->writeln(sprintf(
-            "\n%s Finished for %s: <info>%s</info> processed"
-            . "(<fg=yellow>%s</fg=yellow> skipped / <fg=red>%s</fg=red> failed)",
+            '%s complete (%d total): <fg=green>%d</fg=green> processed'
+            . ' / <fg=yellow>%d</fg=yellow> skipped / <fg=red>%d</fg=red> failed',
             ucfirst(static::ACTION_NAME),
-            $migrator->getSlug(),
-            number_format($processLog[MigrateResultInterface::PROCESSED]),
-            number_format($processLog[MigrateResultInterface::SKIPPED]),
-            number_format($processLog[MigrateResultInterface::FAILED])
+            number_format($tracker->getTotalCount()),
+            number_format($tracker->getProcessedCount()),
+            number_format($tracker->getSkippedCount()),
+            number_format($tracker->getFailedCount())
         ));
+
+        // Cleanup, in case this is running a sub-command
+        $this->migrateService->getDispatcher()->removeSubscriber($tracker);
+        unset($tracker);
+    }
+
+    /**
+     * Log event
+     *
+     * @param OutputInterface $output
+     * @param MigrateResultInterface $event
+     * @param int $itemCount
+     */
+    protected function logEvent(OutputInterface $output, MigrateResultInterface $event, int $itemCount)
+    {
+        $map = [$event::FAILED => 'FAIL', $event::PROCESSED => 'SAVE', $event::SKIPPED => 'SKIP'];
+        $output->writeln(sprintf(' * [%d] %s: %s', $itemCount, $map[$event->getStatus()], $event->getMessage()));
     }
 
     /**
      * @param MigratorInterface $migrator
-     * @return int
+     * @param array $ids |string[]  Source IDs (pass empty array for all source items)
+     * @param bool $clobber
+     * @return iterable|MigrateResultInterface[]
      */
-    protected function getRecCount(MigratorInterface $migrator): int
+    protected function getActionIterator(MigratorInterface $migrator, array $ids = [], bool $clobber = false): iterable
     {
-        return $migrator->countSourceItems();
+        return $this->migrateService->migrateItems($migrator, $ids, $clobber);
     }
 
     /**
-     * @return string
+     * @return MigrateTracker
      */
-    protected function getEventListenName(): string
+    protected function getNewTracker(): MigrateTracker
     {
-        return Events::MIGRATE;
+        return new MigrateTracker(Events::MIGRATE);
     }
 }

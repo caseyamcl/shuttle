@@ -40,15 +40,22 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
     private $exception;
 
     /**
-     * @param string     $sourceId
-     * @param string     $message
+     * @var string
+     */
+    private $migratorName;
+
+    /**
+     * @param string $migratorName
+     * @param string $sourceId
+     * @param string $message
      * @param \Exception $e
      */
-    public function __construct(string $sourceId, string $message, \Exception $e = null)
+    public function __construct(string $migratorName, string $sourceId, string $message, \Exception $e = null)
     {
-        $this->recId     = $sourceId;
-        $this->msg       = $message;
-        $this->exception = $e;
+        $this->migratorName = $migratorName;
+        $this->recId        = $sourceId;
+        $this->msg          = $message;
+        $this->exception    = $e;
     }
 
     /**
@@ -81,5 +88,13 @@ class MigrateFailedResult extends Event implements MigrateResultInterface
     public function getRecordId(): string
     {
         return $this->recId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMigratorName(): string
+    {
+        return $this->migratorName;
     }
 }

@@ -15,8 +15,10 @@
 
 namespace Shuttle\ConsoleCommand;
 
+use Shuttle\Migrator\Event\MigrateResultInterface;
 use Shuttle\Migrator\Events;
 use Shuttle\Migrator\MigratorInterface;
+use Shuttle\Migrator\MigrateTracker;
 
 /**
  * Revert Command
@@ -29,18 +31,20 @@ class Revert extends Migrate
 
     /**
      * @param MigratorInterface $migrator
-     * @return int
+     * @param array $ids |string[]  Source IDs (pass empty array for all source items)
+     * @param bool $clobber  Not used for revert. Ignore this.
+     * @return iterable|MigrateResultInterface[]
      */
-    protected function getRecCount(MigratorInterface $migrator): int
+    protected function getActionIterator(MigratorInterface $migrator, array $ids = [], bool $clobber = false): iterable
     {
-        return $this->migrateService->getRecorder()->getMigratedCount($migrator->getSlug());
+        return $this->migrateService->revertItems($migrator, $ids);
     }
 
     /**
-     * @return string
+     * @return MigrateTracker
      */
-    protected function getEventListenName(): string
+    protected function getNewTracker(): MigrateTracker
     {
-        return Events::REVERT;
+        return new MigrateTracker(Events::REVERT);
     }
 }

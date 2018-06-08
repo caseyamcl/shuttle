@@ -1,6 +1,7 @@
 <?php
 
 namespace ShuttleTest\Fixture;
+
 use Shuttle\Migrator\DestinationInterface;
 
 /**

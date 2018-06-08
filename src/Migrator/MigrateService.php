@@ -23,6 +23,7 @@ use Shuttle\Migrator\Event\MigrateResultInterface;
 use Shuttle\Migrator\Event\RevertFailedResult;
 use Shuttle\Migrator\Event\RevertResult;
 use Shuttle\Recorder\RecorderInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -43,25 +44,15 @@ class MigrateService
     private $dispatcher;
 
     /**
-     * @var MigratorCollection
-     */
-    private $migrators;
-
-    /**
      * Constructor
      *
      * @param RecorderInterface        $recorder
      * @param EventDispatcherInterface $dispatcher
-     * @param MigratorCollection       $migrators
      */
-    public function __construct(
-        RecorderInterface $recorder,
-        EventDispatcherInterface $dispatcher,
-        MigratorCollection $migrators = null
-    ) {
-        $this->recorder   = $recorder;
-        $this->dispatcher = $dispatcher;
-        $this->migrators  = $migrators ?: new MigratorCollection();
+    public function __construct(RecorderInterface $recorder, EventDispatcherInterface $dispatcher = null)
+    {
+        $this->recorder = $recorder;
+        $this->dispatcher = $dispatcher ?: new EventDispatcher();
     }
 
     /**
@@ -70,14 +61,6 @@ class MigrateService
     public function getDispatcher(): EventDispatcherInterface
     {
         return $this->dispatcher;
-    }
-
-    /**
-     * @return MigratorCollection
-     */
-    public function getMigrators(): MigratorCollection
-    {
-        return $this->migrators;
     }
 
     /**
@@ -91,152 +74,177 @@ class MigrateService
     /**
      * Migrate records
      *
-     * @param string $type  Migrator Slug
-     * @param int    $limit 0 means no limit
-     * @param array  $ids   Optionally limit to specified IDs of source records
-     * @return int Number of records attempted
+     * @param MigratorInterface $migrator
+     * @param array $sourceIds Optionally limit to specified IDs of source records
+     * @param bool $clobber  Revert the item and re-migrate it if it is already migrated
+     * @return \Generator|MigrateResultInterface[]
      */
-    public function migrate($type, $limit = 0, array $ids = []): int
+    public function migrateItems(MigratorInterface $migrator, array $sourceIds = [], bool $clobber = false): \Generator
     {
-        $migrator = $this->getMigrators()->get($type);
+        $iterator = ( ! empty($ids)) ? new \ArrayIterator($sourceIds) : $migrator->getSourceIdIterator();
 
-        $iterator = ( ! empty($ids)) ? new \ArrayIterator($ids) : $migrator->listSourceIds();
-        $count = 1;
-
-        foreach ($iterator as $sourceRecId) {
-            // Get out if we are limiting records
-            if ($limit && $count > $limit) {
-                break;
-            }
-
-            $this->dispatcher->dispatch(Events::MIGRATE, $this->doMigrate($migrator, $sourceRecId));
-            $count++;
+        foreach ($iterator as $sourceId) {
+            yield $this->migrate($migrator, $sourceId, $clobber);
         }
-
-        return $count;
     }
 
     /**
      * Revert migrated records
      *
-     * @param string $type
-     * @param int    $limit
-     * @param array  $ids Optionally limit to specified IDs of source records (yes, SOURCE records)
-     * @return int Number of records attempted
+     * @param MigratorInterface $migrator
+     * @param array $sourceIds Optionally limit to specified IDs of source records (yes, SOURCE records)
+     * @return \Generator|MigrateResultInterface[]
      */
-    public function revert($type, $limit = 0, array $ids = []): int
+    public function revertItems(MigratorInterface $migrator, array $sourceIds = []): \Generator
     {
-        $migrator = $this->getMigrators()->get($type);
+        $iterator = ( ! empty($sourceIds))
+            ? new \ArrayIterator($sourceIds)
+            : $this->getRecorder()->listMigratedSourceIds($migrator->getName());
 
-        if (! empty($ids)) {
-            $newIds = [];
-            foreach ($ids as $sourceId) {
-                $newIds[] = $this->recorder->findDestinationId($type, $sourceId);
-            }
-            $iterator = new \ArrayIterator($newIds);
-        } else {
-            $iterator = $this->recorder->listDestinationIds($type);
+        foreach ($iterator as $sourceId) {
+            yield $this->revert($migrator, $sourceId);
         }
-
-        $count = 0;
-
-        foreach ($iterator as $destRecId) {
-            // Get out if we are limiting records
-            if ($limit && $count >= $limit) {
-                break;
-            }
-
-            $this->dispatcher->dispatch(Events::REVERT, $this->doRevert($migrator, $destRecId));
-            $count++;
-        }
-
-        return $count;
     }
 
     /**
-     * Do Migration
+     * Migrate a record
      *
      * @param MigratorInterface $migrator
-     * @param string            $sourceItemId
+     * @param string $sourceItemId
+     * @param bool $clobber
      * @return MigrateResultInterface
      */
-    protected function doMigrate(MigratorInterface $migrator, $sourceItemId): MigrateResultInterface
-    {
-        // If already migrated, skip
-        if ($this->recorder->isMigrated($migrator->getSlug(), $sourceItemId)) {
-            return new MigrateResult(
-                $migrator->getSlug(),
-                $sourceItemId,
-                MigrateResult::SKIPPED,
-                $this->recorder->findDestinationId($migrator->getSlug(), $sourceItemId),
-                sprintf("Item (type %s) with id %s is already migrated", $migrator->getSlug(), $sourceItemId)
-            );
-        }
+    public function migrate(
+        MigratorInterface $migrator,
+        string $sourceItemId,
+        bool $clobber = false
+    ): MigrateResultInterface {
 
-        // Get the new record ID
-        try {
-            $sourceItem = $migrator->getItemFromSource($sourceItemId);
-            $this->getDispatcher()->dispatch(
-                Events::PRE_PREPARE,
-                new MigratePrePrepareEvent($migrator->getSlug(), $sourceItemId, $sourceItem)
-            );
+        // Clobber?
+        if ($clobber && $this->recorder->isMigrated($migrator, $sourceItemId)) {
+            $revertResult = $this->revert($migrator, $sourceItemId);
 
-
-            $destinationItem = $migrator->prepareSourceItem($sourceItem);
-            $this->getDispatcher()->dispatch(
-                Events::PRE_PERSIST,
-                new MigratePrePersistEvent($migrator->getSlug(), $sourceItemId, $destinationItem)
-            );
-
-            $destinationItemId = $migrator->persistDestinationItem($destinationItem);
-            $this->recorder->markMigrated($migrator->getSlug(), $sourceItemId, $destinationItemId);
-
-            return new MigrateResult(
-                $migrator->getSlug(),
-                $sourceItemId,
-                MigrateResult::PROCESSED,
-                $destinationItemId,
-                sprintf(
-                    "Migrated (type %s) with id %s to destination with ID: %s",
-                    $migrator->getSlug(),
+            if ($revertResult->getStatus() == MigrateResultInterface::FAILED) {
+                $result = new MigrateFailedResult(
+                    $migrator->getName(),
                     $sourceItemId,
-                    $destinationItemId
-                )
-            );
-        } catch (\RuntimeException $e) {
-            return new MigrateFailedResult($sourceItemId, $e->getMessage(), $e);
+                    sprintf(
+                        'Item ($type %s) with ID %s failed, because revert failed with message: (%s)',
+                        $migrator->getName(),
+                        $sourceItemId,
+                        $revertResult->getMessage()
+                    )
+                );
+            }
         }
+
+        if (! isset($result)) {
+            $result = $this->doMigrate($migrator, $sourceItemId);
+        }
+
+        $this->dispatcher->dispatch(Events::MIGRATE, $result);
+        $this->dispatcher->dispatch(Events::REVERT_OR_MIGRATE, $result);
+
+        return $result;
     }
 
     /**
+     * Revert a record
+     *
      * @param MigratorInterface $migrator
-     * @param string            $destinationId
+     * @param string            $sourceItemId (yes, SOURCE record ID)
      * @return RevertResult
      */
-    protected function doRevert(MigratorInterface $migrator, string $destinationId): MigrateResultInterface
+    public function revert(MigratorInterface $migrator, string $sourceItemId): MigrateResultInterface
     {
-        try {
-
-            $isDeleted  = $migrator->revert($destinationId);
-            $sourceRecId = $this->recorder->findSourceId($migrator->getSlug(), $destinationId);
-
-            $this->recorder->removeMigratedMark($migrator->getSlug(), $destinationId);
-
-            return new RevertResult(
-                $migrator->getSlug(),
-                $sourceRecId,
-                $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
-                $destinationId,
-                sprintf(
-                    "%s (type %s) with destination ID %s (source id: %s)",
-                    ($isDeleted ? 'reverted' : 'skipped'),
-                    $migrator->getSlug(),
-                    $destinationId,
-                    $sourceRecId
-                )
+        if (! $destinationId = $this->recorder->findDestinationId($migrator->getName(), $sourceItemId)) {
+            $result = new RevertResult(
+                $migrator->getName(),
+                $sourceItemId,
+                RevertResult::SKIPPED,
+                '',
+                sprintf("Item (type %s) with source ID %s was not migrated", $migrator->getName(), $sourceItemId)
             );
-        } catch (\RuntimeException $e) {
-            return new RevertFailedResult($destinationId, $e->getMessage(), $e);
+        } else {
+            try {
+                $isDeleted  = $migrator->removeDestinationItem($sourceItemId);
+                $sourceRecId = $this->recorder->findSourceId($migrator->getName(), $sourceItemId);
+
+                $this->recorder->removeMigratedMark($migrator->getName(), $sourceItemId);
+
+                $result = new RevertResult(
+                    $migrator->getName(),
+                    $sourceRecId,
+                    $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
+                    $sourceItemId,
+                    sprintf(
+                        "%s (type %s) with destination ID %s (source id: %s)",
+                        ($isDeleted ? 'Reverted' : 'Skipped'),
+                        $migrator->getName(),
+                        $sourceItemId,
+                        $sourceRecId
+                    )
+                );
+            } catch (\RuntimeException $e) {
+                $result = new RevertFailedResult($migrator->getName(), $sourceItemId, $e->getMessage(), $e);
+            }
+        }
+
+        $this->dispatcher->dispatch(Events::REVERT_OR_MIGRATE, $result);
+        $this->dispatcher->dispatch(Events::REVERT, $result);
+        return $result;
+    }
+
+    /**
+     * Perform the migration
+     *
+     * @param MigratorInterface $migrator
+     * @param string $sourceItemId
+     * @return MigrateFailedResult|MigrateResult
+     */
+    private function doMigrate(MigratorInterface $migrator, string $sourceItemId)
+    {
+        // If no result yet (not skipped)
+        if ($this->recorder->isMigrated($migrator->getName(), $sourceItemId)) {
+            return new MigrateResult(
+                $migrator->getName(),
+                $sourceItemId,
+                MigrateResult::SKIPPED,
+                $this->recorder->findDestinationId($migrator->getName(), $sourceItemId),
+                sprintf("Item (type %s) with ID %s is already migrated", $migrator->getName(), $sourceItemId)
+            );
+        } else {
+            try {
+                $sourceItem = $migrator->getItemFromSource($sourceItemId);
+                $this->getDispatcher()->dispatch(
+                    Events::PRE_PREPARE,
+                    new MigratePrePrepareEvent($migrator->getName(), $sourceItemId, $sourceItem)
+                );
+
+                $destinationItem = $migrator->prepareSourceItem($sourceItem);
+                $this->getDispatcher()->dispatch(
+                    Events::PRE_PERSIST,
+                    new MigratePrePersistEvent($migrator->getName(), $sourceItemId, $destinationItem)
+                );
+
+                $destinationItemId = $migrator->persistDestinationItem($destinationItem);
+                $this->recorder->markMigrated($migrator->getName(), $sourceItemId, $destinationItemId);
+
+                return new MigrateResult(
+                    $migrator->getName(),
+                    $sourceItemId,
+                    MigrateResult::PROCESSED,
+                    $destinationItemId,
+                    sprintf(
+                        "Migrated (type %s) with ID %s to destination with ID: %s",
+                        $migrator->getName(),
+                        $sourceItemId,
+                        $destinationItemId
+                    )
+                );
+            } catch (\RuntimeException $e) {
+                return new MigrateFailedResult($migrator->getName(), $sourceItemId, $e->getMessage(), $e);
+            }
         }
     }
 }

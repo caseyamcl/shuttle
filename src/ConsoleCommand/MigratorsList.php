@@ -81,13 +81,13 @@ class MigratorsList extends Command
         $list = array();
         foreach ($this->migrators as $migrator) {
             $row = array(
-                'slug'        => $migrator->getSlug(),
+                'slug'        => $migrator->getName(),
                 'description' => $migrator->getDescription()
             );
 
             if ($input->getOption('nostatus') == false) {
                 $row['num_source_recs'] = $migrator->countSourceItems();
-                $row['num_migrated']    = $this->recorder->getMigratedCount($migrator->getSlug());
+                $row['num_migrated']    = $this->recorder->getMigratedCount($migrator->getName());
             }
 
             $list[] = $row;

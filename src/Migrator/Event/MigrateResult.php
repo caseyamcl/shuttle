@@ -27,7 +27,7 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @var string
      */
-    private $type;
+    private $migratorName;
 
     /**
      * @var string
@@ -54,14 +54,14 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * Constructor
      *
-     * @param string $type
+     * @param string $migratorName
      * @param string $sourceId
      * @param string $destinationId
      * @param int    $status
      * @param string $message
      */
     public function __construct(
-        string $type,
+        string $migratorName,
         string $sourceId,
         int    $status,
         string $destinationId = '',
@@ -78,7 +78,7 @@ class MigrateResult extends Event implements MigrateResultInterface
         }
 
         $this->status  = $status;
-        $this->type    = $type;
+        $this->migratorName    = $migratorName;
         $this->oldId   = $sourceId;
         $this->newId   = $destinationId;
         $this->message = $message;
@@ -87,9 +87,9 @@ class MigrateResult extends Event implements MigrateResultInterface
     /**
      * @return string
      */
-    public function getType(): string
+    public function getMigratorName(): string
     {
-        return $this->type;
+        return $this->migratorName;
     }
 
     /**

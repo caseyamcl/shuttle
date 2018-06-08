@@ -1,6 +1,7 @@
 <?php
 
 namespace ShuttleTest\Fixture;
+
 use Shuttle\Migrator\Exception\MissingItemException;
 use Shuttle\Migrator\SourceInterface;
 
@@ -57,8 +58,7 @@ class ArraySource implements \IteratorAggregate, SourceInterface
     {
         if (array_key_exists($id, $this->items)) {
             return $this->items[$id];
-        }
-        else {
+        } else {
             throw new MissingItemException('Missing Item: ' . $id);
         }
     }

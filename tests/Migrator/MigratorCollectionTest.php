@@ -35,10 +35,10 @@ class MigratorCollectionTest extends TestCase
         $arr = iterator_to_array($coll->getIterator());
 
         $this->assertEquals(4, count($arr));
-        $this->assertEquals('d', $arr[0]->getSlug());
-        $this->assertEquals('c', $arr[1]->getSlug());
-        $this->assertEquals('b', $arr[2]->getSlug());
-        $this->assertEquals('a', $arr[3]->getSlug());
+        $this->assertEquals('d', $arr[0]->getName());
+        $this->assertEquals('c', $arr[1]->getName());
+        $this->assertEquals('b', $arr[2]->getName());
+        $this->assertEquals('a', $arr[3]->getName());
     }
 
     /**
@@ -87,7 +87,10 @@ class MigratorCollectionTest extends TestCase
         $this->assertEquals(2, $coll->count());
     }
 
-
+    /**
+     * @throws \MJS\TopSort\CircularDependencyException
+     * @throws \MJS\TopSort\ElementNotFoundException
+     */
     public function testResolveDependenciesReturnsDependenciesInExpectedOrder()
     {
         $a = new TestMigrator('a', ['b', 'e']);
@@ -97,8 +100,8 @@ class MigratorCollectionTest extends TestCase
         $e = new TestMigrator('e');
 
         $coll = new MigratorCollection([$a, $b, $c, $d, $e]);
-        $arr = array_map(function(MigratorInterface $migrator) {
-            return $migrator->getSlug();
+        $arr = array_map(function (MigratorInterface $migrator) {
+            return $migrator->getName();
         }, $coll->resolveDependencies($b));
 
         // Resulting dependency graph should include 'b' and its dependencies, but not 'a' and its dependencies ('e')

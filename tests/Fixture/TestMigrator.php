@@ -56,7 +56,7 @@ class TestMigrator implements MigratorInterface
     /**
      * @return string  A machine-friendly identifier for the type of record being migrated (e.g. 'posts', 'authors'...)
      */
-    public function getSlug(): string
+    public function getName(): string
     {
         return $this->slug;
     }
@@ -80,7 +80,7 @@ class TestMigrator implements MigratorInterface
     /**
      * @return iterable|string[]
      */
-    public function listSourceIds(): iterable
+    public function getSourceIdIterator(): iterable
     {
         return $this->source->listItemIds();
     }
@@ -118,7 +118,7 @@ class TestMigrator implements MigratorInterface
      * @param string $destinationRecordId
      * @return bool  If the record was actually deleted, return TRUE, else FALSE
      */
-    public function revert(string $destinationRecordId): bool
+    public function removeDestinationItem(string $destinationRecordId): bool
     {
         return $this->destination->deleteItem($destinationRecordId);
     }
@@ -143,6 +143,6 @@ class TestMigrator implements MigratorInterface
      */
     public function __toString(): string
     {
-        return $this->getSlug();
+        return $this->getName();
     }
 }

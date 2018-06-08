@@ -18,14 +18,19 @@ namespace Shuttle\Migrator;
 final class Events
 {
     /**
-     * Migrate event dispatched when migrator has completed
+     * Migrate event dispatched when an item migration has completed
      */
     const MIGRATE = 'shuttle.migrate';
 
     /**
-     * Revert event dispatched when revert has completed
+     * Revert event dispatched when an item revert has completed
      */
     const REVERT = 'shuttle.revert';
+
+    /**
+     * Action event dispatched whenever a revert or a migration has complete
+     */
+    const REVERT_OR_MIGRATE = 'shuttle.action';
 
     /**
      * Pre-prepare event dispatched after retrieving source item, but before preparing it for destination
