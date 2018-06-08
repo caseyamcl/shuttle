@@ -25,7 +25,7 @@ class Migrator implements MigratorInterface
     /**
      * @var string
      */
-    private $slug;
+    private $name;
 
     /**
      * @var string
@@ -63,12 +63,14 @@ class Migrator implements MigratorInterface
         $description = '',
         array $dependsOn = []
     ) {
-        $this->source      = $source;
-        $this->destination = $destination;
-
+        // Set the simple stuff first..
         $this->setName($name);
         $this->setDescription($description);
         $this->dependsOn = $dependsOn;
+
+        // ..and this stuff second.
+        $this->source      = $source;
+        $this->destination = $destination;
     }
 
     /**
@@ -76,7 +78,7 @@ class Migrator implements MigratorInterface
      */
     public function getName(): string
     {
-        return $this->slug;
+        return $this->name;
     }
 
     /**
@@ -95,7 +97,7 @@ class Migrator implements MigratorInterface
      */
     protected function setName($slug): Migrator
     {
-        $this->slug = $slug;
+        $this->name = $slug;
         return $this;
     }
 
