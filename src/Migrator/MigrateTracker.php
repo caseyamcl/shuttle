@@ -71,6 +71,8 @@ class MigrateTracker implements EventSubscriberInterface
         $this->initTracking($action->getMigratorName());
         $this->tracking[$action->getMigratorName()][self::TOTAL]++;
         $this->tracking[$action->getMigratorName()][$action->getStatus()]++;
+        $this->tracking[self::ALL][self::TOTAL]++;
+        $this->tracking[self::ALL][$action->getStatus()]++;
     }
 
     /**
@@ -156,7 +158,7 @@ class MigrateTracker implements EventSubscriberInterface
      */
     final private function initTracking(string $migratorName): void
     {
-        if (array_key_exists($migratorName, $this->tracking)) {
+        if (! array_key_exists($migratorName, $this->tracking)) {
             $this->tracking[$migratorName] = [
                 self::TOTAL                       => 0,
                 MigrateResultInterface::FAILED    => 0,

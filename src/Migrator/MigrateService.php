@@ -167,22 +167,20 @@ class MigrateService
             );
         } else {
             try {
-                $isDeleted  = $migrator->removeDestinationItem($sourceItemId);
-                $sourceRecId = $this->recorder->findSourceId($migrator->getName(), $sourceItemId);
-
-                $this->recorder->removeMigratedMark($migrator->getName(), $sourceItemId);
+                $isDeleted = $migrator->removeDestinationItem($destinationId);
+                $this->recorder->removeMigratedMark($migrator->getName(), $destinationId);
 
                 $result = new RevertResult(
                     $migrator->getName(),
-                    $sourceRecId,
-                    $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
                     $sourceItemId,
+                    $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
+                    $destinationId,
                     sprintf(
                         "%s (type %s) with destination ID %s (source id: %s)",
                         ($isDeleted ? 'Reverted' : 'Skipped'),
                         $migrator->getName(),
-                        $sourceItemId,
-                        $sourceRecId
+                        $destinationId,
+                        $sourceItemId
                     )
                 );
             } catch (\RuntimeException $e) {
