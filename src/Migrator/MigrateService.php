@@ -129,7 +129,7 @@ class MigrateService
                     $migrator->getName(),
                     $sourceItemId,
                     sprintf(
-                        'Item ($type %s) with ID %s failed, because revert failed with message: (%s)',
+                        'Failed migrating %s with ID %s, because revert failed with message: (%s)',
                         $migrator->getName(),
                         $sourceItemId,
                         $revertResult->getMessage()
@@ -176,11 +176,11 @@ class MigrateService
                     $isDeleted ? RevertResult::PROCESSED : RevertResult::SKIPPED,
                     $destinationId,
                     sprintf(
-                        "%s (type %s) with destination ID %s (source id: %s)",
+                        "%s %s with ID %s (destination ID %s)",
                         ($isDeleted ? 'Reverted' : 'Skipped'),
                         $migrator->getName(),
-                        $destinationId,
-                        $sourceItemId
+                        $sourceItemId,
+                        $destinationId
                     )
                 );
             } catch (\RuntimeException $e) {
@@ -209,7 +209,7 @@ class MigrateService
                 $sourceItemId,
                 MigrateResult::SKIPPED,
                 $this->recorder->findDestinationId($migrator->getName(), $sourceItemId),
-                sprintf("Item (type %s) with ID %s is already migrated", $migrator->getName(), $sourceItemId)
+                sprintf("Skipped %s with ID %s (already migrated)", $migrator->getName(), $sourceItemId)
             );
         } else {
             try {
@@ -234,7 +234,7 @@ class MigrateService
                     MigrateResult::PROCESSED,
                     $destinationItemId,
                     sprintf(
-                        "Migrated (type %s) with ID %s to destination with ID: %s",
+                        "Migrated %s with ID %s to destination with ID: %s",
                         $migrator->getName(),
                         $sourceItemId,
                         $destinationItemId
