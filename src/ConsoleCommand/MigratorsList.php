@@ -82,7 +82,8 @@ class MigratorsList extends Command
         foreach ($this->migrators as $migrator) {
             $row = array(
                 'slug'        => $migrator->getName(),
-                'description' => $migrator->getDescription()
+                'description' => $migrator->getDescription(),
+                'depends_on'  => $migrator->getDependsOn()
             );
 
             if ($input->getOption('nostatus') == false) {
@@ -121,7 +122,8 @@ class MigratorsList extends Command
     {
         $headers = [
             'Name (slug)',
-            'Description'
+            'Description',
+            'Depends On'
         ];
         if ($hasStatus) {
             $headers[] = 'Source Record Count';
@@ -130,7 +132,10 @@ class MigratorsList extends Command
 
         $table = new Table($output);
         $table->setHeaders($headers);
-        $table->addRows($recs);
+        $table->addRows(array_map(function(array $row) {
+            $row['depends_on'] = implode(', ', $row['depends_on']);
+            return $row;
+        }, $recs));
         $table->render();
     }
 
@@ -140,7 +145,10 @@ class MigratorsList extends Command
      */
     private function outCols(OutputInterface $output, array $recs): void
     {
-        (new Table($output))->setStyle('compact')->addRows($recs)->render();
+        (new Table($output))->setStyle('compact')->addRows(array_map(function(array $row) {
+            $row['depends_on'] = implode(', ', $row['depends_on']);
+            return $row;
+        }, $recs))->render();
     }
 
     /**
