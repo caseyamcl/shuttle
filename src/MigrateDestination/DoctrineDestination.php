@@ -94,7 +94,7 @@ class DoctrineDestination implements DestinationInterface
             $reflection->setAccessible(true);
             return $reflection->getValue($recordData);
         } else {
-            return implode('', $this->metadata->getIdentifierValues($recordData));
+            return implode('', array_map('strval', $this->metadata->getIdentifierValues($recordData)));
         }
     }
 
