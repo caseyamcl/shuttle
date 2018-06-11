@@ -86,7 +86,10 @@ class DoctrineDestination implements DestinationInterface
     public function saveItem($recordData): string
     {
         $this->manager->persist($recordData);
-        $this->manager->flush();
+
+        if ($this->autoFlush) {
+            $this->manager->flush();
+        }
 
         // Get the field from the entity/object
         if ($this->idFieldName) {
@@ -108,6 +111,11 @@ class DoctrineDestination implements DestinationInterface
     {
         if ($rec = $this->findItem($destinationId)) {
             $this->manager->remove($rec);
+
+            if ($this->autoFlush) {
+                $this->manager->flush();
+            }
+
             return true;
         } else {
             return false;
