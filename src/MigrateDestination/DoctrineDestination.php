@@ -15,6 +15,7 @@ use Shuttle\Migrator\Exception\MissingItemException;
 class DoctrineDestination implements DestinationInterface
 {
     const AUTO = null;
+
     /**
      * @var ObjectManager
      */
@@ -71,7 +72,7 @@ class DoctrineDestination implements DestinationInterface
      */
     public function hasItem(string $destinationId): bool
     {
-        return (bool) $this->manager->find($this->className, $destinationId);
+        return (bool) $this->findItem($destinationId);
     }
 
     /**
@@ -105,11 +106,22 @@ class DoctrineDestination implements DestinationInterface
      */
     public function deleteItem(string $destinationId): bool
     {
-        if ($rec = $this->manager->find($this->className, $destinationId)) {
+        if ($rec = $this->findItem($destinationId)) {
             $this->manager->remove($rec);
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * @param string $destinationId
+     * @return null|object
+     */
+    private function findItem(string $destinationId)
+    {
+        return ($this->idFieldName)
+            ? $this->manager->getRepository($this->className)->findOneBy([$this->idFieldName => $destinationId])
+            : $this->manager->find($this->className, $destinationId);
     }
 }
