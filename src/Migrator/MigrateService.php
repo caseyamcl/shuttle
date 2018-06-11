@@ -22,6 +22,7 @@ use Shuttle\Migrator\Event\MigrateResult;
 use Shuttle\Migrator\Event\MigrateResultInterface;
 use Shuttle\Migrator\Event\RevertFailedResult;
 use Shuttle\Migrator\Event\RevertResult;
+use Shuttle\Migrator\Exception\UnmetDependencyException;
 use Shuttle\Recorder\RecorderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -239,6 +240,13 @@ class MigrateService
                         $sourceItemId,
                         $destinationItemId
                     )
+                );
+            } catch (UnmetDependencyException $e) {
+                return new MigrateFailedResult(
+                    $migrator->getName(),
+                    $sourceItemId,
+                    'Unmet dependency: ' . $e->getMessage(),
+                    $e
                 );
             } catch (\RuntimeException $e) {
                 return new MigrateFailedResult($migrator->getName(), $sourceItemId, $e->getMessage(), $e);
