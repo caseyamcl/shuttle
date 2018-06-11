@@ -184,7 +184,7 @@ class MigrateService
                         $destinationId
                     )
                 );
-            } catch (\RuntimeException $e) {
+            } catch (\Throwable $e) {
                 $result = new RevertFailedResult($migrator->getName(), $sourceItemId, $e->getMessage(), $e);
             }
         }
@@ -248,7 +248,7 @@ class MigrateService
                     'Unmet dependency: ' . $e->getMessage(),
                     $e
                 );
-            } catch (\RuntimeException $e) {
+            } catch (\Throwable $e) {
                 return new MigrateFailedResult($migrator->getName(), $sourceItemId, $e->getMessage(), $e);
             }
         }
