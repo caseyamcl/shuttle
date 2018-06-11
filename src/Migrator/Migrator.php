@@ -15,6 +15,9 @@
 
 namespace Shuttle\Migrator;
 
+use Shuttle\Migrator\Behavior\HasDestinationTrait;
+use Shuttle\Migrator\Behavior\HasSourceTrait;
+
 /**
  * Base Migrator
  *
@@ -22,6 +25,9 @@ namespace Shuttle\Migrator;
  */
 class Migrator implements MigratorInterface
 {
+    use HasSourceTrait;
+    use HasDestinationTrait;
+
     /**
      * @var string
      */
@@ -114,39 +120,6 @@ class Migrator implements MigratorInterface
     }
 
     /**
-     * @return SourceInterface
-     */
-    public function getSource(): SourceInterface
-    {
-        return $this->source;
-    }
-
-    /**
-     * @return DestinationInterface
-     */
-    public function getDestination(): DestinationInterface
-    {
-        return $this->destination;
-    }
-
-    /**
-     * @return int  Number of records in the source
-     */
-    public function countSourceItems(): int
-    {
-        return $this->source->count();
-    }
-
-    /**
-     * @param string $sourceId
-     * @return array
-     */
-    public function getItemFromSource(string $sourceId): array
-    {
-        return $this->getSource()->getItem($sourceId);
-    }
-
-    /**
      * @param array $source
      * @return mixed
      */
@@ -154,34 +127,6 @@ class Migrator implements MigratorInterface
     {
         // By default, do nothing to the record..
         return $source;
-    }
-
-    /**
-     * @param mixed $record
-     * @return string
-     */
-    public function persistDestinationItem($record): string
-    {
-        return $this->destination->saveItem($record);
-    }
-
-    /**
-     * Revert a single record
-     *
-     * @param string $destinationRecordId
-     * @return bool
-     */
-    public function removeDestinationItem(string $destinationRecordId): bool
-    {
-        return $this->destination->deleteItem($destinationRecordId);
-    }
-
-    /**
-     * @return array|string[]
-     */
-    public function getSourceIdIterator(): iterable
-    {
-        return $this->source->listItemIds();
     }
 
     /**
@@ -204,4 +149,22 @@ class Migrator implements MigratorInterface
     {
         return $this->getName();
     }
+
+    /**
+     * @return DestinationInterface
+     */
+    public function getDestination(): DestinationInterface
+    {
+        return $this->destination;
+    }
+
+    /**
+     * @return SourceInterface
+     */
+    public function getSource(): SourceInterface
+    {
+        return $this->source;
+    }
+
+
 }
