@@ -2,6 +2,8 @@
 
 namespace Shuttle\Helper;
 
+use Shuttle\Event\ActionResultInterface;
+use Shuttle\ShuttleAction;
 use Shuttle\ShuttleEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -31,8 +33,7 @@ class Tracker implements EventSubscriberInterface
      */
     public function __construct(string $trackAction)
     {
-        $this->trackAction = $trackAction;
-        $this->tracking = [];
+        $this->trackAction = ShuttleAction::ensureValidAction($trackAction);
         $this->initTracking(self::ALL);
     }
 
@@ -42,39 +43,25 @@ class Tracker implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ShuttleEvents::POST_REVERT  => 'trackRevert',
-            ShuttleEvents::POST_MIGRATE => 'trackMigrate'
+            ShuttleEvents::POST_REVERT  => 'track',
+            ShuttleEvents::POST_MIGRATE => 'track'
         ];
     }
 
     /**
-     * @param MigrateResultInterface $migrateResult
+     * @param ActionResultInterface $action
      */
-    public function trackMigrate(MigrateResultInterface $migrateResult)
+    public function track(ActionResultInterface $action)
     {
-        if ($this->trackEvent == Events::MIGRATE or $this->trackEvent == Events::REVERT_OR_MIGRATE) {
-            $this->doTrack($migrateResult);
+        if ($action->getAction() !== $this->trackAction) {
+            return;
         }
-    }
 
-    /**
-     * @param MigrateResultInterface $revertResult
-     */
-    public function trackRevert(MigrateResultInterface $revertResult)
-    {
-        if ($this->trackEvent == Events::REVERT or $this->trackEvent == Events::REVERT_OR_MIGRATE) {
-            $this->doTrack($revertResult);
-        }
-    }
-
-    /**
-     * @param MigrateResultInterface $action
-     */
-    protected function doTrack(MigrateResultInterface $action)
-    {
         $this->initTracking($action->getMigratorName());
+
         $this->tracking[$action->getMigratorName()][self::TOTAL]++;
         $this->tracking[$action->getMigratorName()][$action->getStatus()]++;
+
         $this->tracking[self::ALL][self::TOTAL]++;
         $this->tracking[self::ALL][$action->getStatus()]++;
     }
@@ -106,7 +93,7 @@ class Tracker implements EventSubscriberInterface
     public function getProcessedCount(string $migratorName = self::ALL): int
     {
         $this->initTracking($migratorName);
-        return $this->tracking[$migratorName][MigrateResultInterface::PROCESSED];
+        return $this->tracking[$migratorName][ActionResultInterface::PROCESSED];
     }
 
     /**
@@ -116,7 +103,7 @@ class Tracker implements EventSubscriberInterface
     public function getSkippedCount(string $migratorName = self::ALL): int
     {
         $this->initTracking($migratorName);
-        return $this->tracking[$migratorName][MigrateResultInterface::SKIPPED];
+        return $this->tracking[$migratorName][ActionResultInterface::SKIPPED];
     }
 
     /**
@@ -126,7 +113,7 @@ class Tracker implements EventSubscriberInterface
     public function getFailedCount(string $migratorName = self::ALL): int
     {
         $this->initTracking($migratorName);
-        return $this->tracking[$migratorName][MigrateResultInterface::FAILED];
+        return $this->tracking[$migratorName][ActionResultInterface::FAILED];
     }
 
     /**
@@ -155,10 +142,10 @@ class Tracker implements EventSubscriberInterface
     {
         if (! array_key_exists($migratorName, $this->tracking)) {
             $this->tracking[$migratorName] = [
-                self::TOTAL                       => 0,
-                MigrateResultInterface::FAILED    => 0,
-                MigrateResultInterface::PROCESSED => 0,
-                MigrateResultInterface::SKIPPED   => 0
+                self::TOTAL                      => 0,
+                ActionResultInterface::FAILED    => 0,
+                ActionResultInterface::PROCESSED => 0,
+                ActionResultInterface::SKIPPED   => 0
             ];
         }
     }

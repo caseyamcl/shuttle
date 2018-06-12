@@ -3,13 +3,15 @@
 namespace Shuttle\Event;
 
 use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\ShuttleAction;
 use Shuttle\SourceItem;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class PostMigrateEvent
  * @package Shuttle\Event
  */
-class PostMigrateEvent
+class MigrateProcessedEvent extends Event implements ActionResultInterface
 {
     /**
      * @var string
@@ -70,5 +72,21 @@ class PostMigrateEvent
     public function getRecord(): MigratorRecordInterface
     {
         return $this->record;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this::PROCESSED;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAction(): string
+    {
+        return ShuttleAction::MIGRATE;
     }
 }

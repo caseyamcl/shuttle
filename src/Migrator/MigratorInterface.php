@@ -103,5 +103,4 @@ interface MigratorInterface
      * @return MigratorRecordInterface
      */
     public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface;
-
 }

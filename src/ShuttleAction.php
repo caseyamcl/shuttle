@@ -19,4 +19,23 @@ final class ShuttleAction
     {
         return in_array($action, [self::MIGRATE, self::REVERT]);
     }
+
+    /**
+     * @param string $action
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public static function ensureValidAction(string $action): string
+    {
+        if (! static::isValidAction($action)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid action: %s (allowed: %s, %s)',
+                $action,
+                self::MIGRATE,
+                self::REVERT
+            ));
+        }
+
+        return $action;
+    }
 }

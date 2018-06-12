@@ -50,14 +50,16 @@ class Shuttle
     }
 
     /**
-     * Migrate one or multiple items
+     * Migrate some or all items
      *
      * @param string $migratorName
-     * @param iterable|string[] $sourceIds  Source IDs to migrate, or null for all
+     * @param iterable|string[] $sourceIds Source IDs to migrate, or null for all
+     * @param callable|null $continue  A callable that returns TRUE for continue and FALSE to stop
      */
-    public function migrate(string $migratorName, ?iterable $sourceIds = null)
+    public function migrate(string $migratorName, ?iterable $sourceIds = null, callable $continue = null)
     {
-        $migrator = $this->getMigratorCollection()->get($migratorName);
+        $migrator = $this->getMigrators()->get($migratorName);
+        $continue = $continue ?: function() { return true; };
 
         // Build an iterator
         if ($sourceIds) {
@@ -72,6 +74,11 @@ class Shuttle
 
         /** @var SourceItem $sourceItem */
         foreach ($iterator as $sourceItem) {
+
+            if (! $continue()) {
+                return;
+            }
+
             $prepared = $migrator->prepare($sourceItem);
             $destinationId = $migrator->persist($prepared);
             $migrator->recordMigrate($sourceItem, $destinationId);
@@ -79,14 +86,16 @@ class Shuttle
     }
 
     /**
-     * Revert one ore multiple items
+     * Revert some or all items
      *
      * @param string $migratorName
-     * @param iterable|string[] $sourceIds  Source IDs to migrate, or null for all
+     * @param iterable|string[] $sourceIds Source IDs to migrate, or null for all
+     * @param callable|null $continue  A callable that returns TRUE for continue and FALSE to stop
      */
-    public function revert(string $migratorName, ?iterable $sourceIds = null)
+    public function revert(string $migratorName, ?iterable $sourceIds = null, callable $continue = null)
     {
-        $migrator = $this->getMigratorCollection()->get($migratorName);
+        $migrator = $this->getMigrators()->get($migratorName);
+        $continue = $continue ?: function() { return true; };
 
         $iterator = $sourceIds ?: function () use ($migrator) {
             foreach ($migrator->getReport() as $record) {
@@ -96,6 +105,11 @@ class Shuttle
 
         /** @var string[] $sourceId */
         foreach ($iterator as $sourceId) {
+
+            if (! $continue()) {
+                return;
+            }
+
             $migrator->remove($sourceId);
         }
     }

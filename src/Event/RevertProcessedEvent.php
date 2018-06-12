@@ -2,13 +2,14 @@
 
 namespace Shuttle\Event;
 
+use Shuttle\ShuttleAction;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class PostRevertEvent
  * @package Shuttle\Event
  */
-class PostRevertEvent extends Event
+class RevertProcessedEvent extends Event implements ActionResultInterface
 {
     /**
      * @var string
@@ -21,21 +22,22 @@ class PostRevertEvent extends Event
     private $sourceId;
 
     /**
-     * @var string
-     */
-    private $destinationId;
-
-    /**
-     * PostRevertEvent constructor.
+     * RevertProcessedEvent constructor.
      * @param string $migratorName
      * @param string $sourceId
-     * @param string $destinationId
      */
-    public function __construct(string $migratorName, string $sourceId, string $destinationId)
+    public function __construct(string $migratorName, string $sourceId)
     {
         $this->migratorName = $migratorName;
         $this->sourceId = $sourceId;
-        $this->destinationId = $destinationId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAction(): string
+    {
+        return ShuttleAction::REVERT;
     }
 
     /**
@@ -49,16 +51,8 @@ class PostRevertEvent extends Event
     /**
      * @return string
      */
-    public function getSourceId(): string
+    public function getStatus(): string
     {
-        return $this->sourceId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDestinationId(): string
-    {
-        return $this->destinationId;
+        return $this::PROCESSED;
     }
 }
