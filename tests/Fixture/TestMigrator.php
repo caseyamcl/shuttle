@@ -2,9 +2,10 @@
 
 namespace ShuttleTest\Fixture;
 
-use Shuttle\Migrator\DestinationInterface;
+use Shuttle\Exception\MissingItemException;
 use Shuttle\Migrator\MigratorInterface;
-use Shuttle\Migrator\SourceInterface;
+use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\SourceItem;
 
 /**
  * Class FakeMigrator
@@ -144,5 +145,85 @@ class TestMigrator implements MigratorInterface
     public function __toString(): string
     {
         return $this->getName();
+    }
+
+    /**
+     * @param string $id
+     * @return SourceItem
+     * @throws MissingItemException  If source item is not found
+     */
+    public function getSourceItem(string $id): SourceItem
+    {
+        // TODO: Implement getSourceItem() method.
+    }
+
+    /**
+     * Get a report of
+     *
+     * @return \iterable|MigratorRecordInterface[]
+     */
+    public function getReport(): iterable
+    {
+        // TODO: Implement getReport() method.
+    }
+
+    /**
+     * @param string $sourceId
+     * @return bool
+     */
+    public function isMigrated(string $sourceId): bool
+    {
+        // TODO: Implement isMigrated() method.
+    }
+
+    /**
+     * Get the next source record, represented as an array
+     *
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
+     */
+    public function getSourceIterator(): iterable
+    {
+        // TODO: Implement getSourceIterator() method.
+    }
+
+    /**
+     * @param SourceItem $sourceItem
+     * @return mixed
+     */
+    public function prepare(SourceItem $sourceItem)
+    {
+        // TODO: Implement prepare() method.
+    }
+
+    /**
+     * @param mixed $preparedItem
+     * @return string  Destination Id
+     */
+    public function persist($preparedItem): string
+    {
+        // TODO: Implement persist() method.
+    }
+
+    /**
+     * @param string $sourceId
+     * @throws \RuntimeException  Throw exception if destination not found
+     */
+    public function remove(string $sourceId)
+    {
+        // TODO: Implement remove() method.
+    }
+
+    /**
+     * Record that a migration has occurred
+     *
+     * @param SourceItem $sourceItem
+     * @param string $destinationId
+     * @return MigratorRecordInterface
+     */
+    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface
+    {
+        // TODO: Implement recordMigrate() method.
     }
 }

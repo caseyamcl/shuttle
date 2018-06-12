@@ -3,8 +3,7 @@
 namespace ShuttleTest\Migrator;
 
 use PHPUnit\Framework\TestCase;
-use Shuttle\Migrator\MigratorCollection;
-use Shuttle\Migrator\MigratorInterface;
+use Shuttle\MigratorCollection;
 use ShuttleTest\Fixture\TestMigrator;
 
 /**

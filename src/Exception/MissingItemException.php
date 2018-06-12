@@ -13,7 +13,7 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Migrator\Exception;
+namespace Shuttle\Exception;
 
 class MissingItemException extends MigratorException
 {

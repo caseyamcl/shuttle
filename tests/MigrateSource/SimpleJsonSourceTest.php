@@ -16,7 +16,6 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\JsonSource;
-use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
 
 class SimpleJsonSourceTest extends AbstractSourceInterfaceTest

@@ -16,7 +16,7 @@
 namespace ShuttleTest\Migrator;
 
 use PHPUnit\Framework\TestCase;
-use Shuttle\Migrator\DestinationInterface;
+use Shuttle\__OLD_Migrator\DestinationInterface;
 
 abstract class AbstractDestinationInterfaceTest extends TestCase
 {

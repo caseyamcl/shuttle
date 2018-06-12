@@ -15,10 +15,10 @@
 
 namespace Shuttle\ConsoleCommand;
 
-use Shuttle\Migrator\Event\MigrateResultInterface;
-use Shuttle\Migrator\Events;
-use Shuttle\Migrator\MigratorInterface;
-use Shuttle\Migrator\MigrateTracker;
+use Shuttle\__OLD_Migrator\Event\MigrateResultInterface;
+use Shuttle\__OLD_Migrator\Events;
+use Shuttle\__OLD_Migrator\MigratorInterface;
+use Shuttle\Helper\Tracker;
 
 /**
  * Revert Command
@@ -37,14 +37,14 @@ class Revert extends Migrate
      */
     protected function getActionIterator(MigratorInterface $migrator, array $ids = [], bool $clobber = false): iterable
     {
-        return $this->migrateService->revertItems($migrator, $ids);
+        return $this->shuttle->revertItems($migrator, $ids);
     }
 
     /**
-     * @return MigrateTracker
+     * @return Tracker
      */
-    protected function getNewTracker(): MigrateTracker
+    protected function getNewTracker(): Tracker
     {
-        return new MigrateTracker(Events::REVERT);
+        return new Tracker(Events::REVERT);
     }
 }

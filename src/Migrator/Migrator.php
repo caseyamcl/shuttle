@@ -1,43 +1,20 @@
 <?php
-/**
- * Shuttle Library
- *
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/caseyamcl/phpoaipmh
- * @package caseyamcl/shuttle
- * @author Casey McLaughlin <caseyamcl@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * ------------------------------------------------------------------
- */
 
 namespace Shuttle\Migrator;
 
-use Shuttle\Migrator\Behavior\HasDestinationTrait;
-use Shuttle\Migrator\Behavior\HasSourceTrait;
+use Shuttle\Migrator\AbstractMigrator;
+use Shuttle\DestinationInterface;
+use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\RecorderInterface;
+use Shuttle\SourceInterface;
+use Shuttle\SourceItem;
 
 /**
- * Base Migrator
- *
- * @author Casey McLaughlin <caseyamcl@gmail.com>
+ * Class Migrator
+ * @package Shuttle\NewShuttle
  */
-class Migrator implements MigratorInterface
+class Migrator extends AbstractMigrator
 {
-    use HasSourceTrait;
-    use HasDestinationTrait;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var string
-     */
-    private $description;
-
     /**
      * @var SourceInterface
      */
@@ -49,122 +26,148 @@ class Migrator implements MigratorInterface
     private $destination;
 
     /**
-     * @var array|string[]
+     * @var callable
      */
-    private $dependsOn;
+    private $prepare;
 
     /**
-     * Constructor
+     * @var RecorderInterface
+     */
+    private $recorder;
+
+    /**
+     * AbstractMigrator constructor.
      *
-     * @param string $name
      * @param SourceInterface $source
      * @param DestinationInterface $destination
-     * @param string $description
-     * @param array|string[] $dependsOn  An array of slugs that should be migrated before this
+     * @param RecorderInterface $recorder
+     * @param callable $prepare Callback must accept a SourceItem interface and return the prepared record (any type)
      */
     public function __construct(
-        string $name,
         SourceInterface $source,
         DestinationInterface $destination,
-        $description = '',
-        array $dependsOn = []
-    ) {
-        // Set the simple stuff first..
-        $this->setName($name);
-        $this->setDescription($description);
-        $this->dependsOn = $dependsOn;
-
-        // ..and this stuff second.
-        $this->source      = $source;
+        RecorderInterface $recorder,
+        callable $prepare = null)
+    {
+        $this->source = $source;
         $this->destination = $destination;
+        $this->recorder = $recorder;
+        $this->prepare = $prepare ?: function(SourceItem $sourceItem) { return $sourceItem->getData(); };
     }
 
     /**
-     * @return string  A unique identifier for the type of record being migrated
+     * If is countable, return the number of source items, or NULL if unknown
+     * @return int|null
      */
-    public function getName(): string
+    public function countSourceItems(): ?int
     {
-        return $this->name;
+        return $this->source->countSourceItems();
     }
 
     /**
-     * @return string  A description of the records being migrated
+     * @param string $id
+     * @return SourceItem
+     * @throws \Exception  If source item is not found
      */
-    public function getDescription(): string
+    public function getSourceItem(string $id): SourceItem
     {
-        return $this->description;
+        return $this->source->getSourceItem($id);
     }
 
     /**
-     * Set Slug
+     * Get a report of
      *
-     * @param string $slug
-     * @return Migrator
+     * @return \iterable|MigratorRecordInterface[]
      */
-    protected function setName($slug): Migrator
+    public function getReport(): iterable
     {
-        $this->name = $slug;
-        return $this;
+        return $this->recorder->findRecords($this->__toString());
     }
 
     /**
-     * Set Description
+     * @param string $sourceId
+     * @return bool
+     */
+    public function isMigrated(string $sourceId): bool
+    {
+        return (bool) $this->recorder->findMigrationRecord($sourceId, $this->__toString());
+    }
+
+    /**
+     * Get the next source record, represented as an array
      *
-     * @param string $description
-     * @return Migrator
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
      */
-    protected function setDescription($description): Migrator
+    public function getSourceIterator(): iterable
     {
-        $this->description = (string) $description;
-        return $this;
+        return $this->source->getSourceIterator();
     }
 
     /**
-     * @param array $source
+     * @param SourceItem $sourceItem
      * @return mixed
      */
-    public function prepareSourceItem(array $source)
+    public function prepare(SourceItem $sourceItem)
     {
-        // By default, do nothing to the record..
-        return $source;
+        return call_user_func($this->prepare, $sourceItem);
     }
 
     /**
-     * Get other migrators that this migrator depends on
-     *
-     * NOTE: This is not a comprehensive; it does not list transitive dependencies.  Use
-     * MigratorCollection::listDependencies() to determine all dependencies for a given migrator
-     *
-     * @return array|string[]
+     * @param mixed $preparedItem
+     * @return string  Destination Id
      */
-    public function getDependsOn(): array
+    public function persist($preparedItem): string
     {
-        return $this->dependsOn;
+        return $this->destination->persist($preparedItem);
     }
 
     /**
+     * @param string $sourceId
+     * @throws \RuntimeException  Throw exception if destination not found
+     */
+    public function remove(string $sourceId)
+    {
+        return $this->destination->remove($this->getDestinationIdForSourceId($sourceId));
+    }
+
+    /**
+     * Record that a migration has occurred
+     *
+     * @param SourceItem $sourceItem
+     * @param string $destinationId
+     * @return MigratorRecordInterface
+     */
+    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface
+    {
+        return $this->recorder->recordMigrate($sourceItem, $destinationId, $this->__toString());
+    }
+
+    /**
+     * @param SourceItem $sourceItem
+     * @param string $destinationId
+     */
+    public function recordRevert(SourceItem $sourceItem, string $destinationId)
+    {
+        $this->recorder->recordRevert($sourceItem, $destinationId, $this->__toString());
+    }
+
+    /**
+     * @param string $sourceId
      * @return string
      */
-    public function __toString(): string
+    protected function getDestinationIdForSourceId(string $sourceId): string
     {
-        return $this->getName();
+        if ($record = $this->recorder->findMigrationRecord($sourceId, $this->__toString())) {
+            return $record->getDestinationId();
+        }
+        else {
+            throw new \RuntimeException(
+                'Missing destination ID for item (type: %s) with source ID: %s',
+                $this->__toString(),
+                $sourceId
+            );
+        }
     }
-
-    /**
-     * @return DestinationInterface
-     */
-    public function getDestination(): DestinationInterface
-    {
-        return $this->destination;
-    }
-
-    /**
-     * @return SourceInterface
-     */
-    public function getSource(): SourceInterface
-    {
-        return $this->source;
-    }
-
-
 }

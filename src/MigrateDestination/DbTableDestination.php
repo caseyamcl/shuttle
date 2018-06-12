@@ -15,8 +15,8 @@
 
 namespace Shuttle\MigrateDestination;
 
-use Shuttle\Migrator\DestinationInterface;
-use Shuttle\Migrator\Exception\MissingItemException;
+use Shuttle\Exception\MissingItemException;
+use Shuttle\DestinationInterface;
 
 /**
  * Class DbTableDestination
@@ -70,57 +70,36 @@ class DbTableDestination implements DestinationInterface
     }
 
     /**
-     * Get record
-     *
-     * @param string $destinationId
-     * @return bool
+     * @param mixed $preparedItem
+     * @return string  Destination Id
      */
-    public function hasItem(string $destinationId): bool
+    public function persist($preparedItem): string
     {
-        $sql = sprintf("SELECT t.* FROM %s t WHERE t.%s = ?", $this->tableName, $this->idColumn);
-
-        $stmt = $this->dbConn->prepare($sql);
-        $stmt->execute([$destinationId]);
-
-        return (bool) $stmt->fetch(\PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Save a record
-     *
-     * Create or update the record
-     *
-     * @param array $recordData
-     * @return string  The ID of the inserted record
-     */
-    public function saveItem($recordData): string
-    {
-        if (! is_array($recordData)) {
+        if (! is_array($preparedItem)) {
             throw new \InvalidArgumentException(get_called_class() . " expects record data to be an array");
         }
 
         $query = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
             $this->tableName,
-            implode(', ', array_keys($recordData)),
-            implode(', ', array_fill(0, count($recordData), '?'))
+            implode(', ', array_keys($preparedItem)),
+            implode(', ', array_fill(0, count($preparedItem), '?'))
         );
 
         $stmt = $this->dbConn->prepare($query);
-        $stmt->execute(array_values($recordData));
+        $stmt->execute(array_values($preparedItem));
 
-        return (isset($recordData[$this->idColumn]))
-            ? $recordData[$this->idColumn]
+        return (isset($preparedItem[$this->idColumn]))
+            ? $preparedItem[$this->idColumn]
             : (string) $this->dbConn->lastInsertId();
     }
 
     /**
-     * Remove a record
-     *
      * @param string $destinationId
      * @return bool
+     * @throws \RuntimeException  Throw exception if destination not found
      */
-    public function deleteItem(string $destinationId): bool
+    public function remove(string $destinationId)
     {
         $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idColumn);
         $stmt = $this->dbConn->prepare($sql);

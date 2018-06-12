@@ -23,26 +23,6 @@ namespace Shuttle\MigrateSource;
 class DbTableSource extends DbSource
 {
     /**
-     * Build from DSN
-     *
-     * @param string $dsn
-     * @param string $username
-     * @param string $password
-     * @param string $tableName
-     * @param string $idColumn
-     * @return static
-     */
-    public static function build(
-        string $dsn,
-        string $username,
-        string $password,
-        string $tableName,
-        string $idColumn = 'id'
-    ) {
-        return new static(new \PDO($dsn, $username, $password), $tableName, $idColumn);
-    }
-
-    /**
      * Constructor
      *
      * @param \PDO   $dbConn     Database Connection

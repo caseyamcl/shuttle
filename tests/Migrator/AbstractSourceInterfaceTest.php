@@ -16,7 +16,6 @@
 namespace ShuttleTest\Migrator;
 
 use PHPUnit\Framework\TestCase;
-use Shuttle\Migrator\SourceInterface;
 
 /**
  * Class AbstractSourceInterfaceTest
@@ -44,7 +43,7 @@ abstract class AbstractSourceInterfaceTest extends TestCase
     }
 
     /**
-     * @expectedException \Shuttle\Migrator\Exception\MissingItemException
+     * @expectedException \Shuttle\Exception\MissingItemException
      */
     public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
     {

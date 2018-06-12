@@ -2,14 +2,15 @@
 
 namespace ShuttleTest\Fixture;
 
-use Shuttle\Migrator\Exception\MissingItemException;
-use Shuttle\Migrator\SourceInterface;
+use Shuttle\Exception\MissingItemException;
+use Shuttle\SourceInterface;
+use Shuttle\SourceItem;
 
 /**
  * Class ArraySource
  * @package ShuttleTest\Fixture
  */
-class ArraySource implements \IteratorAggregate, SourceInterface
+class ArraySource implements SourceInterface
 {
     const DEFAULT_ITEMS = [['a', 'A'], ['b', 'B'], ['c', 'C']];
 
@@ -27,47 +28,41 @@ class ArraySource implements \IteratorAggregate, SourceInterface
         $this->items = $items;
     }
 
+
     /**
-     * Count elements of an object
-     * @link http://php.net/manual/en/countable.count.php
-     * @return int The custom count as an integer.
-     * </p>
-     * <p>
-     * The return value is cast to an integer.
-     * @since 5.1.0
+     * If is countable, return the number of source items, or NULL if unknown
+     * @return int|null
      */
-    public function count()
+    public function countSourceItems(): ?int
     {
         return count($this->items);
     }
 
     /**
-     * @return iterable|string[]  Get a list of record IDs in the source
+     * Get the next source record, represented as an array
+     *
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
      */
-    public function listItemIds(): iterable
+    public function getSourceIterator(): iterable
     {
-        return array_map('strval', array_keys($this->items));
-    }
-
-    /**
-     * @param string $id The item ID to get
-     * @return array  The item, represented as key/value associative array
-     * @throws MissingItemException
-     */
-    public function getItem(string $id): array
-    {
-        if (array_key_exists($id, $this->items)) {
-            return $this->items[$id];
-        } else {
-            throw new MissingItemException('Missing Item: ' . $id);
+        foreach ($this->items as $id => $item) {
+            yield new SourceItem($id, $item);
         }
     }
 
     /**
-     * @return \ArrayIterator|\Traversable
+     * @param string $id
+     * @return SourceItem
+     * @throws \Exception  If source item is not found
      */
-    public function getIterator()
+    public function getSourceItem(string $id): SourceItem
     {
-        return new \ArrayIterator($this->items);
+        if (array_key_exists($id, $this->items)) {
+            return new SourceItem($id, $this->items[$id]);
+        } else {
+            throw new MissingItemException('Missing Item: ' . $id);
+        }
     }
 }

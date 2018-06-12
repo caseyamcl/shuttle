@@ -15,9 +15,8 @@
 
 namespace Shuttle\ConsoleCommand;
 
-use Shuttle\Migrator\MigratorCollection;
 use Shuttle\Migrator\MigratorInterface;
-use Shuttle\Recorder\RecorderInterface;
+use Shuttle\MigratorCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,22 +36,14 @@ class MigratorsList extends Command
     private $migrators;
 
     /**
-     * @var RecorderInterface
-     */
-    private $recorder;
-
-    /**
      * Constructor
      *
      * @param MigratorCollection $migrators
-     * @param RecorderInterface  $recorder
      */
-    public function __construct(MigratorCollection $migrators, RecorderInterface $recorder)
+    public function __construct(MigratorCollection $migrators)
     {
-        parent::__construct();
-
         $this->migrators = $migrators;
-        $this->recorder  = $recorder;
+        parent::__construct();
     }
 
     protected function configure()
@@ -88,7 +79,7 @@ class MigratorsList extends Command
 
             if ($input->getOption('nostatus') == false) {
                 $row['num_source_recs'] = $migrator->countSourceItems();
-                $row['num_migrated']    = $this->recorder->getMigratedCount($migrator->getName());
+                $row['num_migrated']    = count(iterator_to_array($migrator->getReport()));
             }
 
             $list[] = $row;

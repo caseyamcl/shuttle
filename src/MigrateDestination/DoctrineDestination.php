@@ -5,8 +5,7 @@ namespace Shuttle\MigrateDestination;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Util\ClassUtils;
-use Shuttle\Migrator\DestinationInterface;
-use Shuttle\Migrator\Exception\MissingItemException;
+use Shuttle\Exception\MissingItemException;
 
 /**
  * Class DoctrineEntityDestination

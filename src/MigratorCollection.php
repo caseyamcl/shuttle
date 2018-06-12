@@ -13,11 +13,12 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Migrator;
+namespace Shuttle;
 
 use ArrayIterator;
 use Countable;
 use MJS\TopSort\Implementations\StringSort;
+use Shuttle\Migrator\MigratorInterface;
 
 /**
  * Class MigratorCollection
@@ -65,8 +66,8 @@ class MigratorCollection implements \IteratorAggregate, Countable
      */
     public function add(MigratorInterface $migrator): void
     {
-        $this->migrators[$migrator->getName()] = $migrator;
-        $this->sorter->add($migrator->getName(), $migrator->getDependsOn());
+        $this->migrators[$migrator->__toString()] = $migrator;
+        $this->sorter->add($migrator->__toString(), $migrator->getDependsOn());
     }
 
     /**
@@ -92,9 +93,9 @@ class MigratorCollection implements \IteratorAggregate, Countable
      * use self::resolveDependencies()
      *
      * @param string[] $names
-     * @return \Iterator|MigratorInterface[]  An iterator of migrators in the same order of the supplied names
+     * @return \ArrayIterator|MigratorInterface[]  An iterator of migrators in the same order of the supplied names
      */
-    public function getMultiple(string ...$names): \Iterator
+    public function getMultiple(string ...$names): \ArrayIterator
     {
         return new \ArrayIterator(array_map([$this, 'get'], $names));
     }
@@ -104,11 +105,11 @@ class MigratorCollection implements \IteratorAggregate, Countable
      *
      * This returns migrators in dependency order.
      *
-     * @return \Iterator|MigratorInterface[]  An iterator of migrators in the order they must be processed
+     * @return \ArrayIterator|MigratorInterface[]  An iterator of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function getIterator(): \Iterator
+    public function getIterator(): \ArrayIterator
     {
         return new ArrayIterator(array_map([$this, 'get'], $this->sorter->sort()));
     }
@@ -127,11 +128,11 @@ class MigratorCollection implements \IteratorAggregate, Countable
      * Resolve dependencies for a given migrator slug or instance
      *
      * @param string[] $migrators  The migrator(s) or name(s) of the migrator(s)
-     * @return iterable|MigratorInterface[]  A list of migrators in the order they must be processed
+     * @return \ArrayIterator|MigratorInterface[]  A list of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function resolveDependencies(string ...$migrators): iterable
+    public function resolveDependencies(string ...$migrators): array
     {
         $sorter = new StringSort();
 
@@ -145,7 +146,7 @@ class MigratorCollection implements \IteratorAggregate, Countable
             }
         }
 
-        return array_map([$this, 'get'], $sorter->sort());
+        return new \ArrayIterator(array_map([$this, 'get'], $sorter->sort()));
     }
 
     /**
@@ -160,8 +161,8 @@ class MigratorCollection implements \IteratorAggregate, Countable
      */
     private function iterateDependencies(MigratorInterface $migrator, array $visited = [])
     {
-        if (! in_array($migrator->getName(), $visited)) {
-            $visited[] = $migrator->getName();
+        if (! in_array($migrator->__toString(), $visited)) {
+            $visited[] = $migrator->__toString();
             yield $migrator;
         }
 

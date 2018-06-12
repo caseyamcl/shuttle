@@ -31,20 +31,18 @@ class ConsoleCommandBuilder
      */
     public function buildCommands(Shuttle $shuttle, bool $onePerMigrator = true, bool $includeListCommand = false)
     {
-        $service = $shuttle->getMigrateService();
-
         if ($onePerMigrator == true) {
             foreach ($shuttle->getMigrators() as $migrator) {
-                $commands[] = new ConsoleCmd\Migrate($service, $shuttle->getMigrators(), $migrator);
-                $commands[] = new ConsoleCmd\Revert($service, $shuttle->getMigrators(), $migrator);
+                $commands[] = new ConsoleCmd\Migrate($shuttle, $migrator);
+                $commands[] = new ConsoleCmd\Revert($shuttle, $migrator);
             }
         } else {
-            $commands[] = new ConsoleCmd\Migrate($service, $shuttle->getMigrators());
-            $commands[] = new ConsoleCmd\Revert($service, $shuttle->getMigrators());
+            $commands[] = new ConsoleCmd\Migrate($shuttle);
+            $commands[] = new ConsoleCmd\Revert($shuttle);
         }
 
         if ($includeListCommand) {
-            $commands[] = new ConsoleCmd\MigratorsList($shuttle->getMigrators(), $shuttle->getRecorder());
+            $commands[] = new ConsoleCmd\MigratorsList($shuttle->getMigrators());
         }
 
         return $commands ?? [];

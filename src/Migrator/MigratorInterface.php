@@ -1,87 +1,107 @@
 <?php
-/**
- * Shuttle Library
- *
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/caseyamcl/phpoaipmh
- * @package caseyamcl/shuttle
- * @author Casey McLaughlin <caseyamcl@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * ------------------------------------------------------------------
- */
 
 namespace Shuttle\Migrator;
 
+use Shuttle\Exception\MissingItemException;
+use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\SourceItem;
+
 /**
- * Migrator Interface
- *
- * @package Shuttle\Service\Migrator
+ * Class MigratorInterface
+ * @package Shuttle\Migrator
  */
 interface MigratorInterface
 {
-    /**
-     * @return string  A machine-friendly identifier for the type of record being migrated (e.g. 'posts', 'authors'...)
-     */
-    public function getName(): string;
+    // --------------------------------------------------------------
+    // Migrator Metadata
 
     /**
-     * @return string  A description of the records being migrated
-     */
-    public function getDescription(): string;
-
-    /**
-     * @return int  Number of records in the source
-     */
-    public function countSourceItems(): int;
-
-    /**
-     * @return iterable|string[]
-     */
-    public function getSourceIdIterator(): iterable;
-
-    /**
-     * @param string $sourceId
-     * @return array
-     */
-    public function getItemFromSource(string $sourceId): array;
-
-    /**
-     * @param array $source
-     * @return mixed
-     */
-    public function prepareSourceItem(array $source);
-
-    /**
-     * @param mixed $record
-     * @return string
-     */
-    public function persistDestinationItem($record): string;
-
-    /**
-     * Revert a single record
-     *
-     * @param string $destinationRecordId
-     * @return bool  If the record was actually deleted, return TRUE, else FALSE
-     */
-    public function removeDestinationItem(string $destinationRecordId): bool;
-
-    /**
-     * Get a list of migrator slugs that should be migrated before this one
-     *
-     * NOTE: This is not a comprehensive; it does not list transitive dependencies.  Use
-     * MigratorCollection::listDependencies() to determine all dependencies for a given migrator
-     *
-     * @return array|string[]
-     */
-    public function getDependsOn(): array;
-
-    /**
-     * This should return the slug
+     * A unique name for the migrator; can be the class name, or some other machine-name-friendly identifier
+     * (if a single class is used in multiple instances)
      *
      * @return string
      */
     public function __toString(): string;
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string;
+
+    // --------------------------------------------------------------
+    // Reporting
+
+    /**
+     * If is countable, return the number of source items, or NULL if unknown
+     * @return int|null
+     */
+    public function countSourceItems(): ?int;
+
+    /**
+     * @param string $id
+     * @return SourceItem
+     * @throws MissingItemException  If source item is not found
+     */
+    public function getSourceItem(string $id): SourceItem;
+
+    /**
+     * Get a report of
+     *
+     * @return \iterable|MigratorRecordInterface[]
+     */
+    public function getReport(): iterable;
+
+    /**
+     * @param string $sourceId
+     * @return bool
+     */
+    public function isMigrated(string $sourceId): bool;
+
+    // --------------------------------------------------------------
+    // Migrator Dependencies Management
+
+    /**
+     * @return array|string[]
+     */
+    public function getDependsOn(): array;
+
+    // --------------------------------------------------------------
+    // Migration process
+
+    /**
+     * Get the next source record, represented as an array
+     *
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
+     */
+    public function getSourceIterator(): iterable;
+
+    /**
+     * @param SourceItem $sourceItem
+     * @return mixed
+     */
+    public function prepare(SourceItem $sourceItem);
+
+    /**
+     * @param mixed $preparedItem
+     * @return string  Destination Id
+     */
+    public function persist($preparedItem): string;
+
+    /**
+     * @param string $sourceId
+     * @throws \RuntimeException  Throw exception if destination not found
+     */
+    public function remove(string $sourceId);
+
+    /**
+     * Record that a migration has occurred
+     *
+     * @param SourceItem $sourceItem
+     * @param string $destinationId
+     * @return MigratorRecordInterface
+     */
+    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface;
+
 }

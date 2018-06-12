@@ -15,9 +15,10 @@
 
 namespace Shuttle\MigrateSource;
 
-use Shuttle\Migrator\SourceInterface;
-use Shuttle\Migrator\Exception\MissingItemException;
+use Shuttle\Exception\MissingItemException;
 use Doctrine\Instantiator\Exception\InvalidArgumentException;
+use Shuttle\SourceInterface;
+use Shuttle\SourceItem;
 
 /**
  * Simple Database Source
@@ -27,7 +28,7 @@ use Doctrine\Instantiator\Exception\InvalidArgumentException;
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class DbSource implements \IteratorAggregate, SourceInterface
+class DbSource implements SourceInterface
 {
     /**
      * @var \PDO
@@ -48,33 +49,6 @@ class DbSource implements \IteratorAggregate, SourceInterface
      * @var string
      */
     private $singleQuery;
-
-    /**
-     * Build from DSN (DB Connection String)
-     *
-     * @param string $dsn         PDO-compatible DSN
-     * @param string $username    Database username
-     * @param string $password    Database password
-     * @param string $countQuery  Should accept no params and return a single row, single column with number of items
-     * @param string $listQuery   Should accept no params and return a single-column list of item IDs
-     * @param string $singleQuery Should accept one param, the ID (placeholder is a '?'), and return a single item
-     * @return static
-     */
-    public static function build(
-        string $dsn,
-        string $username,
-        string $password,
-        string $countQuery,
-        string $listQuery,
-        string $singleQuery
-    ) {
-        return new static(
-            new \PDO($dsn, $username, $password),
-            $countQuery,
-            $listQuery,
-            $singleQuery
-        );
-    }
 
     /**
      * Constructor
@@ -100,7 +74,11 @@ class DbSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    public function count(): int
+    /**
+     * If is countable, return the number of source items, or NULL if unknown
+     * @return int|null
+     */
+    public function countSourceItems(): ?int
     {
         $stmt = $this->dbConn->prepare($this->countQuery);
         $stmt->execute();
@@ -108,35 +86,36 @@ class DbSource implements \IteratorAggregate, SourceInterface
     }
 
     /**
-     * @return iterable|string[]  Get a list of item IDs in the source
+     * @param string $id
+     * @return SourceItem
      */
-    public function listItemIds(): iterable
+    public function getSourceItem(string $id): SourceItem
+    {
+        $stmt = $this->dbConn->prepare($this->singleQuery);
+        $stmt->execute(['id']);
+
+        if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            return new SourceItem($id, $row);
+        }
+        else {
+            throw new MissingItemException();
+        }
+    }
+
+    /**
+     * Get the next source record, represented as an array
+     *
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
+     */
+    public function getSourceIterator(): iterable
     {
         $stmt = $this->dbConn->prepare($this->listQuery);
         $stmt->execute();
 
         while ($id = $stmt->fetchColumn(0)) {
-            yield $id;
+            yield $this->getSourceItem($id);
         }
-    }
-
-    public function getItem(string $id): array
-    {
-        $stmt = $this->dbConn->prepare($this->singleQuery);
-        $stmt->execute([$id]);
-
-        if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            return $row;
-        } else {
-            throw new MissingItemException("Could not find record with ID: " . $id);
-        }
-    }
-
-    /**
-     * @return iterable|string[]
-     */
-    public function getIterator()
-    {
-        return $this->listItemIds();
     }
 }

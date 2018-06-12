@@ -16,7 +16,6 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\YamlSource;
-use Shuttle\Migrator\SourceInterface;
 use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
 
 /**

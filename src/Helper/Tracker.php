@@ -1,8 +1,8 @@
 <?php
 
-namespace Shuttle\Migrator;
+namespace Shuttle\Helper;
 
-use Shuttle\Migrator\Event\MigrateResultInterface;
+use Shuttle\ShuttleEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * @package Shuttle\Migrator
  */
-class MigrateTracker implements EventSubscriberInterface
+class Tracker implements EventSubscriberInterface
 {
     public const ALL = 'all';
     private const TOTAL = 'total';
@@ -23,16 +23,17 @@ class MigrateTracker implements EventSubscriberInterface
     /**
      * @var string
      */
-    private $trackEvent;
+    private $trackAction;
 
     /**
      * MigrateTracker constructor.
-     * @param string $trackEvent  The migrate event to track
+     * @param string $trackAction
      */
-    public function __construct(string $trackEvent = Events::REVERT_OR_MIGRATE)
+    public function __construct(string $trackAction)
     {
-        $this->trackEvent = $trackEvent;
-        $this->reset();
+        $this->trackAction = $trackAction;
+        $this->tracking = [];
+        $this->initTracking(self::ALL);
     }
 
     /**
@@ -40,7 +41,10 @@ class MigrateTracker implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return [Events::REVERT => 'trackRevert', Events::MIGRATE => 'trackMigrate'];
+        return [
+            ShuttleEvents::POST_REVERT  => 'trackRevert',
+            ShuttleEvents::POST_MIGRATE => 'trackMigrate'
+        ];
     }
 
     /**
@@ -73,15 +77,6 @@ class MigrateTracker implements EventSubscriberInterface
         $this->tracking[$action->getMigratorName()][$action->getStatus()]++;
         $this->tracking[self::ALL][self::TOTAL]++;
         $this->tracking[self::ALL][$action->getStatus()]++;
-    }
-
-    /**
-     * Reset tracking
-     */
-    public function reset()
-    {
-        $this->tracking = [];
-        $this->initTracking(self::ALL);
     }
 
     /**

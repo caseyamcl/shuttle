@@ -15,15 +15,16 @@
 
 namespace Shuttle\MigrateSource;
 
-use Shuttle\Migrator\Exception\MissingItemException;
-use Shuttle\Migrator\SourceInterface;
+use Shuttle\Exception\MissingItemException;
+use Shuttle\SourceInterface;
+use Shuttle\SourceItem;
 
 /**
  * Simple JSON Source
  *
  * @author Casey McLaughlin <caseyamcl@gmail.com>
  */
-class JsonSource implements \IteratorAggregate, SourceInterface
+class JsonSource implements SourceInterface
 {
     /**
      * @var array|array[]  Array of arrays
@@ -60,23 +61,22 @@ class JsonSource implements \IteratorAggregate, SourceInterface
         return $arr;
     }
 
+
     /**
-     * @return int
+     * If is countable, return the number of source items, or NULL if unknown
+     * @return int|null
      */
-    public function count()
+    public function countSourceItems(): ?int
     {
         return count($this->items);
     }
 
     /**
-     * @return array|iterable|string[]  Get a list of item IDs in the source
+     * @param string $id
+     * @return SourceItem
+     * @throws \Exception  If source item is not found
      */
-    public function listItemIds(): iterable
-    {
-        return array_map('strval', array_keys($this->items));
-    }
-
-    public function getItem(string $id): array
+    public function getSourceItem(string $id): SourceItem
     {
         if (array_key_exists($id, $this->items)) {
             return $this->items[$id];
@@ -85,8 +85,17 @@ class JsonSource implements \IteratorAggregate, SourceInterface
         }
     }
 
-    public function getIterator()
+    /**
+     * Get the next source record, represented as an array
+     *
+     * Return an array for the next item, or NULL for no more item
+     *
+     * @return iterable|SourceItem[]
+     */
+    public function getSourceIterator(): iterable
     {
-        return new \ArrayIterator($this->listItemIds());
+        foreach ($this->items as $id => $data) {
+            yield new SourceItem($id, $data);
+        }
     }
 }

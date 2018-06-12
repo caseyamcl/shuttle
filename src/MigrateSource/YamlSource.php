@@ -18,6 +18,7 @@ namespace Shuttle\MigrateSource;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
+use Traversable;
 
 /**
  * Simple YAML Source
@@ -32,10 +33,10 @@ class YamlSource extends JsonSource
     private $parser;
 
     /**
-     * @param string $rawJsonData
+     * @param string $rawYamlData
      * @param string $idFieldName
      */
-    public function __construct($rawJsonData, $idFieldName = '')
+    public function __construct($rawYamlData, $idFieldName = '')
     {
         if (! class_exists('Symfony\Component\Yaml\Parser')) {
             throw new \RuntimeException(
@@ -44,7 +45,7 @@ class YamlSource extends JsonSource
         }
 
         $this->parser = new Parser();
-        parent::__construct($rawJsonData, $idFieldName);
+        parent::__construct($rawYamlData, $idFieldName);
     }
 
     protected function decodeInput($rawInput, $idFieldName)

@@ -15,12 +15,10 @@
 
 namespace Shuttle\ConsoleCommand;
 
-use Shuttle\Migrator\Event\MigrateResultInterface;
-use Shuttle\Migrator\Events;
-use Shuttle\Migrator\MigrateService;
-use Shuttle\Migrator\MigrateTracker;
-use Shuttle\Migrator\MigratorCollection;
+use Shuttle\Helper\Tracker;
 use Shuttle\Migrator\MigratorInterface;
+use Shuttle\MigratorCollection;
+use Shuttle\Shuttle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,9 +35,9 @@ class Migrate extends Command
     const ACTION_NAME = 'migrate';
 
     /**
-     * @var MigrateService
+     * @var Shuttle
      */
-    protected $migrateService;
+    protected $shuttle;
 
     /**
      * @var MigratorCollection
@@ -54,18 +52,16 @@ class Migrate extends Command
     /**
      * Constructor
      *
-     * @param MigrateService $migrateService Migrate service
-     * @param MigratorCollection $migrators
-     * @param string $migrator Optionally provide migrator name
-     *                                        (if not provided, a CLI argument is made available to the user)
+     * @param Shuttle $shuttle  Migrate service
+     * @param string $migratorName Optionally provide migrator name
+     *                            (if not provided, a CLI argument is made available to the user)
      */
-    public function __construct(MigrateService $migrateService, MigratorCollection $migrators, string $migrator = '')
+    public function __construct(Shuttle $shuttle, string $migratorName = '')
     {
-        $this->migrateService = $migrateService;
-        $this->migratorCollection = $migrators;
+        $this->shuttle = $shuttle;
 
-        if ($migrator) {
-            $this->migrator = $migrators->get((string) $migrator);
+        if ($migratorName) {
+            $this->migrator = $shuttle->getMigrators()->get($migratorName);
         }
 
         parent::__construct();
@@ -74,8 +70,8 @@ class Migrate extends Command
     protected function configure()
     {
         if ($this->migrator) {
-            $this->setName('migrators:' . static::ACTION_NAME . ':' . $this->migrator->getName());
-            $this->setDescription(ucfirst(static::ACTION_NAME) . " " . $this->migrator->getName());
+            $this->setName('migrators:' . static::ACTION_NAME . ':' . (string) $this->migrator);
+            $this->setDescription(ucfirst(static::ACTION_NAME) . " " . (string) $this->migrator);
         } else {
             $this->setName('migrators:' . static::ACTION_NAME);
             $this->addArgument(
@@ -134,7 +130,7 @@ class Migrate extends Command
     {
         // Setup a tracker
         $tracker = $this->getNewTracker();
-        $this->migrateService->getDispatcher()->addSubscriber($tracker);
+        $this->shuttle->getEventDispatcher()->addSubscriber($tracker);
 
         // Setup migrators
         switch (true) {
@@ -210,7 +206,7 @@ class Migrate extends Command
         ));
 
         // Cleanup, in case this is running a sub-command
-        $this->migrateService->getDispatcher()->removeSubscriber($tracker);
+        $this->shuttle->getDispatcher()->removeSubscriber($tracker);
         unset($tracker);
     }
 
@@ -235,14 +231,14 @@ class Migrate extends Command
      */
     protected function getActionIterator(MigratorInterface $migrator, array $ids = [], bool $clobber = false): iterable
     {
-        return $this->migrateService->migrateItems($migrator, $ids, $clobber);
+        return $this->shuttle->migrateItems($migrator, $ids, $clobber);
     }
 
     /**
-     * @return MigrateTracker
+     * @return Tracker
      */
-    protected function getNewTracker(): MigrateTracker
+    protected function getNewTracker(): Tracker
     {
-        return new MigrateTracker(Events::MIGRATE);
+        return new Tracker(Events::MIGRATE);
     }
 }

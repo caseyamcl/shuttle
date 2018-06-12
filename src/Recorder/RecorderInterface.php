@@ -1,94 +1,51 @@
 <?php
-/**
- * Shuttle Library
- *
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/caseyamcl/phpoaipmh
- * @package caseyamcl/shuttle
- * @author Casey McLaughlin <caseyamcl@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * ------------------------------------------------------------------
- */
 
 namespace Shuttle\Recorder;
 
+use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\SourceItem;
+
 /**
- * Recorder Interface
- *
- * Tracks migration state for records
- *
- * @package Shuttle\Service\Recorder
+ * Class RecorderInterface
+ * @package Shuttle\NewShuttle
  */
 interface RecorderInterface
 {
     /**
-     * Get the number of items migrated already
+     * Record a migration action
      *
-     * @param string $type
-     * @return int
-     */
-    public function getMigratedCount(string $type): int;
-
-    /**
-     * Get a list of destination IDs for items that have been migrated
-     *
-     * @param string $type
-     * @return iterable|string[]  Array of new IDs
-     */
-    public function listDestinationIds(string $type): iterable;
-
-    /**
-     * Get a list of source IDs for items that have been migrated (i.e. they have corresponding destination IDs)
-     *
-     * @param string $type
-     * @return iterable
-     */
-    public function listMigratedSourceIds(string $type): iterable;
-
-    /**
-     * Determine if a source item has been migrated yet
-     *
-     * @param string $type
-     * @param string $sourceId
-     * @return boolean
-     */
-    public function isMigrated(string $type, string $sourceId): bool;
-
-    /**
-     * Get a destination ID for a source ID
-     *
-     * @param string $type
-     * @param string $sourceId
-     * @return string|null
-     */
-    public function findDestinationId(string $type, string $sourceId): ?string;
-
-    /**
-     * Get a source ID for a destination ID
-     *
-     * @param string $type
+     * @param SourceItem $source
      * @param string $destinationId
-     * @return string|null
+     * @param string $type
+     * @return MigratorRecordInterface
      */
-    public function findSourceId(string $type, string $destinationId): ?string;
+    public function recordMigrate(SourceItem $source, string $destinationId, string $type): MigratorRecordInterface;
+
 
     /**
-     * Record that an item has been migrated
+     * Record (or remove record) a revert action
      *
+     * @param SourceItem $source
+     * @param string $destinationId
      * @param string $type
+     * @return mixed
+     */
+    public function recordRevert(SourceItem $source, string $destinationId, string $type);
+
+    /**
+     * Find a migration record; returns NULL if an item is not migrated
+     *
      * @param string $sourceId
-     * @param string $destinationId
+     * @param string $type
+     * @return MigratorRecordInterface|null
      */
-    public function markMigrated(string $type, string $sourceId, string $destinationId): void;
+    public function findMigrationRecord(string $sourceId, string $type): ?MigratorRecordInterface;
 
     /**
-     * Update record to omit that an item has been migrated
+     * Find records for an item type
      *
      * @param string $type
-     * @param string $destinationId
+     * @return iterable|MigratorRecordInterface[]
      */
-    public function removeMigratedMark(string $type, string $destinationId): void;
+    public function findRecords(string $type): iterable;
 }

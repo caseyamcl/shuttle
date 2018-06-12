@@ -16,7 +16,6 @@
 namespace ShuttleTest\MigrateDestination;
 
 use Shuttle\MigrateDestination\DbTableDestination;
-use Shuttle\Migrator\DestinationInterface;
 use ShuttleTest\Migrator\AbstractDestinationInterfaceTest;
 
 /**

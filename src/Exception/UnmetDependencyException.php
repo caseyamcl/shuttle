@@ -1,6 +1,6 @@
 <?php
 
-namespace Shuttle\Migrator\Exception;
+namespace Shuttle\Exception;
 
 /**
  * Unmet Dependency Exception

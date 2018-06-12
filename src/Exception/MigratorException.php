@@ -13,22 +13,9 @@
  * ------------------------------------------------------------------
  */
 
-namespace Shuttle\Migrator\Event;
+namespace Shuttle\Exception;
 
-/**
- * Revert Result
- *
- * @author Casey McLaughlin <caseyamcl@gmail.com>
- */
-class RevertResult extends MigrateResult
+class MigratorException extends \RuntimeException
 {
-    /**
-     * Is Reverted is an alias for 'isMigrated'
-     *
-     * @return bool
-     */
-    public function isReverted(): bool
-    {
-        return $this->isMigrated();
-    }
+    // pass.
 }

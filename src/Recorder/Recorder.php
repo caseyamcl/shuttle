@@ -18,6 +18,10 @@ namespace Shuttle\Recorder;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Shuttle\Helper\DoctrineColumnIterator;
+use Shuttle\Recorder\MigratorRecord;
+use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\RecorderInterface;
+use Shuttle\SourceItem;
 
 /**
  * DBAL Table-Based Recorder
@@ -50,120 +54,88 @@ class Recorder implements RecorderInterface
     }
 
     /**
+     * Find records for an item type
+     *
      * @param string $type
-     * @return int
-     * @throws \Doctrine\DBAL\DBALException
+     * @return iterable|MigratorRecordInterface[]
+     * @throws \Exception
      */
-    public function getMigratedCount(string $type): int
+    public function findRecords(string $type): iterable
     {
-        $stmt = $this->dbConn->prepare("SELECT COUNT(rowid) as cnt FROM {$this->tableName} WHERE type = ?");
-        $stmt->execute([$type]);
-        return (int) $stmt->fetchColumn(0);
-    }
+        $qb = $this->dbConn->createQueryBuilder();
+        $qb->select('t.type, t.source_id, t.destination_id, t.timestamp');
+        $qb->from($this->tableName, 't');
+        $qb->orderBy('t.timestamp', 'ASC');
+        $stmt = $qb->execute();
 
-    /**
-     * @param string $type
-     * @return iterable|string[]
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function listDestinationIds(string $type): iterable
-    {
-        $stmt = $this->dbConn->prepare("SELECT new_id FROM {$this->tableName} WHERE type = ?");
-        $stmt->execute([$type]);
-        return new DoctrineColumnIterator($stmt, 'new_id');
-    }
-
-    /**
-     * @param string $type
-     * @return iterable|string[]
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function listMigratedSourceIds(string $type): iterable
-    {
-        $stmt = $this->dbConn->prepare("SELECT old_id FROM {$this->tableName} WHERE type = ?");
-        $stmt->execute([$type]);
-        return new DoctrineColumnIterator($stmt, 'old_id');
-    }
-
-    /**
-     * @param string $type
-     * @param string $sourceId
-     * @return bool
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function isMigrated(string $type, string $sourceId): bool
-    {
-        return (bool) (strlen($this->findDestinationId($type, $sourceId)));
-    }
-
-    /**
-     * @param string $type
-     * @param string $sourceId
-     * @return null|string
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function findDestinationId(string $type, string $sourceId): ?string
-    {
-        $stmt = $this->dbConn->prepare("SELECT new_id FROM {$this->tableName} WHERE type = ? AND old_id = ?");
-        $stmt->execute([$type, $sourceId]);
-        return (string) $stmt->fetchColumn(0);
-    }
-
-    /**
-     * @param string $type
-     * @param string $destinationId
-     * @return string|null
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function findSourceId(string $type, string $destinationId): ?string
-    {
-        $stmt = $this->dbConn->prepare("SELECT old_id FROM {$this->tableName} WHERE type = ? AND new_id = ?");
-        $stmt->execute([$type, $destinationId]);
-        return (string) $stmt->fetchColumn(0);
-    }
-
-    /**
-     * @param string $type
-     * @param string $sourceId
-     * @param string $destinationId
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function markMigrated(string $type, string $sourceId, string $destinationId): void
-    {
-        // Check and throw exception manually, since indexes seem to be failing silently.. (?)
-        if ($this->findDestinationId($type, $sourceId)) {
-            throw new \PDOException(sprintf(
-                "Integrity violation (app layer):  Duplicate key for %s.oldId: %s",
-                $type,
-                $sourceId
-            ));
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            yield new MigratorRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
         }
-        if ($this->findSourceId($type, $destinationId)) {
-            throw new \PDOException(sprintf(
-                "Integrity violation (app layer):  Duplicate key for %s.newId: %s",
-                $type,
-                $destinationId
-            ));
-        }
+    }
+
+    /**
+     * Find a migration record; returns NULL if an item is not migrated
+     *
+     * @param string $sourceId
+     * @param string $type
+     * @return MigratorRecordInterface|null
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function findMigrationRecord(string $sourceId, string $type): ?MigratorRecordInterface
+    {
+        $qb = $this->dbConn->createQueryBuilder();
+        $qb->select('t.type, t.source_id, t.destination_id, t.timestamp');
+        $qb->from($this->tableName, 't');
+        $qb->where($qb->expr()->eq('t.type', ':type'));
+        $qb->andWhere($qb->expr()->eq('t.source_id', ':source_id'));
+        $qb->setParameter(':type', $type);
+        $qb->setParameter(':source_id', $sourceId);
+        $stmt = $qb->execute();
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return new MigratorRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
+    }
+
+    /**
+     * Record a migration action
+     *
+     * @param SourceItem $source
+     * @param string $destinationId
+     * @param string $type
+     * @return MigratorRecordInterface
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function recordMigrate(SourceItem $source, string $destinationId, string $type): MigratorRecordInterface
+    {
+        $timestamp = new \DateTimeImmutable();
 
         $this->dbConn->insert($this->tableName, [
-            'type'      => $type,
-            'old_id'    => $sourceId,
-            'new_id'    => $destinationId,
-            'timestamp' => time()
+            'type'           => $type,
+            'source_id'      => $source->getId(),
+            'destination_id' => $destinationId,
+            'timestamp'      => $timestamp
         ]);
+
+        return new MigratorRecord($source->getId(), $destinationId, $type, $timestamp);
     }
 
     /**
-     * @param string $type
+     * Record (or remove record) a revert action
+     *
+     * @param SourceItem $source
      * @param string $destinationId
+     * @param string $type
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function removeMigratedMark(string $type, string $destinationId): void
+    public function recordRevert(SourceItem $source, string $destinationId, string $type)
     {
+        $destinationId = $this->findMigrationRecord($source->getId(), $type);
         $this->dbConn->delete($this->tableName, ['type' => $type, 'new_id' => $destinationId]);
     }
+
 
     /**
      * Initialize the database
@@ -183,9 +155,9 @@ class Recorder implements RecorderInterface
         $schema = new Schema();
         $table = $schema->createTable($tableName);
         $table->addColumn('type', 'string', ['length' => 64, 'notnull' => true]);
-        $table->addColumn('old_id', 'string', ['length' => 128, 'notnull' => true]);
-        $table->addColumn('new_id', 'string', ['length' => 128, 'notnull' => true]);
-        $table->addColumn('timestamp', 'integer', ['unsigned' => true, 'notnull' => true]);
+        $table->addColumn('source_id', 'string', ['length' => 128, 'notnull' => true]);
+        $table->addColumn('destination_id', 'string', ['length' => 128, 'notnull' => true]);
+        $table->addColumn('timestamp', 'datetime', ['notnull' => true]);
 
         $table->addColumn(
             'rowid',
@@ -194,9 +166,9 @@ class Recorder implements RecorderInterface
         );
         $table->setPrimaryKey(['rowid']);
 
-        $table->addIndex(['old_id']);
-        $table->addIndex(['new_id']);
-        $table->addUniqueIndex(['type', 'old_id', 'new_id']);
+        $table->addIndex(['source_id']);
+        $table->addIndex(['destination_id']);
+        $table->addUniqueIndex(['type', 'source_id', 'destination_id']);
 
         $queries = $schema->toSql($this->dbConn->getDatabasePlatform());
         foreach ($queries as $query) {
