@@ -54,6 +54,12 @@ interface MigratorInterface
     public function getMigratedSourceIdIterator(): iterable;
 
     /**
+     * Count migrated items, if known
+     * @return int|null
+     */
+    public function countMigratedItems(): ?int;
+
+    /**
      * @param string $sourceId
      * @return bool
      */

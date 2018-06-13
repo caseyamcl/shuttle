@@ -15,8 +15,9 @@
 
 namespace ShuttleTest\MigrateDestination;
 
+use Shuttle\DestinationInterface;
 use Shuttle\MigrateDestination\DbTableDestination;
-use ShuttleTest\Migrator\AbstractDestinationInterfaceTest;
+use ShuttleTest\AbstractDestinationInterfaceTest;
 
 /**
  * Class SimpleDbDestinationTest
@@ -68,7 +69,7 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
     /**
      * @return string
      */
-    protected function getExistingRecordId(): string
+    protected function getExistingItemId(): string
     {
         return '200';
     }
@@ -84,7 +85,7 @@ class SimpleDbDestinationTest extends AbstractDestinationInterfaceTest
     /**
      * @return string
      */
-    protected function getNonExistentRecordId(): string
+    protected function getNonExistentItemId(): string
     {
         return '900';
     }

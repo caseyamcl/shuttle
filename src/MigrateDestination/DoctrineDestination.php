@@ -5,7 +5,7 @@ namespace Shuttle\MigrateDestination;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Util\ClassUtils;
-use Shuttle\Exception\MissingItemException;
+use Shuttle\DestinationInterface;
 
 /**
  * Class DoctrineEntityDestination
@@ -63,28 +63,16 @@ class DoctrineDestination implements DestinationInterface
     }
 
     /**
-     * Does the destination contain the record?
-     *
-     * @param string $destinationId The destination ID
-     * @return bool
-     * @throws MissingItemException
-     */
-    public function hasItem(string $destinationId): bool
-    {
-        return (bool) $this->findItem($destinationId);
-    }
-
-    /**
      * Save a record
      *
      * Create or update the record
      *
-     * @param object $recordData An entity
+     * @param object $preparedItem An entity
      * @return string  The ID of the inserted record
      */
-    public function saveItem($recordData): string
+    public function persist($preparedItem): string
     {
-        $this->manager->persist($recordData);
+        $this->manager->persist($preparedItem);
 
         if ($this->autoFlush) {
             $this->manager->flush();
@@ -92,21 +80,19 @@ class DoctrineDestination implements DestinationInterface
 
         // Get the field from the entity/object
         if ($this->idFieldName) {
-            $reflection = ClassUtils::newReflectionObject($recordData)->getProperty($this->idFieldName);
+            $reflection = ClassUtils::newReflectionObject($preparedItem)->getProperty($this->idFieldName);
             $reflection->setAccessible(true);
-            return $reflection->getValue($recordData);
+            return $reflection->getValue($preparedItem);
         } else {
-            return implode('', array_map('strval', $this->metadata->getIdentifierValues($recordData)));
+            return implode('', array_map('strval', $this->metadata->getIdentifierValues($preparedItem)));
         }
     }
 
     /**
-     * Remove a record
-     *
      * @param string $destinationId
-     * @return bool  If a record existed to be deleted, returns TRUE, else FALSE
+     * @return bool  TRUE if record was found and removed, FALSE if record not found
      */
-    public function deleteItem(string $destinationId): bool
+    public function remove(string $destinationId): bool
     {
         if ($rec = $this->findItem($destinationId)) {
             $this->manager->remove($rec);

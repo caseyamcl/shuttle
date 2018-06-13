@@ -79,7 +79,7 @@ class JsonSource implements SourceInterface
     public function getSourceItem(string $id): SourceItem
     {
         if (array_key_exists($id, $this->items)) {
-            return $this->items[$id];
+            return new SourceItem($id, $this->items[$id]);
         } else {
             throw new MissingItemException("Could not find record with ID: " . $id);
         }
@@ -94,6 +94,6 @@ class JsonSource implements SourceInterface
      */
     public function getSourceIdIterator(): iterable
     {
-        return array_keys($this->items);
+        return array_map('strval', array_keys($this->items));
     }
 }

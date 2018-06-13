@@ -16,7 +16,8 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\YamlSource;
-use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\SourceInterface;
+use ShuttleTest\AbstractSourceInterfaceTest;
 
 /**
  * Yaml Source Test
@@ -55,5 +56,13 @@ class SimpleYamlSourceTest extends AbstractSourceInterfaceTest
     protected function getNonExistentRecordId(): string
     {
         return '4600';
+    }
+
+    /**
+     * @return int|null
+     */
+    protected function getExpectedCount(): ?int
+    {
+        return 3;
     }
 }

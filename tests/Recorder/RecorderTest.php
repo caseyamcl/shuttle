@@ -19,6 +19,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use PHPUnit\Framework\TestCase;
 use Shuttle\Recorder\Recorder;
+use Shuttle\SourceItem;
 
 /**
  * Recorder Test
@@ -27,6 +28,8 @@ use Shuttle\Recorder\Recorder;
  */
 class RecorderTest extends TestCase
 {
+    const TYPE = 'test_type';
+
     /**
      * @var Connection
      */
@@ -66,7 +69,8 @@ class RecorderTest extends TestCase
     public function testGetMigratedCountReturnsZeroForNothingMigrated()
     {
         $obj = new Recorder($this->dbConn);
-        $this->assertEquals(0, $obj->getMigratedCount('foo'));
+        $iterator = iterator_to_array($obj->getRecords('foo'));
+        $this->assertEmpty($iterator);
     }
 
     /**
@@ -75,8 +79,9 @@ class RecorderTest extends TestCase
     public function testMarkMigratedAddsRecordToDb()
     {
         $obj = new Recorder($this->dbConn);
-        $obj->markMigrated('foo', 5, 10);
-        $this->assertEquals(1, $obj->getMigratedCount('foo'));
+        $obj->addMigrateRecord(new SourceItem(5, ['foo' => 'bar']), 10, static::TYPE);
+        $iterator = iterator_to_array($obj->getRecords('foo'));
+        $this->assertEquals(1, count($iterator));
     }
 
     /**
@@ -87,11 +92,11 @@ class RecorderTest extends TestCase
     {
         $obj = new Recorder($this->dbConn);
 
-        $obj->markMigrated('foo', 5, 10);
-        $this->assertEquals(1, $obj->getMigratedCount('foo'));
+        $obj->addMigrateRecord(new SourceItem(5, ['foo' => 'bar']), 10, static::TYPE);
+        $this->assertEquals(1, $obj->countRecords(static::TYPE));
 
-        $obj->removeMigratedMark('foo', 10);
-        $this->assertEquals(0, $obj->getMigratedCount('foo'));
+        $obj->removeMigrateRecord(5, static::TYPE);
+        $this->assertEquals(0, $obj->countRecords(static::TYPE));
     }
 
     /**
@@ -101,6 +106,7 @@ class RecorderTest extends TestCase
     {
         $obj = new Recorder($this->dbConn);
 
+        // LEFT OFF HERE.....
         $obj->markMigrated('foo', 5, 10);
         $obj->markMigrated('foo', 6, 11);
         $obj->markMigrated('foo', 7, 12);

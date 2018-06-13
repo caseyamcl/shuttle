@@ -46,4 +46,10 @@ interface RecorderInterface
      * @return iterable|MigrateRecordInterface[]
      */
     public function getRecords(string $type): iterable;
+
+    /**
+     * @param string $type
+     * @return int|null
+     */
+    public function countRecords(string $type): ?int;
 }

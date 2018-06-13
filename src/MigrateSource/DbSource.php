@@ -53,10 +53,11 @@ class DbSource implements SourceInterface
     /**
      * Constructor
      *
-     * @param \PDO   $dbConn       Database connection
-     * @param string $countQuery   Should accept no params and return a single row, single column with number of records
-     * @param string $listQuery    Should accept no params and return a single-column list of IDs
-     * @param string $singleQuery  Should accept one param, the ID (placeholder is a '?'), and return a single record
+     * @param \PDO $dbConn Database connection
+     * @param string $countQuery Should accept no params and return a single row, single column with number of records
+     * @param string $listQuery Should accept no params and return a single-column list of IDs
+     * @param string $singleQuery Should accept one param, the ID (placeholder is a '?'), and return a single record
+     * @param int $idType
      */
     public function __construct(\PDO $dbConn, string $countQuery, string $listQuery, string $singleQuery)
     {
@@ -92,7 +93,8 @@ class DbSource implements SourceInterface
     public function getSourceItem(string $id): SourceItem
     {
         $stmt = $this->dbConn->prepare($this->singleQuery);
-        $stmt->execute(['id']);
+        $stmt->bindValue(1, $id);
+        $stmt->execute();
 
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return new SourceItem($id, $row);

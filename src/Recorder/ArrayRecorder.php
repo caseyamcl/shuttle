@@ -25,9 +25,9 @@ class ArrayRecorder implements RecorderInterface
      */
     public function addMigrateRecord(SourceItem $source, string $destinationId, string $type): MigrateRecordInterface
     {
-        $key = $source->getId() . '_' . $type;
-        $this->records[$key] = new MigrateRecord($source->getId(), $destinationId, $type);
-        return $this->records[$key];
+
+        $this->records[$type][$source->getId()] = new MigrateRecord($source->getId(), $destinationId, $type);
+        return $this->records[$type][$source->getId()];
     }
 
     /**
@@ -38,8 +38,7 @@ class ArrayRecorder implements RecorderInterface
      */
     public function removeMigrateRecord(string $sourceId, string $type)
     {
-        $key = $sourceId . '_' . $type;
-        unset($this->records[$key]);
+        unset($this->records[$type][$sourceId]);
     }
 
     /**
@@ -51,8 +50,7 @@ class ArrayRecorder implements RecorderInterface
      */
     public function findRecord(string $sourceId, string $type): ?MigrateRecordInterface
     {
-        $key = $sourceId . '_' . $type;
-        return (array_key_exists($key, $this->records)) ? $this->records[$key] : null;
+        return $this->records[$type][$sourceId] ?? null;
     }
 
     /**
@@ -63,6 +61,15 @@ class ArrayRecorder implements RecorderInterface
      */
     public function getRecords(string $type): iterable
     {
-        return $this->records;
+        return $this->records[$type] ?? [];
+    }
+
+    /**
+     * @param string $type
+     * @return int|null
+     */
+    public function countRecords(string $type): ?int
+    {
+        return count($this->records[$type] ?? []);
     }
 }

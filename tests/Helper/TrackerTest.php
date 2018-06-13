@@ -131,12 +131,12 @@ class TrackerTest extends TestCase
             ->getMock();
 
         return [
-            new MigrateProcessedEvent('test1', $sourceItemMock, $recordMock),
-            new MigrateProcessedEvent('test1', $sourceItemMock, $recordMock),
-            new MigrateProcessedEvent('test1', $sourceItemMock, $recordMock),
-            new MigrateProcessedEvent('test2', $sourceItemMock, $recordMock),
-            new MigrateProcessedEvent('test2', $sourceItemMock, $recordMock),
-            new MigrateProcessedEvent('test2', $sourceItemMock, $recordMock),
+            new MigrateProcessedEvent('test1', $sourceItemMock, 'test100'),
+            new MigrateProcessedEvent('test1', $sourceItemMock, 'test100'),
+            new MigrateProcessedEvent('test1', $sourceItemMock, 'test100'),
+            new MigrateProcessedEvent('test2', $sourceItemMock, 'test200'),
+            new MigrateProcessedEvent('test2', $sourceItemMock, 'test200'),
+            new MigrateProcessedEvent('test2', $sourceItemMock, 'test200'),
             new MigrateSkippedEvent('test1', 1, 'test'),
             new MigrateSkippedEvent('test1', 2, 'test'),
             new MigrateSkippedEvent('test2', 3, 'test'),
@@ -156,12 +156,12 @@ class TrackerTest extends TestCase
     protected function getRevertRecords()
     {
         return [
-            new RevertProcessedEvent('test1', 1),
-            new RevertProcessedEvent('test1', 2),
-            new RevertProcessedEvent('test1', 3),
-            new RevertProcessedEvent('test2', 1),
-            new RevertProcessedEvent('test2', 2),
-            new RevertProcessedEvent('test2', 3),
+            new RevertProcessedEvent('test1', 1, true),
+            new RevertProcessedEvent('test1', 2, false),
+            new RevertProcessedEvent('test1', 3, false),
+            new RevertProcessedEvent('test2', 1, true),
+            new RevertProcessedEvent('test2', 2, true),
+            new RevertProcessedEvent('test2', 3, false),
             new RevertSkippedEvent('test1', 4, 'test'),
             new RevertSkippedEvent('test1', 5, 'test'),
             new RevertSkippedEvent('test2', 4, 'test'),

@@ -17,10 +17,6 @@ namespace Shuttle\Recorder;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
-use Shuttle\Helper\DoctrineColumnIterator;
-use Shuttle\Recorder\MigrateRecord;
-use Shuttle\Recorder\MigrateRecordInterface;
-use Shuttle\Recorder\RecorderInterface;
 use Shuttle\SourceItem;
 
 /**
@@ -57,7 +53,7 @@ class Recorder implements RecorderInterface
      * Find records for an item type
      *
      * @param string $type
-     * @return iterable|MigrateRecordInterface[]
+     * @return iterable|\Generator|MigrateRecordInterface[]
      * @throws \Exception
      */
     public function getRecords(string $type): iterable
@@ -69,7 +65,12 @@ class Recorder implements RecorderInterface
         $stmt = $qb->execute();
 
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            yield new MigrateRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
+            yield new MigrateRecord(
+                $row['source_id'],
+                $row['destination_id'],
+                $row['type'],
+                $this->prepareTimestamp($row['timestamp'])
+            );
         }
     }
 
@@ -79,7 +80,6 @@ class Recorder implements RecorderInterface
      * @param string $sourceId
      * @param string $type
      * @return MigrateRecordInterface|null
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
     public function findRecord(string $sourceId, string $type): ?MigrateRecordInterface
@@ -94,7 +94,13 @@ class Recorder implements RecorderInterface
         $stmt = $qb->execute();
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return new MigrateRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
+
+        return new MigrateRecord(
+            $row['source_id'],
+            $row['destination_id'],
+            $row['type'],
+            $this->prepareTimestamp($row['timestamp'])
+        );
     }
 
     /**
@@ -104,7 +110,6 @@ class Recorder implements RecorderInterface
      * @param string $destinationId
      * @param string $type
      * @return MigrateRecordInterface
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
     public function addMigrateRecord(SourceItem $source, string $destinationId, string $type): MigrateRecordInterface
@@ -115,10 +120,10 @@ class Recorder implements RecorderInterface
             'type'           => $type,
             'source_id'      => $source->getId(),
             'destination_id' => $destinationId,
-            'timestamp'      => $timestamp
+            'timestamp'      => $timestamp->format('Y-m-d H:i:s')
         ]);
 
-        return new MigrateRecord($source->getId(), $destinationId, $type, $timestamp);
+        return new MigrateRecord($source->getId(), $destinationId, $type, $this->prepareTimestamp($timestamp));
     }
 
     /**
@@ -131,8 +136,7 @@ class Recorder implements RecorderInterface
      */
     public function removeMigrateRecord(string $sourceId, string $type)
     {
-        $destinationId = $this->findRecord($sourceId, $type);
-        $this->dbConn->delete($this->tableName, ['type' => $type, 'new_id' => $destinationId]);
+        $this->dbConn->delete($this->tableName, ['type' => $type, 'source_id' => $sourceId]);
     }
 
 
@@ -174,4 +178,36 @@ class Recorder implements RecorderInterface
             $this->dbConn->query($query);
         }
     }
+
+    /**
+     * Count migrated records for type
+     *
+     * @param string $type
+     * @return int|null
+     */
+    public function countRecords(string $type): ?int
+    {
+        $qb = $this->dbConn->createQueryBuilder();
+        $qb->select('COUNT(t.source_id)')->from($this->tableName, 't');
+        $qb->where($qb->expr()->eq('t.type', ':type'));
+        $qb->setParameter(':type', $type);
+        $stmt = $qb->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+
+    /**
+     * Resolve date/time object for date/time string
+     *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
+     * @param string|\DateTimeInterface $timestamp
+     * @return \DateTimeInterface
+     */
+    private function prepareTimestamp($timestamp)
+    {
+        return $timestamp instanceof \DateTimeInterface ? $timestamp : new \DateTimeImmutable($timestamp);
+    }
+
+
 }

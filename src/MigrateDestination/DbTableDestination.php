@@ -15,7 +15,6 @@
 
 namespace Shuttle\MigrateDestination;
 
-use Shuttle\Exception\MissingItemException;
 use Shuttle\DestinationInterface;
 
 /**

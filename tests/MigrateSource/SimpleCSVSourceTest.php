@@ -16,7 +16,8 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\CsvSource;
-use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\SourceInterface;
+use ShuttleTest\AbstractSourceInterfaceTest;
 
 class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
 {
@@ -24,26 +25,26 @@ class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
     public function testWithoutHeaderRowReturnsRecordsWithNumericalKeys()
     {
         $obj = $this->getSourceObj(false);
-        $rec = $obj->getItem(350);
+        $item = $obj->getSourceItem(350);
 
-        $this->assertContainsOnly('int', array_keys($rec));
+        $this->assertContainsOnly('int', array_keys($item->getData()));
     }
 
     public function testWithHeaderRowReturnsRecordsWithExpectedKeys()
     {
         $obj = $this->getSourceObj(true);
-        $rec = $obj->getItem(350);
+        $item = $obj->getSourceItem(350);
 
-        $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($rec));
+        $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($item->getData()));
     }
 
     public function testGetRecordIsTolerantOfMismatchedColumnNumbers()
     {
         $obj = $this->getSourceObj(true);
-        $rec = $obj->getItem(450); // 450 in source_header_row.csv is missing the last column
+        $item = $obj->getSourceItem(450); // 450 in source_header_row.csv is missing the last column
 
-        $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($rec));
-        $this->assertEmpty($rec['State']);
+        $this->assertEquals(['FName', 'LName', 'Age', 'Color', 'IdNum', 'State'], array_keys($item->getData()));
+        $this->assertEmpty($item['State']);
     }
 
     /**
@@ -73,5 +74,13 @@ class SimpleCSVSourceTest extends AbstractSourceInterfaceTest
     protected function getNonExistentRecordId(): string
     {
         return '5000';
+    }
+
+    /**
+     * @return int|null
+     */
+    protected function getExpectedCount(): ?int
+    {
+        return 3;
     }
 }

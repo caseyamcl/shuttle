@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## UNRELEASED
 
 ### Added
+- Added the `SourceItem` object to help provide some structure to required source item requirements (Id and data)
 - The `DoctrineDestination` pre-installed destination to support migrating to Doctrine ORM, ODM, etc.
 - New method `MigratorInterface::retrieveSourceItem()` to make migrations API more granular
 - New method `MigratorInterface::persistDestinationItem()` to make migrations API more granular
@@ -14,11 +15,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - New events: `MigratePrePrepareEvent` and `MigratePrePersistEvent` 
 
 ### Changed
-- Breaking: Changed `DestinationInteface::getItem()` to `DestinationInterface::hasItem()`
+- BREAKING: Refactored the main API to be a bit more sensical.  Lots of breaking changes.
 - Removed array type hint from `DestinationInterface` to support more diverse destinations 
 - Minor tweaks to code style and comments
 
 ### Removed
+- `DestinationInterface::getItem()`.  No need to retrieve items from the destination
 - The `MigratorFactory` class (possibly to be refactored later)
 - The `Migrator::migrate()` function.  The public interface for a migrator has become more granular (see 'added' above)
 - The `MigratorInterface::getSource()` and `MigratorInterface::getDestination()` methods.  This will allow creating

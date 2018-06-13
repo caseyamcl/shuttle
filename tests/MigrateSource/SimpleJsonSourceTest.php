@@ -16,7 +16,8 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\JsonSource;
-use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\SourceInterface;
+use ShuttleTest\AbstractSourceInterfaceTest;
 
 class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
 {
@@ -42,5 +43,13 @@ class SimpleJsonSourceTest extends AbstractSourceInterfaceTest
     protected function getNonExistentRecordId(): string
     {
         return '10000';
+    }
+
+    /**
+     * @return int|null
+     */
+    protected function getExpectedCount(): ?int
+    {
+        return 3;
     }
 }

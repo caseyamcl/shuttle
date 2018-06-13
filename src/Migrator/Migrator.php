@@ -88,6 +88,14 @@ class Migrator extends AbstractMigrator
     }
 
     /**
+     * @return int|null
+     */
+    public function countMigratedItems(): ?int
+    {
+        return $this->recorder->countRecords($this->__toString());
+    }
+
+    /**
      * Returns TRUE if we can locate the destination ID in the tracker and the destination confirms record existence
      *
      * @param string $sourceId

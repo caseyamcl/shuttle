@@ -26,7 +26,6 @@ class MigratorTest extends TestCase
         $this->assertEquals(7, count($iterator));
     }
 
-
     public function testReadItemsSucceed()
     {
         $migrator = new TestMigrator();
@@ -201,5 +200,21 @@ class MigratorTest extends TestCase
     {
         $migrator = new TestMigrator();
         $this->assertTrue($migrator->remove(1)); // Item '1' is not already in the destination
+    }
+
+    public function testCountMigratedItemsReturnsExpectedValues()
+    {
+        $migrator = new TestMigrator();
+
+        // Migrator has records for two items by default
+        $this->assertEquals(2, $migrator->countMigratedItems());
+
+        // Migrate an item..
+        $sourceItem = $migrator->getSourceItem(TestMigrator::ITEM_SUCCEEDS_ID);
+        $migrator->persist($migrator->prepare($sourceItem), $sourceItem);
+
+        // Now we have three migrated items.
+        $this->assertEquals(3, $migrator->countMigratedItems());
+
     }
 }

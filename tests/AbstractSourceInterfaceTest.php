@@ -13,9 +13,11 @@
  * ------------------------------------------------------------------
  */
 
-namespace ShuttleTest\Migrator;
+namespace ShuttleTest;
 
 use PHPUnit\Framework\TestCase;
+use Shuttle\SourceInterface;
+use Shuttle\SourceItem;
 
 /**
  * Class AbstractSourceInterfaceTest
@@ -24,31 +26,37 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AbstractSourceInterfaceTest extends TestCase
 {
-    public function testListRecordIdsReturnsTraversableListOfStrings()
+    public function testGetSourceIdIteratorReturnsIterableOfStrings()
     {
         $obj = $this->getSourceObj();
-        $ids = $obj->listItemIds();
+        $ids = $obj->getSourceIdIterator();
 
         $this->assertTrue(is_array($ids) or $ids instanceof \Traversable);
         $this->assertContainsOnly('string', $ids);
     }
 
-    public function testGetRecordReturnsNonEmptyArrayForExistingRecord()
+    public function testGetItemReturnsSourceItemInstance()
     {
         $obj = $this->getSourceObj();
-        $rec = $obj->getItem($this->getExistingRecordId());
+        $sourceItem = $obj->getSourceItem($this->getExistingRecordId());
 
-        $this->assertInternalType('array', $rec);
-        $this->assertNotEmpty($rec);
+        $this->assertInstanceOf(SourceItem::class, $sourceItem);
+        $this->assertEquals($this->getExistingRecordId(), $sourceItem->getId());
     }
 
     /**
      * @expectedException \Shuttle\Exception\MissingItemException
      */
-    public function testGetRecordThrowsMissingRecordExceptionForNonExistentRecord()
+    public function testGetItemThrowsMissingRecordExceptionForNonExistentRecord()
     {
         $obj = $this->getSourceObj();
-        $obj->getItem($this->getNonExistentRecordId());
+        $obj->getSourceItem($this->getNonExistentRecordId());
+    }
+
+    public function testCountItemsReturnsPositiveIntOrNull()
+    {
+        $obj = $this->getSourceObj();
+        $this->assertEquals($this->getExpectedCount(), $obj->countSourceItems());
     }
 
     // ---------------------------------------------------------------
@@ -67,4 +75,9 @@ abstract class AbstractSourceInterfaceTest extends TestCase
      * @return string
      */
     abstract protected function getNonExistentRecordId(): string;
+
+    /**
+     * @return int|null
+     */
+    abstract protected function getExpectedCount(): ?int;
 }

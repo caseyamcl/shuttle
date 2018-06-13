@@ -16,7 +16,8 @@
 namespace ShuttleTest\MigrateSource;
 
 use Shuttle\MigrateSource\DbSource;
-use ShuttleTest\Migrator\AbstractSourceInterfaceTest;
+use Shuttle\SourceInterface;
+use ShuttleTest\AbstractSourceInterfaceTest;
 
 /**
  * Simple DB Test
@@ -85,5 +86,13 @@ class SimpleDbSourceTest extends AbstractSourceInterfaceTest
     protected function getNonExistentRecordId(): string
     {
         return '900';
+    }
+
+    /**
+     * @return int|null
+     */
+    protected function getExpectedCount(): ?int
+    {
+        return 3;
     }
 }
