@@ -10,7 +10,7 @@ use Shuttle\Event\RevertFailedEvent;
 use Shuttle\Event\RevertProcessedEvent;
 use Shuttle\Event\RevertSkippedEvent;
 use Shuttle\Helper\Tracker;
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\ShuttleAction;
 use Shuttle\ShuttleEvents;
 use Shuttle\SourceItem;
@@ -91,7 +91,7 @@ class TrackerTest extends TestCase
         $dispatcher->addSubscriber($obj);
 
         foreach ($this->getMigrateRecords() as $migrateRecord) {
-            $dispatcher->dispatch(ShuttleEvents::POST_MIGRATE, $migrateRecord);
+            $dispatcher->dispatch(ShuttleEvents::MIGRATE_RESULT, $migrateRecord);
         }
 
         $this->assertEquals(6, $obj->getProcessedCount());
@@ -125,8 +125,8 @@ class TrackerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        /** @var MigratorRecordInterface $recordMock */
-        $recordMock = $this->getMockBuilder(MigratorRecordInterface::class)
+        /** @var MigrateRecordInterface $recordMock */
+        $recordMock = $this->getMockBuilder(MigrateRecordInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 

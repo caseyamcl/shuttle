@@ -2,9 +2,11 @@
 
 namespace Shuttle\Migrator;
 
+use Shuttle\Exception\AlreadyMigratedException;
+use Shuttle\Exception\MissingItemException;
 use Shuttle\Migrator\AbstractMigrator;
 use Shuttle\DestinationInterface;
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\Recorder\RecorderInterface;
 use Shuttle\SourceInterface;
 use Shuttle\SourceItem;
@@ -77,20 +79,31 @@ class Migrator extends AbstractMigrator
     /**
      * Get a report of
      *
-     * @return \iterable|MigratorRecordInterface[]
+     * @return \iterable|MigrateRecordInterface[]
      */
-    public function getReport(): iterable
+    public function getMigrateRecords(): iterable
     {
-        return $this->recorder->findRecords($this->__toString());
+        return $this->recorder->getRecords($this->__toString());
     }
 
     /**
+     * @param string $sourceId
+     * @return null|MigrateRecordInterface
+     */
+    public function findMigrateRecord(string $sourceId): ?MigrateRecordInterface
+    {
+        return $this->recorder->findRecord($sourceId, (string) $this);
+    }
+
+    /**
+     * Returns TRUE if we can locate the destination ID in the tracker and the destination confirms record existence
+     *
      * @param string $sourceId
      * @return bool
      */
     public function isMigrated(string $sourceId): bool
     {
-        return (bool) $this->recorder->findMigrationRecord($sourceId, $this->__toString());
+        return (bool) $this->recorder->findRecord($sourceId, $this->__toString());
     }
 
     /**
@@ -116,20 +129,37 @@ class Migrator extends AbstractMigrator
 
     /**
      * @param mixed $preparedItem
+     * @param SourceItem $sourceItem
      * @return string  Destination Id
      */
-    public function persist($preparedItem): string
+    public function persist($preparedItem, SourceItem $sourceItem): string
     {
-        return $this->destination->persist($preparedItem);
+        // Do not allow migrating if already migrated (must manually revert first)
+        if ($this->isMigrated($sourceItem->getId())) {
+            throw new AlreadyMigratedException(sprintf(
+                'Record (type %s) with ID is already migrated: %s',
+                (string) $this,
+                $sourceItem->getId()
+            ));
+        }
+
+        $destinationId = $this->destination->persist($preparedItem);
+        $this->recordMigrate($sourceItem, $destinationId);
+        return $destinationId;
     }
 
     /**
+     * Remove the record
+     *
      * @param string $sourceId
-     * @throws \RuntimeException  Throw exception if destination not found
+     * @return bool  TRUE if record was found and removed, FALSE if not found
+     * @throws MissingItemException Throw exception if destination not found
      */
-    public function remove(string $sourceId)
+    public function remove(string $sourceId): bool
     {
-        return $this->destination->remove($this->getDestinationIdForSourceId($sourceId));
+        $removed = $this->destination->remove($this->getDestinationIdForSourceId($sourceId));
+        $this->recordRevert($sourceId);
+        return $removed;
     }
 
     /**
@@ -137,20 +167,19 @@ class Migrator extends AbstractMigrator
      *
      * @param SourceItem $sourceItem
      * @param string $destinationId
-     * @return MigratorRecordInterface
+     * @return MigrateRecordInterface
      */
-    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface
+    protected function recordMigrate(SourceItem $sourceItem, string $destinationId): MigrateRecordInterface
     {
-        return $this->recorder->recordMigrate($sourceItem, $destinationId, $this->__toString());
+        return $this->recorder->addMigrateRecord($sourceItem, $destinationId, $this->__toString());
     }
 
     /**
-     * @param SourceItem $sourceItem
-     * @param string $destinationId
+     * @param string $sourceId
      */
-    public function recordRevert(SourceItem $sourceItem, string $destinationId)
+    protected function recordRevert(string $sourceId)
     {
-        $this->recorder->recordRevert($sourceItem, $destinationId, $this->__toString());
+        $this->recorder->removeMigrateRecord($sourceId, $this->__toString());
     }
 
     /**
@@ -159,15 +188,15 @@ class Migrator extends AbstractMigrator
      */
     protected function getDestinationIdForSourceId(string $sourceId): string
     {
-        if ($record = $this->recorder->findMigrationRecord($sourceId, $this->__toString())) {
+        if ($record = $this->recorder->findRecord($sourceId, $this->__toString())) {
             return $record->getDestinationId();
         }
         else {
-            throw new \RuntimeException(
+            throw new MissingItemException(sprintf(
                 'Missing destination ID for item (type: %s) with source ID: %s',
                 $this->__toString(),
                 $sourceId
-            );
+            ));
         }
     }
 }

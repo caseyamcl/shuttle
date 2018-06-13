@@ -117,6 +117,14 @@ class Migrate extends Command
             InputOption::VALUE_REQUIRED,
             'A comma-separated list of source IDs to ' . static::ACTION_NAME
         );
+
+        // TODO: IMPLEMENT THIS...
+        $this->addOption(
+            'abort-on-error',
+            'a',
+            InputOption::VALUE_NONE,
+            'Abort on the first error'
+        );
     }
 
     /**

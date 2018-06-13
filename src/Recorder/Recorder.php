@@ -18,8 +18,8 @@ namespace Shuttle\Recorder;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Shuttle\Helper\DoctrineColumnIterator;
-use Shuttle\Recorder\MigratorRecord;
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\MigrateRecord;
+use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\Recorder\RecorderInterface;
 use Shuttle\SourceItem;
 
@@ -57,10 +57,10 @@ class Recorder implements RecorderInterface
      * Find records for an item type
      *
      * @param string $type
-     * @return iterable|MigratorRecordInterface[]
+     * @return iterable|MigrateRecordInterface[]
      * @throws \Exception
      */
-    public function findRecords(string $type): iterable
+    public function getRecords(string $type): iterable
     {
         $qb = $this->dbConn->createQueryBuilder();
         $qb->select('t.type, t.source_id, t.destination_id, t.timestamp');
@@ -69,7 +69,7 @@ class Recorder implements RecorderInterface
         $stmt = $qb->execute();
 
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            yield new MigratorRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
+            yield new MigrateRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
         }
     }
 
@@ -78,11 +78,11 @@ class Recorder implements RecorderInterface
      *
      * @param string $sourceId
      * @param string $type
-     * @return MigratorRecordInterface|null
+     * @return MigrateRecordInterface|null
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public function findMigrationRecord(string $sourceId, string $type): ?MigratorRecordInterface
+    public function findRecord(string $sourceId, string $type): ?MigrateRecordInterface
     {
         $qb = $this->dbConn->createQueryBuilder();
         $qb->select('t.type, t.source_id, t.destination_id, t.timestamp');
@@ -94,7 +94,7 @@ class Recorder implements RecorderInterface
         $stmt = $qb->execute();
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return new MigratorRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
+        return new MigrateRecord($row['source_id'], $row['destination_id'], $row['type'], $row['timestamp']);
     }
 
     /**
@@ -103,11 +103,11 @@ class Recorder implements RecorderInterface
      * @param SourceItem $source
      * @param string $destinationId
      * @param string $type
-     * @return MigratorRecordInterface
+     * @return MigrateRecordInterface
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public function recordMigrate(SourceItem $source, string $destinationId, string $type): MigratorRecordInterface
+    public function addMigrateRecord(SourceItem $source, string $destinationId, string $type): MigrateRecordInterface
     {
         $timestamp = new \DateTimeImmutable();
 
@@ -118,21 +118,20 @@ class Recorder implements RecorderInterface
             'timestamp'      => $timestamp
         ]);
 
-        return new MigratorRecord($source->getId(), $destinationId, $type, $timestamp);
+        return new MigrateRecord($source->getId(), $destinationId, $type, $timestamp);
     }
 
     /**
      * Record (or remove record) a revert action
      *
-     * @param SourceItem $source
-     * @param string $destinationId
+     * @param string $sourceId
      * @param string $type
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
      */
-    public function recordRevert(SourceItem $source, string $destinationId, string $type)
+    public function removeMigrateRecord(string $sourceId, string $type)
     {
-        $destinationId = $this->findMigrationRecord($source->getId(), $type);
+        $destinationId = $this->findRecord($sourceId, $type);
         $this->dbConn->delete($this->tableName, ['type' => $type, 'new_id' => $destinationId]);
     }
 

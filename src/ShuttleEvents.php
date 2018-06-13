@@ -11,18 +11,9 @@ final class ShuttleEvents
     /**
      * Read source record
      *
-     * This event occurs after a source item has been read, but before
-     * any other action has been taken
+     * This event occurs after a source item has been read, but before the record has been prepared
      */
     const READ_SOURCE_RECORD = 'shuttle.read_source';
-
-    /**
-     * Pre-prepare
-     *
-     * This event occurs after a source item has been read, but before it has been prepared.  It is
-     * called directly after READ_SOURCE_RECORD
-     */
-    const PRE_PREPARE = 'shuttle.pre_prepare';
 
     /**
      * Pre-persist
@@ -34,28 +25,22 @@ final class ShuttleEvents
     /**
      * Pre-revert
      *
-     * This event occurs before an item has been removed from the destination
+     * This event occurs before an item is removed from the destination
      */
     const PRE_REVERT = 'shuttle.pre_revert';
 
     /**
-     * This event occurs after an item has been persisted (or removed) in the destination, but before the
-     * recording of the migration occurs
-     */
-    const PRE_RECORD = 'shuttle.pre_record';
-
-    /**
      * This event occurs after an item has been persisted in the destination, and the migration has been recorded
      */
-    const POST_MIGRATE = 'shuttle.post_migrate';
+    const MIGRATE_RESULT = 'shuttle.post_migrate';
 
     /**
      * This event occurs after an item has been removed from the destination, and the revert has been recorded
      */
-    const POST_REVERT = 'shuttle.post_revert';
+    const REVERT_RESULT = 'shuttle.post_revert';
 
     /**
-     * This event occurs when any part of an action (migrate or revert) fails
+     * This event occurs if processing was interrupted by the $continue callback before the iterator completed
      */
-    const ACTION_FAILED = 'shuttle.action_failed';
+    const ABORT = 'shuttle.abort';
 }

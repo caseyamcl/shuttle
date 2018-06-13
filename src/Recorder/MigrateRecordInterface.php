@@ -6,7 +6,7 @@ namespace Shuttle\Recorder;
  * Class MigratorReportItem
  * @package Shuttle\NewShuttle
  */
-interface MigratorRecordInterface
+interface MigrateRecordInterface
 {
     /**
      * @return string

@@ -51,7 +51,7 @@ class MigrateSkippedEvent extends Event implements ActionResultInterface
      */
     public function getStatus(): string
     {
-        return $this::SKIPPED;
+        return self::SKIPPED;
     }
 
     /**
@@ -60,5 +60,29 @@ class MigrateSkippedEvent extends Event implements ActionResultInterface
     public function getAction(): string
     {
         return ShuttleAction::MIGRATE;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReason(): string
+    {
+        return $this->reason;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceId(): string
+    {
+        return $this->sourceId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->getReason();
     }
 }

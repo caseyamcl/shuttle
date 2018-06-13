@@ -2,13 +2,11 @@
 
 namespace Shuttle\Recorder;
 
-use Shuttle\Recorder\MigratorRecordInterface;
-
 /**
  * Class MigratorRecord
  * @package Shuttle\NewShuttle
  */
-class MigratorRecord implements MigratorRecordInterface
+class MigrateRecord implements MigrateRecordInterface
 {
     /**
      * @var string
@@ -32,11 +30,13 @@ class MigratorRecord implements MigratorRecordInterface
 
     /**
      * MigratorRecord constructor.
+     *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param string $sourceId
      * @param string $destinationId
      * @param string $migratorName
      * @param \DateTimeInterface $timestamp
-     * @throws \Exception
      */
     public function __construct(
         string $sourceId,
@@ -47,6 +47,8 @@ class MigratorRecord implements MigratorRecordInterface
         $this->sourceId = $sourceId;
         $this->destinationId = $destinationId;
         $this->migratorName = $migratorName;
+
+        /** @noinspection PhpUnhandledExceptionInspection */
         $this->timestamp = $timestamp ?: new \DateTimeImmutable();
     }
 

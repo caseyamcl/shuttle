@@ -26,4 +26,9 @@ interface ActionResultInterface
      * @return string
      */
     public function getStatus(): string;
+
+    /**
+     * @return string
+     */
+    public function getMessage(): string;
 }

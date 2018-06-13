@@ -2,8 +2,10 @@
 
 namespace Shuttle\Migrator;
 
+use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use Shuttle\Exception\MissingItemException;
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Exception\UnmetDependencyException;
+use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\SourceItem;
 
 /**
@@ -47,9 +49,9 @@ interface MigratorInterface
     /**
      * Get a report of
      *
-     * @return \iterable|MigratorRecordInterface[]
+     * @return \iterable|MigrateRecordInterface[]
      */
-    public function getReport(): iterable;
+    public function getMigrateRecords(): iterable;
 
     /**
      * @param string $sourceId
@@ -85,22 +87,15 @@ interface MigratorInterface
 
     /**
      * @param mixed $preparedItem
+     * @param SourceItem $sourceItem
      * @return string  Destination Id
+     * @throws UnmetDependencyException  If we try to save an item with an unmet dependency
      */
-    public function persist($preparedItem): string;
+    public function persist($preparedItem, SourceItem $sourceItem): string;
 
     /**
      * @param string $sourceId
-     * @throws \RuntimeException  Throw exception if destination not found
+     * @return bool  TRUE if record was found and removed, FALSE if not found
      */
-    public function remove(string $sourceId);
-
-    /**
-     * Record that a migration has occurred
-     *
-     * @param SourceItem $sourceItem
-     * @param string $destinationId
-     * @return MigratorRecordInterface
-     */
-    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface;
+    public function remove(string $sourceId): bool;
 }

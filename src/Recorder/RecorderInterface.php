@@ -2,7 +2,7 @@
 
 namespace Shuttle\Recorder;
 
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\SourceItem;
 
 /**
@@ -17,35 +17,33 @@ interface RecorderInterface
      * @param SourceItem $source
      * @param string $destinationId
      * @param string $type
-     * @return MigratorRecordInterface
+     * @return MigrateRecordInterface
      */
-    public function recordMigrate(SourceItem $source, string $destinationId, string $type): MigratorRecordInterface;
+    public function addMigrateRecord(SourceItem $source, string $destinationId, string $type): MigrateRecordInterface;
 
 
     /**
      * Record (or remove record) a revert action
      *
-     * @param SourceItem $source
-     * @param string $destinationId
+     * @param string $sourceId
      * @param string $type
-     * @return mixed
      */
-    public function recordRevert(SourceItem $source, string $destinationId, string $type);
+    public function removeMigrateRecord(string $sourceId, string $type);
 
     /**
      * Find a migration record; returns NULL if an item is not migrated
      *
      * @param string $sourceId
      * @param string $type
-     * @return MigratorRecordInterface|null
+     * @return MigrateRecordInterface|null
      */
-    public function findMigrationRecord(string $sourceId, string $type): ?MigratorRecordInterface;
+    public function findRecord(string $sourceId, string $type): ?MigrateRecordInterface;
 
     /**
      * Find records for an item type
      *
      * @param string $type
-     * @return iterable|MigratorRecordInterface[]
+     * @return iterable|MigrateRecordInterface[]
      */
-    public function findRecords(string $type): iterable;
+    public function getRecords(string $type): iterable;
 }

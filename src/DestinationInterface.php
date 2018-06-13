@@ -16,7 +16,7 @@ interface DestinationInterface
 
     /**
      * @param string $destinationId
-     * @throws \RuntimeException  Throw exception if destination not found
+     * @return bool  TRUE if record was found and removed, FALSE if record not found
      */
-    public function remove(string $destinationId);
+    public function remove(string $destinationId): bool;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace ShuttleTest\Fixture;
+namespace Shuttle\MigrateSource;
 
 use Shuttle\Exception\MissingItemException;
 use Shuttle\SourceInterface;
@@ -12,8 +12,6 @@ use Shuttle\SourceItem;
  */
 class ArraySource implements SourceInterface
 {
-    const DEFAULT_ITEMS = [['a', 'A'], ['b', 'B'], ['c', 'C']];
-
     /**
      * @var array
      */
@@ -21,11 +19,11 @@ class ArraySource implements SourceInterface
 
     /**
      * ArraySource constructor.
-     * @param array $items
+     * @param iterable $items
      */
-    public function __construct(array $items = self::DEFAULT_ITEMS)
+    public function __construct(iterable $items)
     {
-        $this->items = $items;
+        $this->items = ($items instanceOf \Traversable) ? iterator_to_array($items) : $items;
     }
 
 
@@ -48,14 +46,14 @@ class ArraySource implements SourceInterface
     public function getSourceIterator(): iterable
     {
         foreach ($this->items as $id => $item) {
-            yield new SourceItem($id, $item);
+            yield new SourceItem((string) $id, $item);
         }
     }
 
     /**
      * @param string $id
      * @return SourceItem
-     * @throws \Exception  If source item is not found
+     * @throws MissingItemException  If source item is not found
      */
     public function getSourceItem(string $id): SourceItem
     {

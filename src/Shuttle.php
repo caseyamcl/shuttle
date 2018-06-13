@@ -87,9 +87,6 @@ class Shuttle
             };
         } else {
             $iterator = $migrator->getSourceIterator();
-            if (is_array($iterator)) {
-                $iterator = new \ArrayIterator($iterator);
-            }
         }
 
         // Loop
@@ -103,14 +100,9 @@ class Shuttle
                 break;
             }
 
-            try {
-                /** @var SourceItem $sourceItem */
-                $sourceItem = $iterator->current();
-                $result = $this->migrateItem($migrator, $sourceItem);
-            } catch (\Throwable $e) {
-                $result = new MigrateFailedEvent($migratorName, 'unknown', 'Failed to read source item');
-                $this->getEventDispatcher()->dispatch(ShuttleEvents::MIGRATE_RESULT, $result);
-            }
+            /** @var SourceItem $sourceItem */
+            $sourceItem = $iterator->current();
+            $result = $this->migrateItem($migrator, $sourceItem);
 
             $lastAction = $result;
         }

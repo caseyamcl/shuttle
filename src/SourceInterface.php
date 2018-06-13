@@ -2,6 +2,8 @@
 
 namespace Shuttle;
 
+use Shuttle\Exception\MissingItemException;
+
 /**
  * Source Interface
  *
@@ -18,7 +20,7 @@ interface SourceInterface
     /**
      * @param string $id
      * @return SourceItem
-     * @throws \Exception  If source item is not found
+     * @throws MissingItemException  If source item is not found
      */
     public function getSourceItem(string $id): SourceItem;
 

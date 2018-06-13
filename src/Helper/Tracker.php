@@ -5,6 +5,7 @@ namespace Shuttle\Helper;
 use Shuttle\Event\ActionResultInterface;
 use Shuttle\ShuttleAction;
 use Shuttle\ShuttleEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -28,6 +29,18 @@ class Tracker implements EventSubscriberInterface
     private $trackAction;
 
     /**
+     * @param string $trackAction
+     * @param EventDispatcherInterface $dispatcher
+     * @return Tracker
+     */
+    public static function createAndAttach(string $trackAction, EventDispatcherInterface $dispatcher): Tracker
+    {
+        $that = new static($trackAction);
+        $dispatcher->addSubscriber($that);
+        return $that;
+    }
+
+    /**
      * MigrateTracker constructor.
      * @param string $trackAction
      */
@@ -43,8 +56,8 @@ class Tracker implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ShuttleEvents::POST_REVERT  => 'track',
-            ShuttleEvents::POST_MIGRATE => 'track'
+            ShuttleEvents::REVERT_RESULT  => 'track',
+            ShuttleEvents::MIGRATE_RESULT => 'track'
         ];
     }
 

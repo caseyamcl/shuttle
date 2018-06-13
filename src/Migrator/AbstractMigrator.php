@@ -10,9 +10,9 @@ use Shuttle\Migrator\MigratorInterface;
  */
 abstract class AbstractMigrator implements MigratorInterface
 {
-    const NAME        = null;
-    const DESCRIPTION = '';
-    const DEPENDS_ON  = [];
+    public const NAME        = null;
+    public const DESCRIPTION = '';
+    public const DEPENDS_ON  = [];
 
     /**
      * @return string
@@ -35,7 +35,7 @@ abstract class AbstractMigrator implements MigratorInterface
      */
     public function getDependsOn(): array
     {
-        return $this->requireConstant('DEPENDS_ON');
+        return static::DEPENDS_ON;
     }
 
     /**

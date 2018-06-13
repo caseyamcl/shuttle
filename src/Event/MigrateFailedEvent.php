@@ -93,4 +93,12 @@ class MigrateFailedEvent extends Event implements ActionResultInterface
     {
         return static::FAILED;
     }
+
+    /**
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->getReason();
+    }
 }

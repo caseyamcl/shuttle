@@ -15,6 +15,17 @@ your records as needed.
 It provides a quick way to get started for 80% of use cases, but also provides advanced capabilities for more complex
 workloads.
 
+Key Features:
+
+* Migrate, revert, and report on data from any source to any destination
+* Included classes for common sources (CSV, database, Doctrine, YAML, etc.) and destinations (database, Doctrine)
+* Calculate dependencies for migrations and ensure migrations occur in the correct order (e.g. 'post' items must be
+  migrated before 'comment' items)
+* Event system to hook into migration process for logging or other purposes
+* Fully extensible; interface-driven approach
+* Included (but optional) Symfony console commands
+* 100% unit tested and PSR-2 compliant
+
 ## Installation
 
 Install via Composer:
@@ -23,7 +34,7 @@ Install via Composer:
 
 ## Quick concepts
 
-To migrate data, you need four things:
+To migrate data, you need three things:
 
 * A **source**: Shuttle defines a `SourceInterface`.  You can use one of the built-in sources in the
   `Shuttle\MigrateSource` namespace or create your own:
@@ -34,12 +45,10 @@ To migrate data, you need four things:
     * `YamlSource` - Retrieve source items from a YAML string
 * A **destination**: Shuttle defines a `DestinationInterface`.  You can use the built-in 
     `Shuttle\MigrateDestination\DbTableDestination` or create your own.
-* An set of **items** in the source to migrate.  These are typically database rows, CSV rows, JSON records, or
+* A set of **items** in the source to migrate.  These are typically database rows, CSV rows, JSON records, or
   something similar.  In Shuttle, the data must have a unique identifier and be represented as an array.
-* A **recorder**: This is the mechanism that keeps track of source items and destination items.  It maps source item 
-  IDs and destination item IDs so that items are migrated only once and can be reverted.
 
-## Migrate from one database to another
+## Quick Example - Migrate from one database to another
 
 If you're migrating from one database to another, you can use the bundled `DbSource` and `DbDestination`
 

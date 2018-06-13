@@ -132,7 +132,7 @@ class MigratorCollection implements \IteratorAggregate, Countable
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function resolveDependencies(string ...$migrators): array
+    public function resolveDependencies(string ...$migrators): iterable
     {
         $sorter = new StringSort();
 
@@ -142,7 +142,7 @@ class MigratorCollection implements \IteratorAggregate, Countable
             }
 
             foreach ($this->iterateDependencies($migrator) as $dependency) {
-                $sorter->add($dependency->getName(), $dependency->getDependsOn());
+                $sorter->add((string) $dependency, $dependency->getDependsOn());
             }
         }
 

@@ -1,8 +1,9 @@
 <?php
 
-namespace ShuttleTest\Fixture;
+namespace Shuttle\MigrateDestination;
 
 use Shuttle\DestinationInterface;
+use Shuttle\Exception\MissingItemException;
 
 /**
  * Class ArrayDestination
@@ -30,19 +31,22 @@ class ArrayDestination implements DestinationInterface
      */
     public function persist($preparedItem): string
     {
-        $key = count($this->items);
+        $key = (max(array_keys($this->items)) ?: 0) + 100;
         $this->items[$key] = $preparedItem;
-        return $key;
+        return (string) $key;
     }
 
     /**
      * @param string $destinationId
-     * @throws \RuntimeException  Throw exception if destination not found
+     * @return bool
      */
-    public function remove(string $destinationId)
+    public function remove(string $destinationId): bool
     {
-        if (array_key_exists($destinationId, $this->items)) {
+        if (array_key_exists((int) $destinationId, $this->items)) {
             unset($this->items[$destinationId]);
+            return true;
+        } else {
+            return false;
         }
     }
 }

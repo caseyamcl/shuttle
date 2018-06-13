@@ -79,7 +79,7 @@ class MigratorsList extends Command
 
             if ($input->getOption('nostatus') == false) {
                 $row['num_source_recs'] = $migrator->countSourceItems();
-                $row['num_migrated']    = count(iterator_to_array($migrator->getReport()));
+                $row['num_migrated']    = count(iterator_to_array($migrator->getMigrateRecords()));
             }
 
             $list[] = $row;

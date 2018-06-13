@@ -2,228 +2,114 @@
 
 namespace ShuttleTest\Fixture;
 
-use Shuttle\Exception\MissingItemException;
-use Shuttle\Migrator\MigratorInterface;
-use Shuttle\Recorder\MigratorRecordInterface;
+use Shuttle\Exception\UnmetDependencyException;
+use Shuttle\MigrateDestination\ArrayDestination;
+use Shuttle\MigrateSource\ArraySource;
+use Shuttle\Migrator\Migrator;
+use Shuttle\Recorder\ArrayRecorder;
 use Shuttle\SourceItem;
 
 /**
  * Class FakeMigrator
  * @package ShuttleTest\Fixture
  */
-class TestMigrator implements MigratorInterface
+class TestMigrator extends Migrator
 {
-    const DESCRIPTION = 'Test Migrator';
+    public const NAME = 'Test';
+    public const DESCRIPTION = 'Test Migrator';
 
-    /**
-     * @var string
-     */
-    private $slug;
-    /**
-     * @var array
-     */
-    private $dependsOn;
+    public const SOURCE_ITEMS = [
+        /* PROCESSED */ 1 => ['result' => 'succeeds'],
+        /* SKIPPED   */ 2 => ['result' => 'already-migrated'],
+        /* FAILED    */ 3 => ['result' => 'unmet-dependency'],
+        /* FAILED    */ 4 => ['result' => 'prepare-exception'],
+        /* FAILED    */ 5 => ['result' => 'persist-exception'],
+        /* SKIPPED   */ 6 => ['result' => 'recorded-but-not-migrated'],
 
-    /**
-     * @var SourceInterface
-     */
-    private $source;
+        /* FAILED */ 7 => ['result' => 'read-exception']
+    ];
 
-    /**
-     * @var DestinationInterface
-     */
-    private $destination;
+    public const DESTINATION_ITEMS = [
+        100 => ['already' => 'migrated']
+    ];
 
     /**
      * TestMigrator constructor.
-     *
-     * @param string $slug
-     * @param array $dependsOn
-     * @param SourceInterface|null $source
-     * @param DestinationInterface|null $destination
+     * @param bool $includeFailedRead
      */
-    public function __construct(
-        string $slug,
-        array $dependsOn = [],
-        SourceInterface $source = null,
-        DestinationInterface $destination = null
-    ) {
-        $this->slug = $slug;
-        $this->dependsOn = $dependsOn;
-        $this->source = $source ?: new ArraySource();
-        $this->destination = $destination ?: new ArrayDestination();
-    }
-
-    /**
-     * @return string  A machine-friendly identifier for the type of record being migrated (e.g. 'posts', 'authors'...)
-     */
-    public function getName(): string
+    public function __construct(bool $includeFailedRead = true)
     {
-        return $this->slug;
+        $recorder = new ArrayRecorder();
+        $recorder->addMigrateRecord(new SourceItem(2, self::SOURCE_ITEMS[2]), '100', (string) $this);
+        $recorder->addMigrateRecord(new SourceItem(6, self::SOURCE_ITEMS[6]), '200', (string) $this);
+
+        $sourceArray = self::SOURCE_ITEMS;
+        if (! $includeFailedRead) {
+            array_pop($sourceArray);
+        }
+
+
+        parent::__construct(
+            new ArraySource($sourceArray),
+            new ArrayDestination(self::DESTINATION_ITEMS),
+            $recorder,
+            [$this, 'prepare']
+        );
     }
 
-    /**
-     * @return string  A description of the records being migrated
-     */
-    public function getDescription(): string
-    {
-        return static::DESCRIPTION;
-    }
-
-    /**
-     * @return int  Number of records in the source
-     */
-    public function countSourceItems(): int
-    {
-        return $this->source->count();
-    }
-
-    /**
-     * @return iterable|string[]
-     */
-    public function getSourceIdIterator(): iterable
-    {
-        return $this->source->listItemIds();
-    }
-
-    /**
-     * @param string $sourceId
-     * @return array
-     */
-    public function getItemFromSource(string $sourceId): array
-    {
-        return $this->source->getItem($sourceId);
-    }
-
-    /**
-     * @param array $source
-     * @return mixed
-     */
-    public function prepareSourceItem(array $source)
-    {
-        return $source;
-    }
-
-    /**
-     * @param mixed $record
-     * @return string
-     */
-    public function persistDestinationItem($record): string
-    {
-        return $this->destination->saveItem($record);
-    }
-
-    /**
-     * Revert a single record
-     *
-     * @param string $destinationRecordId
-     * @return bool  If the record was actually deleted, return TRUE, else FALSE
-     */
-    public function removeDestinationItem(string $destinationRecordId): bool
-    {
-        return $this->destination->deleteItem($destinationRecordId);
-    }
-
-    /**
-     * Get a list of migrator slugs that should be migrated before this one
-     *
-     * NOTE: This is not a comprehensive; it does not list transitive dependencies.  Use
-     * MigratorCollection::listDependencies() to determine all dependencies for a given migrator
-     *
-     * @return array|string[]
-     */
-    public function getDependsOn(): array
-    {
-        return $this->dependsOn;
-    }
-
-    /**
-     * This should return the slug
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->getName();
-    }
-
-    /**
-     * @param string $id
-     * @return SourceItem
-     * @throws MissingItemException  If source item is not found
-     */
     public function getSourceItem(string $id): SourceItem
     {
-        // TODO: Implement getSourceItem() method.
+        $item = parent::getSourceItem($id);
+
+        if (($item['result'] ?? '') == 'read-exception') {
+            throw new \RuntimeException('Test read exception');
+        }
+
+        return $item;
     }
 
     /**
-     * Get a report of
-     *
-     * @return \iterable|MigratorRecordInterface[]
-     */
-    public function getReport(): iterable
-    {
-        // TODO: Implement getReport() method.
-    }
-
-    /**
-     * @param string $sourceId
-     * @return bool
-     */
-    public function isMigrated(string $sourceId): bool
-    {
-        // TODO: Implement isMigrated() method.
-    }
-
-    /**
-     * Get the next source record, represented as an array
-     *
-     * Return an array for the next item, or NULL for no more item
-     *
-     * @return iterable|SourceItem[]
+     * @return iterable|\Generator
      */
     public function getSourceIterator(): iterable
     {
-        // TODO: Implement getSourceIterator() method.
+        foreach (parent::getSourceIterator() as $item) {
+            if (($item['result'] ?? '') == 'read-exception') {
+                throw new \RuntimeException('Test read exception');
+            }
+            else {
+                yield $item;
+            }
+        }
     }
 
     /**
-     * @param SourceItem $sourceItem
-     * @return mixed
+     * @param SourceItem $item
+     * @return array
      */
-    public function prepare(SourceItem $sourceItem)
+    public function prepare(SourceItem $item)
     {
-        // TODO: Implement prepare() method.
+        if (($item['result'] ?? '')  == 'prepare-exception') {
+            throw new \RuntimeException('Test prepare exception');
+        } elseif (($item['result'] ?? '')  == 'unmet-dependency') {
+            throw new UnmetDependencyException('Test unmet dependency exception');
+        } else {
+            return $item->getData();
+        }
     }
 
     /**
      * @param mixed $preparedItem
-     * @return string  Destination Id
-     */
-    public function persist($preparedItem): string
-    {
-        // TODO: Implement persist() method.
-    }
-
-    /**
-     * @param string $sourceId
-     * @throws \RuntimeException  Throw exception if destination not found
-     */
-    public function remove(string $sourceId)
-    {
-        // TODO: Implement remove() method.
-    }
-
-    /**
-     * Record that a migration has occurred
-     *
      * @param SourceItem $sourceItem
-     * @param string $destinationId
-     * @return MigratorRecordInterface
+     * @return string
      */
-    public function recordMigrate(SourceItem $sourceItem, string $destinationId): MigratorRecordInterface
+    public function persist($preparedItem, SourceItem $sourceItem): string
     {
-        // TODO: Implement recordMigrate() method.
+        if (($sourceItem['result'] ?? '')  == 'persist-exception') {
+            throw new \RuntimeException('Test persist exception');
+        }
+        else {
+            return parent::persist($preparedItem, $sourceItem);
+        }
     }
 }

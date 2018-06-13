@@ -58,15 +58,15 @@ class DbTableDestination implements DestinationInterface
     /**
      * Constructor
      *
-     * @param \PDO    $dbConn
-     * @param string  $tableName
-     * @param string  $idColumn
+     * @param \PDO $dbConn
+     * @param string $tableName
+     * @param string $idColumn
      */
     public function __construct(\PDO $dbConn, string $tableName, string $idColumn = 'id')
     {
-        $this->dbConn    = $dbConn;
+        $this->dbConn = $dbConn;
         $this->tableName = $tableName;
-        $this->idColumn  = $idColumn;
+        $this->idColumn = $idColumn;
     }
 
     /**
@@ -75,7 +75,7 @@ class DbTableDestination implements DestinationInterface
      */
     public function persist($preparedItem): string
     {
-        if (! is_array($preparedItem)) {
+        if (!is_array($preparedItem)) {
             throw new \InvalidArgumentException(get_called_class() . " expects record data to be an array");
         }
 
@@ -91,20 +91,19 @@ class DbTableDestination implements DestinationInterface
 
         return (isset($preparedItem[$this->idColumn]))
             ? $preparedItem[$this->idColumn]
-            : (string) $this->dbConn->lastInsertId();
+            : (string)$this->dbConn->lastInsertId();
     }
 
     /**
      * @param string $destinationId
      * @return bool
-     * @throws \RuntimeException  Throw exception if destination not found
      */
-    public function remove(string $destinationId)
+    public function remove(string $destinationId): bool
     {
         $sql = sprintf("DELETE FROM %s WHERE %s = ?", $this->tableName, $this->idColumn);
         $stmt = $this->dbConn->prepare($sql);
 
         $stmt->execute([$destinationId]);
-        return (bool) $stmt->rowCount();
+        return (bool)$stmt->rowCount();
     }
 }
