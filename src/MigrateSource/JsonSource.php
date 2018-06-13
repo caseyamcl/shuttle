@@ -90,12 +90,10 @@ class JsonSource implements SourceInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|SourceItem[]
+     * @return iterable|string[]
      */
-    public function getSourceIterator(): iterable
+    public function getSourceIdIterator(): iterable
     {
-        foreach ($this->items as $id => $data) {
-            yield new SourceItem($id, $data);
-        }
+        return array_keys($this->items);
     }
 }

@@ -5,7 +5,6 @@ namespace ShuttleTest\Migrator;
 use PHPUnit\Framework\TestCase;
 use Shuttle\Exception\AlreadyMigratedException;
 use Shuttle\Migrator\MigratorInterface;
-use Shuttle\SourceItem;
 use ShuttleTest\Fixture\TestMigrator;
 
 /**
@@ -20,28 +19,42 @@ class MigratorTest extends TestCase
         $this->assertInstanceOf(MigratorInterface::class, $migrator);
     }
 
-    public function testReadGoodSourceItemsSucceeds()
+    public function testIterateIdsSucceeds()
+    {
+        $iterator = (new TestMigrator())->getSourceIdIterator();
+        $iterator = ($iterator instanceof \Traversable) ? iterator_to_array($iterator) : $iterator;
+        $this->assertEquals(7, count($iterator));
+    }
+
+
+    public function testReadItemsSucceed()
     {
         $migrator = new TestMigrator();
-        $iterator = $migrator->getSourceIterator();
+        $iterator = $migrator->getSourceIdIterator();
 
-        // Read only first five items (#6 throws exception)
-        for ($i = 1; $i < 6; $i++) {
-            $source = $iterator->current();
-            $this->assertInstanceOf(SourceItem::class, $source);
-            $iterator->next();
+        $goodCount = 0;
+        $badCount = 0;
+        foreach ($iterator as $sourceId) {
+            try {
+                $source = $migrator->getSourceItem($sourceId);
+                $goodCount++;
+            } catch (\Throwable $e) {
+                $badCount++;
+            }
         }
-        $this->assertEquals(6, $i);
+
+        $this->assertEquals(6, $goodCount);
+        $this->assertEquals(1, $badCount);
     }
 
     /**
      * @expectedException \RuntimeException
      */
-    public function testReadThrowsExceptionOnItemSix()
+    public function testReadThrowsExceptionOnItemSeven()
     {
         $migrator = new TestMigrator();
-        $iterator = $migrator->getSourceIterator();
-        iterator_to_array($iterator);
+        $migrator->getSourceItem(7);
+
     }
 
     public function testReadGoodItemByIdReturnsSourceItem()

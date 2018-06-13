@@ -25,8 +25,7 @@ class TestMigrator extends Migrator
         /* FAILED    */ 4 => ['result' => 'prepare-exception'],
         /* FAILED    */ 5 => ['result' => 'persist-exception'],
         /* SKIPPED   */ 6 => ['result' => 'recorded-but-not-migrated'],
-
-        /* FAILED */ 7 => ['result' => 'read-exception']
+        /* FAILED    */ 7 => ['result' => 'read-exception']
     ];
 
     public const DESTINATION_ITEMS = [
@@ -37,20 +36,14 @@ class TestMigrator extends Migrator
      * TestMigrator constructor.
      * @param bool $includeFailedRead
      */
-    public function __construct(bool $includeFailedRead = true)
+    public function __construct()
     {
         $recorder = new ArrayRecorder();
         $recorder->addMigrateRecord(new SourceItem(2, self::SOURCE_ITEMS[2]), '100', (string) $this);
         $recorder->addMigrateRecord(new SourceItem(6, self::SOURCE_ITEMS[6]), '200', (string) $this);
 
-        $sourceArray = self::SOURCE_ITEMS;
-        if (! $includeFailedRead) {
-            array_pop($sourceArray);
-        }
-
-
         parent::__construct(
-            new ArraySource($sourceArray),
+            new ArraySource(self::SOURCE_ITEMS),
             new ArrayDestination(self::DESTINATION_ITEMS),
             $recorder,
             [$this, 'prepare']
@@ -66,21 +59,6 @@ class TestMigrator extends Migrator
         }
 
         return $item;
-    }
-
-    /**
-     * @return iterable|\Generator
-     */
-    public function getSourceIterator(): iterable
-    {
-        foreach (parent::getSourceIterator() as $item) {
-            if (($item['result'] ?? '') == 'read-exception') {
-                throw new \RuntimeException('Test read exception');
-            }
-            else {
-                yield $item;
-            }
-        }
     }
 
     /**

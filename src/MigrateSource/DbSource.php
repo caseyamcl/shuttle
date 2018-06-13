@@ -107,15 +107,15 @@ class DbSource implements SourceInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|SourceItem[]
+     * @return iterable|string[]
      */
-    public function getSourceIterator(): iterable
+    public function getSourceIdIterator(): iterable
     {
         $stmt = $this->dbConn->prepare($this->listQuery);
         $stmt->execute();
 
-        while ($id = $stmt->fetchColumn(0)) {
-            yield $this->getSourceItem($id);
+        while ($val = $stmt->fetchColumn(0)) {
+            yield (string) $val;
         }
     }
 }

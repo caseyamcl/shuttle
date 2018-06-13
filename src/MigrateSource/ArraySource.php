@@ -43,11 +43,9 @@ class ArraySource implements SourceInterface
      *
      * @return iterable|SourceItem[]
      */
-    public function getSourceIterator(): iterable
+    public function getSourceIdIterator(): iterable
     {
-        foreach ($this->items as $id => $item) {
-            yield new SourceItem((string) $id, $item);
-        }
+        return array_keys($this->items);
     }
 
     /**

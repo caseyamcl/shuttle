@@ -75,9 +75,9 @@ interface MigratorInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|SourceItem[]
+     * @return iterable|string[]
      */
-    public function getSourceIterator(): iterable;
+    public function getSourceIdIterator(): iterable;
 
     /**
      * @param SourceItem $sourceItem

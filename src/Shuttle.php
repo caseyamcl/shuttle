@@ -86,7 +86,7 @@ class Shuttle
                 }
             };
         } else {
-            $iterator = $migrator->getSourceIterator();
+            $iterator = $migrator->getSourceIdIterator();
         }
 
         // Loop

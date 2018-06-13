@@ -113,9 +113,9 @@ class Migrator extends AbstractMigrator
      *
      * @return iterable|SourceItem[]
      */
-    public function getSourceIterator(): iterable
+    public function getSourceIdIterator(): iterable
     {
-        return $this->source->getSourceIterator();
+        return $this->source->getSourceIdIterator();
     }
 
     /**
