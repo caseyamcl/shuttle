@@ -4,7 +4,6 @@ namespace Shuttle\Migrator;
 
 use Shuttle\Exception\AlreadyMigratedException;
 use Shuttle\Exception\MissingItemException;
-use Shuttle\Migrator\AbstractMigrator;
 use Shuttle\DestinationInterface;
 use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\Recorder\RecorderInterface;
@@ -79,20 +78,13 @@ class Migrator extends AbstractMigrator
     /**
      * Get a report of
      *
-     * @return \iterable|MigrateRecordInterface[]
+     * @return \iterable|\Generator|MigrateRecordInterface[]
      */
-    public function getMigrateRecords(): iterable
+    public function getMigratedSourceIdIterator(): iterable
     {
-        return $this->recorder->getRecords($this->__toString());
-    }
-
-    /**
-     * @param string $sourceId
-     * @return null|MigrateRecordInterface
-     */
-    public function findMigrateRecord(string $sourceId): ?MigrateRecordInterface
-    {
-        return $this->recorder->findRecord($sourceId, (string) $this);
+        foreach ($this->recorder->getRecords($this->__toString()) as $record) {
+            yield $record->getSourceId();
+        }
     }
 
     /**

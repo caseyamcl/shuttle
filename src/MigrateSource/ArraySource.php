@@ -26,7 +26,6 @@ class ArraySource implements SourceInterface
         $this->items = ($items instanceOf \Traversable) ? iterator_to_array($items) : $items;
     }
 
-
     /**
      * If is countable, return the number of source items, or NULL if unknown
      * @return int|null

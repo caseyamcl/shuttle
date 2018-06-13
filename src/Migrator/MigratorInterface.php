@@ -47,11 +47,11 @@ interface MigratorInterface
     public function getSourceItem(string $id): SourceItem;
 
     /**
-     * Get a report of
+     * Iterate over migrated source IDs
      *
-     * @return \iterable|MigrateRecordInterface[]
+     * @return iterable|string[]
      */
-    public function getMigrateRecords(): iterable;
+    public function getMigratedSourceIdIterator(): iterable;
 
     /**
      * @param string $sourceId

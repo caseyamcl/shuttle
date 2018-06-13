@@ -2,7 +2,6 @@
 
 namespace Shuttle;
 
-use SebastianBergmann\FileIterator\Iterator;
 use Shuttle\Event\AbortEvent;
 use Shuttle\Event\ActionResultInterface;
 use Shuttle\Event\MigrateFailedEvent;
@@ -66,27 +65,21 @@ class Shuttle
     /**
      * Migrate some or all items
      *
-     * @param string $migratorName
+     * @param string|MigratorInterface $migrator
      * @param iterable|string[] $sourceIds Source IDs to migrate, or null for all
      * @param callable|null $continue A callable that accepts the last action, or null (return TRUE to continue)
      */
-    public function migrate(string $migratorName, ?iterable $sourceIds = null, callable $continue = null)
+    public function migrate(string $migrator, ?iterable $sourceIds = null, callable $continue = null)
     {
-        $migrator = $this->getMigrators()->get($migratorName);
+        $migrator = $this->resolveMigrator($migrator);
         $continue = $continue ?: function () {
             return true;
         };
 
-        // Build an iterator
-        /** @var Iterator $iterator */
-        if ($sourceIds) {
-            $iterator = function () use ($migrator, $sourceIds) {
-                foreach ($sourceIds as $sourceId) {
-                    yield $migrator->getSourceItem($sourceId);
-                }
-            };
-        } else {
-            $iterator = $migrator->getSourceIdIterator();
+        // Build a source ID iterator
+        $iterator = $sourceIds ?: $migrator->getSourceIdIterator();
+        if (is_array($iterator)) {
+            $iterator = new \ArrayIterator($iterator);
         }
 
         // Loop
@@ -100,37 +93,32 @@ class Shuttle
                 break;
             }
 
-            /** @var SourceItem $sourceItem */
-            $sourceItem = $iterator->current();
-            $result = $this->migrateItem($migrator, $sourceItem);
-
-            $lastAction = $result;
+            $lastAction = $this->migrateItem($migrator, $iterator->current());
         }
     }
 
     /**
      * Revert some or all items
      *
-     * @param string $migratorName
+     * @param string|MigratorInterface $migrator
      * @param iterable|string[] $sourceIds Source IDs to migrate, or null for all
      * @param callable|null $continue A callable that accepts the last action, or null (return TRUE to continue)
      */
-    public function revert(string $migratorName, ?iterable $sourceIds = null, callable $continue = null)
+    public function revert(string $migrator, ?iterable $sourceIds = null, callable $continue = null)
     {
-        $migrator = $this->getMigrators()->get($migratorName);
+        $migrator = $this->resolveMigrator($migrator);
         $continue = $continue ?: function () {
             return true;
         };
 
-        $iterator = $sourceIds ?: function () use ($migrator) {
-            foreach ($migrator->getMigrateRecords() as $record) {
-                yield $record->getSourceId();
-            }
-        };
+        $iterator = $sourceIds ?: $migrator->getMigratedSourceIdIterator();
+        if (is_array($iterator)) {
+            $iterator = new \ArrayIterator($iterator);
+        }
 
-        /** @var string[] $sourceId */
-        $lastAction = null;
-        foreach ($iterator as $sourceId) {
+        for ($lastAction = null, $iterator->rewind(); $iterator->valid(); $iterator->next()) {
+
+            $sourceId = $iterator->current();
 
             if (!$continue()) {
                 $this->eventDispatcher->dispatch(
@@ -147,20 +135,27 @@ class Shuttle
     /**
      * Migrate an item
      *
-     * @param MigratorInterface $migrator
-     * @param SourceItem $sourceItem
+     * @param string|MigratorInterface $migrator
+     * @param string $sourceItemId
      * @return ActionResultInterface
      */
-    private function migrateItem(MigratorInterface $migrator, SourceItem $sourceItem): ActionResultInterface
+    public function migrateItem(string $migrator, string $sourceItemId): ActionResultInterface
     {
+        $migrator = $this->resolveMigrator($migrator);
+
         try {
+
+            if ($migrator->isMigrated($sourceItemId)) {
+                throw new AlreadyMigratedException();
+            }
+
+            $sourceItem = $migrator->getSourceItem($sourceItemId);
             $this->eventDispatcher->dispatch(
                 ShuttleEvents::READ_SOURCE_RECORD,
                 new ReadSourceEvent($sourceItem, (string) $migrator)
             );
 
             $prepared = $migrator->prepare($sourceItem);
-
             $this->eventDispatcher->dispatch(
                 ShuttleEvents::PRE_PERSIST,
                 new PrePersistEvent($sourceItem, $prepared, (string) $migrator)
@@ -172,14 +167,14 @@ class Shuttle
         } catch (AlreadyMigratedException $e) {
             $result = new MigrateSkippedEvent(
                 (string) $migrator,
-                $sourceItem->getId(),
+                $sourceItemId,
                 'Item is already migrated'
             );
         }
         catch (UnmetDependencyException $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
-                $sourceItem->getId(),
+                $sourceItemId,
                 'Unmet dependency: ' . $e->getMessage(),
                 $e
             );
@@ -187,7 +182,7 @@ class Shuttle
         catch (\Throwable $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
-                $sourceItem->getId(),
+                $sourceItemId,
                 'An unexpected error occurred',
                 $e
             );
@@ -200,12 +195,14 @@ class Shuttle
     /**
      * Revert an item
      *
-     * @param MigratorInterface $migrator
+     * @param string|MigratorInterface $migrator
      * @param string $sourceId
      * @return ActionResultInterface
      */
-    private function revertItem(MigratorInterface $migrator, string $sourceId): ActionResultInterface
+    public function revertItem(string $migrator, string $sourceId): ActionResultInterface
     {
+        $migrator = $this->resolveMigrator($migrator);
+
         try {
             if ($migrator->isMigrated($sourceId)) {
                 $actuallyDeleted = $migrator->remove($sourceId);
@@ -222,5 +219,16 @@ class Shuttle
 
         $this->getEventDispatcher()->dispatch(ShuttleEvents::REVERT_RESULT, $result);
         return $result;
+    }
+
+    /**
+     * @param string|MigratorInterface $migrator
+     * @return MigratorInterface
+     */
+    private function resolveMigrator(string $migrator): MigratorInterface
+    {
+        return ($migrator instanceOf MigratorInterface)
+            ? $migrator
+            : $this->migratorCollection->get((string) $migrator);
     }
 }

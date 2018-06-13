@@ -133,14 +133,36 @@ class MigratorTest extends TestCase
         }
     }
 
-    public function testRecorderReturnsRecordWhenItemMigrated()
+    public function testMigratorReturnsRecordWhenItemMigrated()
     {
         $migrator = new TestMigrator();
-        $source = $migrator->getSourceItem(1);
-        $prepared = $migrator->prepare($source);
-        $migrator->persist($prepared, $source);
+        $sourceItem = $migrator->getSourceItem(1);
+        $prepared = $migrator->prepare($sourceItem);
+        $migrator->persist($prepared, $sourceItem);
 
         $this->assertTrue($migrator->isMigrated(1));
+    }
+
+    public function testMigratorReturnsTrueForItemsItThinksAreAlreadyMigrated()
+    {
+        $migrator = new TestMigrator();
+        $this->assertTrue($migrator->isMigrated(TestMigrator::ITEM_ALREADY_PROCESSED_ID));
+        $this->assertTrue($migrator->isMigrated(TestMigrator::ITEM_RECORDED_BUT_NOT_IN_DEST_ID));
+    }
+
+    public function testGetMigratedSourceIdsReturnsExpectedValues()
+    {
+        $migrator = new TestMigrator();
+
+        $sourceItem = $migrator->getSourceItem(TestMigrator::ITEM_SUCCEEDS_ID);
+        $prepared = $migrator->prepare($sourceItem);
+        $migrator->persist($prepared, $sourceItem);
+
+        $migratedIds = iterator_to_array($migrator->getMigratedSourceIdIterator());
+
+        $this->assertContains(TestMigrator::ITEM_SUCCEEDS_ID, $migratedIds);
+        $this->assertContains(TestMigrator::ITEM_ALREADY_PROCESSED_ID, $migratedIds);
+        $this->assertContains(TestMigrator::ITEM_RECORDED_BUT_NOT_IN_DEST_ID, $migratedIds);
     }
 
     /**

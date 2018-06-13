@@ -4,13 +4,14 @@ namespace Shuttle;
 
 use PHPUnit\Framework\TestCase;
 use Shuttle\Event\ActionResultInterface;
-use Shuttle\Event\PrePersistEvent;
-use Shuttle\Event\ReadSourceEvent;
+use Shuttle\Event\RevertProcessedEvent;
 use Shuttle\Helper\Tracker;
+use ShuttleTest\Fixture\RecordingEventDispatcher;
 use ShuttleTest\Fixture\TestMigrator;
 
 /**
- * Class ShuttleTest
+ * Shuttle Test
+ *
  * @package Shuttle
  */
 class ShuttleTest extends TestCase
@@ -27,55 +28,142 @@ class ShuttleTest extends TestCase
         $tracker = Tracker::createAndAttach(ShuttleAction::MIGRATE, $shuttle->getEventDispatcher());
 
         $shuttle->migrate(TestMigrator::NAME);
-        $this->assertEquals(6, $tracker->getTotalCount());
+        $this->assertEquals(7, $tracker->getTotalCount());
         $this->assertEquals(1, $tracker->getProcessedCount());
         $this->assertEquals(2, $tracker->getSkippedCount());
-        $this->assertEquals(3, $tracker->getFailedCount());
+        $this->assertEquals(4, $tracker->getFailedCount());
+    }
+
+    public function testMigrateRunsCorrectlyWithIdIterator()
+    {
+        $shuttle = $this->createNewShuttle();
+        $tracker = Tracker::createAndAttach(ShuttleAction::MIGRATE, $shuttle->getEventDispatcher());
+
+        $shuttle->migrate(TestMigrator::NAME, [TestMigrator::ITEM_SUCCEEDS_ID, 'non-existent-id']);
+        $this->assertEquals(2, $tracker->getTotalCount());
+        $this->assertEquals(1, $tracker->getProcessedCount()); // Succeeds
+        $this->assertEquals(1, $tracker->getFailedCount());    // Read error on 'non-existent-id'
     }
 
     public function testExpectedEventsAreDispatchedForValidItem()
     {
         $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
 
-        $readSourceRecord = null;
-        $prePersistRecord = null;
-        $migrateResult = null;
+        $shuttle->migrate(TestMigrator::NAME, [TestMigrator::ITEM_SUCCEEDS_ID]);
 
-        $shuttle->getEventDispatcher()->addListener(ShuttleEvents::READ_SOURCE_RECORD, function(ReadSourceEvent $event) use (&$readSourceRecord) {
-            $readSourceRecord = $event;
-        });
-        $shuttle->getEventDispatcher()->addListener(ShuttleEvents::PRE_PERSIST, function(PrePersistEvent $event) use (&$prePersistRecord) {
-            $prePersistRecord = $event;
-        });
-        $shuttle->getEventDispatcher()->addListener(ShuttleEvents::MIGRATE_RESULT, function(ActionResultInterface $event) use (&$migrateResult) {
-            $migrateResult = $event;
-        });
-
-        $shuttle->migrate(TestMigrator::NAME, [1]);
-
-        $this->assertInstanceOf(ReadSourceEvent::class, $readSourceRecord);
-        $this->assertInstanceOf(PrePersistEvent::class, $prePersistRecord);
-        $this->assertInstanceOf(ActionResultInterface::class, $migrateResult);
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::READ_SOURCE_RECORD));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::PRE_PERSIST));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::MIGRATE_RESULT));
     }
 
     public function testExpectedEventsAreDispatchedForUnmetDependencyItem()
     {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
 
+        $shuttle->migrateItem(TestMigrator::NAME, TestMigrator::ITEM_UNMET_DEPENDENCY_ID);
+
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::READ_SOURCE_RECORD));
+        $this->assertFalse($dispatcher->eventWasDispatched(ShuttleEvents::PRE_PERSIST));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::MIGRATE_RESULT));
+
+        $this->assertEquals(
+            ActionResultInterface::FAILED,
+            $dispatcher->findFirstEvent(ShuttleEvents::MIGRATE_RESULT)->getStatus()
+        );
     }
 
     public function testExpectedEventsAreDispatchedForAlreadyMigratedItem()
     {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
 
+        $shuttle->migrateItem(TestMigrator::NAME, TestMigrator::ITEM_ALREADY_PROCESSED_ID);
+
+        $this->assertFalse($dispatcher->eventWasDispatched(ShuttleEvents::READ_SOURCE_RECORD));
+        $this->assertFalse($dispatcher->eventWasDispatched(ShuttleEvents::PRE_PERSIST));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::MIGRATE_RESULT));
+
+        $this->assertEquals(
+            ActionResultInterface::SKIPPED,
+            $dispatcher->findFirstEvent(ShuttleEvents::MIGRATE_RESULT)->getStatus()
+        );
     }
 
     public function testExpectedEventsAreDispatchedForPrepareFailure()
     {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
 
+        $shuttle->migrateItem(TestMigrator::NAME, TestMigrator::ITEM_PREPARE_EXCEPTION_ID);
+
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::READ_SOURCE_RECORD));
+        $this->assertFalse($dispatcher->eventWasDispatched(ShuttleEvents::PRE_PERSIST));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::MIGRATE_RESULT));
+
+        $this->assertEquals(
+            ActionResultInterface::FAILED,
+            $dispatcher->findFirstEvent(ShuttleEvents::MIGRATE_RESULT)->getStatus()
+        );
     }
 
     public function testExpectedEventsAreDispatchedForPersistFailure()
     {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
 
+        $shuttle->migrateItem(TestMigrator::NAME, TestMigrator::ITEM_PERSIST_EXCEPTION_ID);
+
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::READ_SOURCE_RECORD));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::PRE_PERSIST));
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::MIGRATE_RESULT));
+
+        $this->assertEquals(
+            ActionResultInterface::FAILED,
+            $dispatcher->findFirstEvent(ShuttleEvents::MIGRATE_RESULT)->getStatus()
+        );
+    }
+
+    public function testRevert()
+    {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
+
+        $shuttle->revert(TestMigrator::NAME);
+
+        /** @var RevertProcessedEvent $firstRevertResult */
+        /** @var RevertProcessedEvent $secondRevertResult */
+        $firstRevertResult  = $dispatcher->findNthEvent(ShuttleEvents::REVERT_RESULT, 0);
+        $secondRevertResult = $dispatcher->findNthEvent(ShuttleEvents::REVERT_RESULT, 1);
+
+        $this->assertEquals(RevertProcessedEvent::PROCESSED, $firstRevertResult->getStatus());
+        $this->assertEquals(RevertProcessedEvent::PROCESSED, $secondRevertResult->getStatus());
+
+        $this->assertTrue($firstRevertResult->isDeleteOccurred());
+        $this->assertFalse($secondRevertResult->isDeleteOccurred());
+    }
+
+    public function testRevertRunsCorrectlyWithIdIterator()
+    {
+        $shuttle = $this->createNewShuttle();
+        $tracker = Tracker::createAndAttach(ShuttleAction::REVERT, $shuttle->getEventDispatcher());
+
+        $shuttle->revert(TestMigrator::NAME, [
+            TestMigrator::ITEM_ALREADY_PROCESSED_ID,
+            TestMigrator::ITEM_SUCCEEDS_ID,
+            'non-existent-id']
+        );
+
+        $this->assertEquals(3, $tracker->getTotalCount());
+        $this->assertEquals(1, $tracker->getProcessedCount()); // Succeeds
+        $this->assertEquals(2, $tracker->getSkippedCount());   // skip on 'non-existent-id' and non-migrated ID
     }
 
     // --------------------------------------------------------------
@@ -85,6 +173,6 @@ class ShuttleTest extends TestCase
      */
     private function createNewShuttle(): Shuttle
     {
-        return new Shuttle(new MigratorCollection([new TestMigrator(false)]));
+        return new Shuttle(new MigratorCollection([new TestMigrator()]), new RecordingEventDispatcher());
     }
 }

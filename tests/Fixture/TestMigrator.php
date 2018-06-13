@@ -18,14 +18,24 @@ class TestMigrator extends Migrator
     public const NAME = 'Test';
     public const DESCRIPTION = 'Test Migrator';
 
+    // --------------------------------------------------------------
+
+    public const ITEM_SUCCEEDS_ID = 1;
+    public const ITEM_ALREADY_PROCESSED_ID = 2;
+    public const ITEM_UNMET_DEPENDENCY_ID = 3;
+    public const ITEM_PREPARE_EXCEPTION_ID = 4;
+    public const ITEM_PERSIST_EXCEPTION_ID = 5;
+    public const ITEM_RECORDED_BUT_NOT_IN_DEST_ID = 6;
+    public const ITEM_READ_FAIL_ID = 7;
+
     public const SOURCE_ITEMS = [
-        /* PROCESSED */ 1 => ['result' => 'succeeds'],
-        /* SKIPPED   */ 2 => ['result' => 'already-migrated'],
-        /* FAILED    */ 3 => ['result' => 'unmet-dependency'],
-        /* FAILED    */ 4 => ['result' => 'prepare-exception'],
-        /* FAILED    */ 5 => ['result' => 'persist-exception'],
-        /* SKIPPED   */ 6 => ['result' => 'recorded-but-not-migrated'],
-        /* FAILED    */ 7 => ['result' => 'read-exception']
+        /* PROCESSED */ self::ITEM_SUCCEEDS_ID                 => ['result' => 'succeeds'],
+        /* SKIPPED   */ self::ITEM_ALREADY_PROCESSED_ID        => ['result' => 'already-migrated'],
+        /* FAILED    */ self::ITEM_UNMET_DEPENDENCY_ID         => ['result' => 'unmet-dependency'],
+        /* FAILED    */ self::ITEM_PREPARE_EXCEPTION_ID        => ['result' => 'prepare-exception'],
+        /* FAILED    */ self::ITEM_PERSIST_EXCEPTION_ID        => ['result' => 'persist-exception'],
+        /* SKIPPED   */ self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID => ['result' => 'recorded-but-not-migrated'],
+        /* FAILED    */ self::ITEM_READ_FAIL_ID                => ['result' => 'read-exception']
     ];
 
     public const DESTINATION_ITEMS = [
@@ -39,8 +49,20 @@ class TestMigrator extends Migrator
     public function __construct()
     {
         $recorder = new ArrayRecorder();
-        $recorder->addMigrateRecord(new SourceItem(2, self::SOURCE_ITEMS[2]), '100', (string) $this);
-        $recorder->addMigrateRecord(new SourceItem(6, self::SOURCE_ITEMS[6]), '200', (string) $this);
+
+        $recorder->addMigrateRecord(new SourceItem(
+            self::ITEM_ALREADY_PROCESSED_ID,
+            self::SOURCE_ITEMS[self::ITEM_ALREADY_PROCESSED_ID]),
+            '100',
+            (string) $this
+        );
+
+        $recorder->addMigrateRecord(new SourceItem(
+            self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID,
+            self::SOURCE_ITEMS[self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID]),
+            '200',
+            (string) $this
+        );
 
         parent::__construct(
             new ArraySource(self::SOURCE_ITEMS),
