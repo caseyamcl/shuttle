@@ -48,12 +48,15 @@ class Migrator extends AbstractMigrator
         SourceInterface $source,
         DestinationInterface $destination,
         RecorderInterface $recorder,
-        callable $prepare = null)
-    {
+        callable $prepare = null
+    ) {
+    
         $this->source = $source;
         $this->destination = $destination;
         $this->recorder = $recorder;
-        $this->prepare = $prepare ?: function(SourceItem $sourceItem) { return $sourceItem->getData(); };
+        $this->prepare = $prepare ?: function (SourceItem $sourceItem) {
+            return $sourceItem->getData();
+        };
     }
 
     /**
@@ -190,8 +193,7 @@ class Migrator extends AbstractMigrator
     {
         if ($record = $this->recorder->findRecord($sourceId, $this->__toString())) {
             return $record->getDestinationId();
-        }
-        else {
+        } else {
             throw new MissingItemException(sprintf(
                 'Missing destination ID for item (type: %s) with source ID: %s',
                 $this->__toString(),

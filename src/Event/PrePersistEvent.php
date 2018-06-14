@@ -1,6 +1,7 @@
 <?php
 
 namespace Shuttle\Event;
+
 use Shuttle\SourceItem;
 use Symfony\Component\EventDispatcher\Event;
 

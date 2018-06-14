@@ -43,7 +43,7 @@ class Shuttle
     public function __construct(MigratorCollection $collection, EventDispatcherInterface $eventDispatcher = null)
     {
         $this->migratorCollection = $collection;
-        $this->eventDispatcher = $eventDispatcher ?: New EventDispatcher();
+        $this->eventDispatcher = $eventDispatcher ?: new EventDispatcher();
     }
 
     /**
@@ -84,7 +84,6 @@ class Shuttle
 
         // Loop
         for ($iterator->rewind(), $lastAction = null; $iterator->valid(); $iterator->next()) {
-
             if (! $continue($lastAction)) {
                 $this->eventDispatcher->dispatch(
                     ShuttleEvents::ABORT,
@@ -117,7 +116,6 @@ class Shuttle
         }
 
         for ($lastAction = null, $iterator->rewind(); $iterator->valid(); $iterator->next()) {
-
             $sourceId = $iterator->current();
 
             if (!$continue($lastAction)) {
@@ -144,7 +142,6 @@ class Shuttle
         $migrator = $this->resolveMigrator($migrator);
 
         try {
-
             if ($migrator->isMigrated($sourceItemId)) {
                 throw new AlreadyMigratedException();
             }
@@ -163,23 +160,20 @@ class Shuttle
 
             $destinationId = $migrator->persist($prepared, $sourceItem);
             $result = new MigrateProcessedEvent((string) $migrator, $sourceItem, $destinationId);
-
         } catch (AlreadyMigratedException $e) {
             $result = new MigrateSkippedEvent(
                 (string) $migrator,
                 $sourceItemId,
                 'Item is already migrated'
             );
-        }
-        catch (UnmetDependencyException $e) {
+        } catch (UnmetDependencyException $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
                 $sourceItemId,
                 'Unmet dependency: ' . $e->getMessage(),
                 $e
             );
-        }
-        catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
                 $sourceItemId,
@@ -207,13 +201,10 @@ class Shuttle
             if ($migrator->isMigrated($sourceId)) {
                 $actuallyDeleted = $migrator->remove($sourceId);
                 $result = new RevertProcessedEvent((string) $migrator, $sourceId, $actuallyDeleted);
-
             } else {
                 $result = new RevertSkippedEvent((string) $migrator, $sourceId, 'Destination record no longer found');
             }
-
-        }
-        catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $result = new RevertFailedEvent((string) $migrator, $sourceId, 'An unexpected error occurred', $e);
         }
 
@@ -227,7 +218,7 @@ class Shuttle
      */
     private function resolveMigrator(string $migrator): MigratorInterface
     {
-        return ($migrator instanceOf MigratorInterface)
+        return ($migrator instanceof MigratorInterface)
             ? $migrator
             : $this->migratorCollection->get((string) $migrator);
     }

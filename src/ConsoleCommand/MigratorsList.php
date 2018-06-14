@@ -123,7 +123,7 @@ class MigratorsList extends Command
 
         $table = new Table($output);
         $table->setHeaders($headers);
-        $table->addRows(array_map(function(array $row) {
+        $table->addRows(array_map(function (array $row) {
             $row['depends_on'] = implode(', ', $row['depends_on']);
             return $row;
         }, $recs));
@@ -136,7 +136,7 @@ class MigratorsList extends Command
      */
     private function outCols(OutputInterface $output, array $recs): void
     {
-        (new Table($output))->setStyle('compact')->addRows(array_map(function(array $row) {
+        (new Table($output))->setStyle('compact')->addRows(array_map(function (array $row) {
             $row['depends_on'] = implode(', ', $row['depends_on']);
             return $row;
         }, $recs))->render();

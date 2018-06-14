@@ -23,7 +23,7 @@ class ArraySource implements SourceInterface
      */
     public function __construct(iterable $items)
     {
-        $this->items = ($items instanceOf \Traversable) ? iterator_to_array($items) : $items;
+        $this->items = ($items instanceof \Traversable) ? iterator_to_array($items) : $items;
     }
 
     /**

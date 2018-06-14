@@ -158,8 +158,7 @@ class ShuttleTest extends TestCase
         $shuttle->revert(TestMigrator::NAME, [
             TestMigrator::ITEM_ALREADY_PROCESSED_ID,
             TestMigrator::ITEM_SUCCEEDS_ID,
-            'non-existent-id']
-        );
+            'non-existent-id']);
 
         $this->assertEquals(3, $tracker->getTotalCount());
         $this->assertEquals(1, $tracker->getProcessedCount()); // Succeeds
@@ -172,7 +171,7 @@ class ShuttleTest extends TestCase
         $tracker = Tracker::createAndAttach(ShuttleAction::MIGRATE, $shuttle->getEventDispatcher());
 
         $count = 0;
-        $continue = function(?ActionResultInterface $result) use (&$count) {
+        $continue = function (?ActionResultInterface $result) use (&$count) {
             $count++;
             return $count > 3 ? false : true;
         };
@@ -188,7 +187,7 @@ class ShuttleTest extends TestCase
         $dispatcher = $shuttle->getEventDispatcher();
 
         $count = 0;
-        $continue = function(?ActionResultInterface $result) use (&$count) {
+        $continue = function (?ActionResultInterface $result) use (&$count) {
             $count++;
             return $count > 3 ? false : true;
         };

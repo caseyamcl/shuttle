@@ -136,7 +136,7 @@ class Migrate extends Command
         $tracker = Tracker::createAndAttach(static::ACTION_NAME, $this->shuttle->getEventDispatcher());
 
         // Setup console logging
-        $consoleLogger = function(ActionResultInterface $result) use ($output, $tracker) {
+        $consoleLogger = function (ActionResultInterface $result) use ($output, $tracker) {
             $this->logAction($output, $result, $tracker);
         };
         $this->shuttle->getEventDispatcher()->addListener(ShuttleEvents::MIGRATE_RESULT, $consoleLogger);
@@ -165,7 +165,7 @@ class Migrate extends Command
             : null;
 
         // Setup a continue callback
-        $continueCallback = function(?ActionResultInterface $lastAction) use ($tracker, $input): bool {
+        $continueCallback = function (?ActionResultInterface $lastAction) use ($tracker, $input): bool {
             $limit = (int) $input->getOption('limit') ?: 0;
             $errorAbort = $input->getOption('abort-on-error');
 
@@ -180,7 +180,6 @@ class Migrate extends Command
 
         /** @var MigratorInterface $migrator */
         foreach ($migrators as $migrator) {
-
             // Output some info
             $output->writeln(sprintf(
                 'Processing <info>%s</info> items from <info>%s</info> (%s)',

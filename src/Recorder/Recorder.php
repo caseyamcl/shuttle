@@ -211,6 +211,4 @@ class Recorder implements RecorderInterface
     {
         return $timestamp instanceof \DateTimeInterface ? $timestamp : new \DateTimeImmutable($timestamp);
     }
-
-
 }

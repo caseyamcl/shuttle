@@ -85,4 +85,4 @@ class MigrateRecord implements MigrateRecordInterface
     {
         return $this->migratorName;
     }
-};
+}

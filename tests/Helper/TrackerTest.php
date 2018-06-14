@@ -169,5 +169,4 @@ class TrackerTest extends TestCase
             new RevertFailedEvent('test2', 7, 'test')
         ];
     }
-
 }

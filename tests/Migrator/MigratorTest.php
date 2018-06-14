@@ -53,7 +53,6 @@ class MigratorTest extends TestCase
     {
         $migrator = new TestMigrator();
         $migrator->getSourceItem(7);
-
     }
 
     public function testReadGoodItemByIdReturnsSourceItem()
@@ -215,6 +214,5 @@ class MigratorTest extends TestCase
 
         // Now we have three migrated items.
         $this->assertEquals(3, $migrator->countMigratedItems());
-
     }
 }

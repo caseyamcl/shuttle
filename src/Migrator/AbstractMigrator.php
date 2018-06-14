@@ -43,7 +43,7 @@ abstract class AbstractMigrator implements MigratorInterface
      * @return mixed
      * @throws \RuntimeException  If missing required constant
      */
-    protected final function requireConstant(string $constant)
+    final protected function requireConstant(string $constant)
     {
         $val = constant(get_called_class() . '::' . $constant);
 

@@ -50,16 +50,20 @@ class TestMigrator extends Migrator
     {
         $recorder = new ArrayRecorder();
 
-        $recorder->addMigrateRecord(new SourceItem(
-            self::ITEM_ALREADY_PROCESSED_ID,
-            self::SOURCE_ITEMS[self::ITEM_ALREADY_PROCESSED_ID]),
+        $recorder->addMigrateRecord(
+            new SourceItem(
+                self::ITEM_ALREADY_PROCESSED_ID,
+                self::SOURCE_ITEMS[self::ITEM_ALREADY_PROCESSED_ID]
+            ),
             '100',
             (string) $this
         );
 
-        $recorder->addMigrateRecord(new SourceItem(
-            self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID,
-            self::SOURCE_ITEMS[self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID]),
+        $recorder->addMigrateRecord(
+            new SourceItem(
+                self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID,
+                self::SOURCE_ITEMS[self::ITEM_RECORDED_BUT_NOT_IN_DEST_ID]
+            ),
             '200',
             (string) $this
         );
@@ -107,8 +111,7 @@ class TestMigrator extends Migrator
     {
         if (($sourceItem['result'] ?? '')  == 'persist-exception') {
             throw new \RuntimeException('Test persist exception');
-        }
-        else {
+        } else {
             return parent::persist($preparedItem, $sourceItem);
         }
     }
