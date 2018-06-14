@@ -2,12 +2,13 @@
 
 namespace Shuttle\Event;
 use Shuttle\ShuttleAction;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class AbortEvent
  * @package Shuttle\Event
  */
-class AbortEvent
+class AbortEvent extends Event
 {
     /**
      * @var null|ActionResultInterface

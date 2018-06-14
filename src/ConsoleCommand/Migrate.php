@@ -40,11 +40,6 @@ class Migrate extends Command
     protected $shuttle;
 
     /**
-     * @var MigratorCollection
-     */
-    private $migratorCollection;
-
-    /**
      * @var MigratorInterface|null
      */
     protected $migrator;

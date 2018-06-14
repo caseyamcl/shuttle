@@ -85,7 +85,7 @@ class Shuttle
         // Loop
         for ($iterator->rewind(), $lastAction = null; $iterator->valid(); $iterator->next()) {
 
-            if (! $continue) {
+            if (! $continue($lastAction)) {
                 $this->eventDispatcher->dispatch(
                     ShuttleEvents::ABORT,
                     new AbortEvent(ShuttleAction::MIGRATE, (string) $migrator, $lastAction)
@@ -120,7 +120,7 @@ class Shuttle
 
             $sourceId = $iterator->current();
 
-            if (!$continue()) {
+            if (!$continue($lastAction)) {
                 $this->eventDispatcher->dispatch(
                     ShuttleEvents::ABORT,
                     new AbortEvent(ShuttleAction::REVERT, (string) $migrator, $lastAction)

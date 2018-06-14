@@ -166,6 +166,37 @@ class ShuttleTest extends TestCase
         $this->assertEquals(2, $tracker->getSkippedCount());   // skip on 'non-existent-id' and non-migrated ID
     }
 
+    public function testContinueCallbackIsHonored()
+    {
+        $shuttle = $this->createNewShuttle();
+        $tracker = Tracker::createAndAttach(ShuttleAction::MIGRATE, $shuttle->getEventDispatcher());
+
+        $count = 0;
+        $continue = function(?ActionResultInterface $result) use (&$count) {
+            $count++;
+            return $count > 3 ? false : true;
+        };
+
+        $shuttle->migrate(TestMigrator::NAME, [], $continue);
+        $this->assertEquals(3, $tracker->getTotalCount());
+    }
+
+    public function testAbortThrowsExpectedEvent()
+    {
+        $shuttle = $this->createNewShuttle();
+        /** @var RecordingEventDispatcher $dispatcher */
+        $dispatcher = $shuttle->getEventDispatcher();
+
+        $count = 0;
+        $continue = function(?ActionResultInterface $result) use (&$count) {
+            $count++;
+            return $count > 3 ? false : true;
+        };
+
+        $shuttle->migrate(TestMigrator::NAME, [], $continue);
+        $this->assertTrue($dispatcher->eventWasDispatched(ShuttleEvents::ABORT));
+    }
+
     // --------------------------------------------------------------
 
     /**
