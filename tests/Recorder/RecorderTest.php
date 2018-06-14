@@ -80,7 +80,7 @@ class RecorderTest extends TestCase
     {
         $obj = new Recorder($this->dbConn);
         $obj->addMigrateRecord(new SourceItem(5, ['foo' => 'bar']), 10, static::TYPE);
-        $iterator = iterator_to_array($obj->getRecords('foo'));
+        $iterator = iterator_to_array($obj->getRecords(static::TYPE));
         $this->assertEquals(1, count($iterator));
     }
 
@@ -106,42 +106,41 @@ class RecorderTest extends TestCase
     {
         $obj = new Recorder($this->dbConn);
 
-        // LEFT OFF HERE.....
-        $obj->markMigrated('foo', 5, 10);
-        $obj->markMigrated('foo', 6, 11);
-        $obj->markMigrated('foo', 7, 12);
-        $obj->markMigrated('foo', 8, 13);
-        $obj->markMigrated('bar', 9, 14);
-        $obj->markMigrated('bar', 10, 15);
+        $obj->addMigrateRecord(new SourceItem(5, ['foo']), '10', 'foo');
+        $obj->addMigrateRecord(new SourceItem(6, ['foo']), '11', 'foo');
+        $obj->addMigrateRecord(new SourceItem(7, ['foo']), '12', 'foo');
+        $obj->addMigrateRecord(new SourceItem(8, ['foo']), '13', 'foo');
+        $obj->addMigrateRecord(new SourceItem(9, ['bar']), '14', 'bar');
+        $obj->addMigrateRecord(new SourceItem(10, ['bar']), '15', 'bar');
 
         /** @var \Traversable $fooList */
         /** @var \Traversable $barList */
-        $fooList = $obj->listDestinationIds('foo');
-        $barList = $obj->listDestinationIds('bar');
+        $fooList = $obj->getRecords('foo');
+        $barList = $obj->getRecords('bar');
 
-        $this->assertEquals([10, 11, 12, 13], iterator_to_array($fooList));
-        $this->assertEquals([15, 14], iterator_to_array($barList));
+        $this->assertEquals(4, count(iterator_to_array($fooList)));
+        $this->assertEquals(2, count(iterator_to_array($barList)));
     }
 
     /**
      * @throws \Doctrine\DBAL\DBALException
-     * @expectedException \PDOException
+     * @expectedException \Exception
      */
-    public function testMarkMigratedThrowsExceptionForDuplicateOldId()
+    public function testAddMigrateRecordThrowsExceptionForDuplicateSourceId()
     {
         $obj = new Recorder($this->dbConn);
-        $obj->markMigrated('foo', 5, 10);
-        $obj->markMigrated('foo', 5, 11);
+        $obj->addMigrateRecord(new SourceItem(5, ['foo']), '10', 'foo');
+        $obj->addMigrateRecord(new SourceItem(5, ['foo']), '11', 'foo');
     }
 
     /**
      * @throws \Doctrine\DBAL\DBALException
-     * @expectedException \PDOException
+     * @expectedException \Exception
      */
-    public function testMarkMigratedThrowsExceptionForDuplicateNewId()
+    public function testMarkMigratedThrowsExceptionForDuplicateDestinationId()
     {
         $obj = new Recorder($this->dbConn);
-        $obj->markMigrated('foo', 5, 10);
-        $obj->markMigrated('foo', 6, 10);
+        $obj->addMigrateRecord(new SourceItem(5, ['foo']), '10', 'foo');
+        $obj->addMigrateRecord(new SourceItem(6, ['foo']), '10', 'foo');
     }
 }

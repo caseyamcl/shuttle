@@ -60,6 +60,8 @@ class Recorder implements RecorderInterface
     {
         $qb = $this->dbConn->createQueryBuilder();
         $qb->select('t.type, t.source_id, t.destination_id, t.timestamp');
+        $qb->where($qb->expr()->eq('t.type', ':type'));
+        $qb->setParameter(':type', $type);
         $qb->from($this->tableName, 't');
         $qb->orderBy('t.timestamp', 'ASC');
         $stmt = $qb->execute();
@@ -171,7 +173,8 @@ class Recorder implements RecorderInterface
 
         $table->addIndex(['source_id']);
         $table->addIndex(['destination_id']);
-        $table->addUniqueIndex(['type', 'source_id', 'destination_id']);
+        $table->addUniqueIndex(['type', 'source_id']);
+        $table->addUniqueIndex(['type', 'destination_id']);
 
         $queries = $schema->toSql($this->dbConn->getDatabasePlatform());
         foreach ($queries as $query) {
