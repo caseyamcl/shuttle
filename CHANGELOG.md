@@ -4,23 +4,26 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## UNRELEASED
+## [0.3] - 2018-06-14
 
 ### Added
 - Added the `SourceItem` object to help provide some structure to required source item requirements (Id and data)
 - The `DoctrineDestination` pre-installed destination to support migrating to Doctrine ORM, ODM, etc.
-- New method `MigratorInterface::retrieveSourceItem()` to make migrations API more granular
-- New method `MigratorInterface::persistDestinationItem()` to make migrations API more granular
-- New method `MigratorInterface::prepare::prepareSourceItem()` to make migrations API more granular
-- New events: `MigratePrePrepareEvent` and `MigratePrePersistEvent` 
+- New method `MigratorInterface::getSourceItem()` to make migrations API more granular
+- New method `MigratorInterface::prepare()` to make migrations API more granular
+- New method `MigratorInterface::prepare::persist()` to make migrations API more granular
+- New events: `READ_SOURCE_RECORD` and `PRE_PERSIST` 
+- `ArrayRecorder`, `ArraySource` and `ArrayDestination`, mostly for testing; but these can be extended to other
+  production use-cases.
 
 ### Changed
-- BREAKING: Refactored the main API to be a bit more sensical.  Lots of breaking changes.
+- BREAKING: Refactored the main API to be a bit more sane.  Lots of breaking changes.
+- BREAKING: Refactored events
 - Removed array type hint from `DestinationInterface` to support more diverse destinations 
-- Minor tweaks to code style and comments
+- Code style and comment fixes
 
 ### Removed
-- `DestinationInterface::getItem()`.  No need to retrieve items from the destination
+- `DestinationInterface::getItem()`.  There is no need to retrieve items from the destination
 - The `MigratorFactory` class (possibly to be refactored later)
 - The `Migrator::migrate()` function.  The public interface for a migrator has become more granular (see 'added' above)
 - The `MigratorInterface::getSource()` and `MigratorInterface::getDestination()` methods.  This will allow creating
