@@ -87,15 +87,15 @@ class MigratorCollection implements \IteratorAggregate, Countable
     }
 
     /**
-     * Get multiple migrators
+     * Get multiple migrators without resolving dependencies
      *
-     * This does not not do any dependency resolution or sorting.  If you need to do that,
+     * This DOES NOT do any dependency resolution or sorting.  If you need to do that,
      * use self::resolveDependencies()
      *
-     * @param string[] $names
+     * @param iterable|string[] $names
      * @return \ArrayIterator|MigratorInterface[]  An iterator of migrators in the same order of the supplied names
      */
-    public function getMultiple(string ...$names): \ArrayIterator
+    public function getMultiple(iterable $names): \ArrayIterator
     {
         return new \ArrayIterator(array_map([$this, 'get'], $names));
     }
@@ -105,13 +105,15 @@ class MigratorCollection implements \IteratorAggregate, Countable
      *
      * This returns migrators in dependency order.
      *
+     * @param string $action
      * @return \ArrayIterator|MigratorInterface[]  An iterator of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function getIterator(): \ArrayIterator
+    public function getIterator(string $action = ShuttleAction::MIGRATE): \ArrayIterator
     {
-        return new ArrayIterator(array_map([$this, 'get'], $this->sorter->sort()));
+        $items = array_map([$this, 'get'], $this->sorter->sort());
+        return new ArrayIterator($action = ShuttleAction::REVERT ? array_reverse($items, true) : $items);
     }
 
     /**
@@ -127,12 +129,13 @@ class MigratorCollection implements \IteratorAggregate, Countable
     /**
      * Resolve dependencies for a given migrator slug or instance
      *
-     * @param string[] $migrators  The migrator(s) or name(s) of the migrator(s)
+     * @param iterable|string[] $migrators The migrator(s) or name(s) of the migrator(s)
+     * @param string $action  Either 'migrate' or 'revert'
      * @return \ArrayIterator|MigratorInterface[]  A list of migrators in the order they must be processed
      * @throws \MJS\TopSort\CircularDependencyException
      * @throws \MJS\TopSort\ElementNotFoundException
      */
-    public function resolveDependencies(string ...$migrators): iterable
+    public function resolveDependencies(iterable $migrators, string $action = ShuttleAction::MIGRATE): iterable
     {
         $sorter = new StringSort();
 
@@ -146,7 +149,12 @@ class MigratorCollection implements \IteratorAggregate, Countable
             }
         }
 
-        return new \ArrayIterator(array_map([$this, 'get'], $sorter->sort()));
+        $items = array_map([$this, 'get'], $sorter->sort());
+        if ($action == ShuttleAction::REVERT) {
+            $items = array_reverse($items, true);
+        }
+
+        return new \ArrayIterator($items);
     }
 
     /**

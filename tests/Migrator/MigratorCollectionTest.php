@@ -102,7 +102,7 @@ class MigratorCollectionTest extends TestCase
         $coll = new MigratorCollection([$a, $b, $c, $d, $e]);
         $arr = array_map(function (MigratorInterface $migrator) {
             return (string) $migrator;
-        }, iterator_to_array($coll->resolveDependencies($b)));
+        }, iterator_to_array($coll->resolveDependencies([$b])));
 
         // Resulting dependency graph should include 'b' and its dependencies, but not 'a' and its dependencies ('e')
         $this->assertEquals(3, count($arr));

@@ -15,10 +15,8 @@
 
 namespace Shuttle\ConsoleCommand;
 
-use Shuttle\__OLD_Migrator\Event\MigrateResultInterface;
-use Shuttle\__OLD_Migrator\Events;
-use Shuttle\__OLD_Migrator\MigratorInterface;
-use Shuttle\Helper\Tracker;
+use Shuttle\Migrator\MigratorInterface;
+use Shuttle\ShuttleAction;
 
 /**
  * Revert Command
@@ -27,24 +25,15 @@ use Shuttle\Helper\Tracker;
  */
 class Revert extends Migrate
 {
-    const ACTION_NAME = 'revert';
+    const ACTION_NAME = ShuttleAction::REVERT;
 
     /**
      * @param MigratorInterface $migrator
-     * @param array $ids |string[]  Source IDs (pass empty array for all source items)
-     * @param bool $clobber  Not used for revert. Ignore this.
-     * @return iterable|MigrateResultInterface[]
+     * @param iterable|null $sourceIds
+     * @param callable $continue
      */
-    protected function getActionIterator(MigratorInterface $migrator, array $ids = [], bool $clobber = false): iterable
+    protected function runAction(MigratorInterface $migrator, ?iterable $sourceIds, callable $continue)
     {
-        return $this->shuttle->revertItems($migrator, $ids);
-    }
-
-    /**
-     * @return Tracker
-     */
-    protected function getNewTracker(): Tracker
-    {
-        return new Tracker(Events::REVERT);
+        $this->shuttle->revert($migrator, $sourceIds, $continue);
     }
 }
