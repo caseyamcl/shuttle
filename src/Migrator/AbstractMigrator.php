@@ -2,8 +2,6 @@
 
 namespace Shuttle\Migrator;
 
-use Shuttle\Migrator\MigratorInterface;
-
 /**
  * Class AbstractMigrator
  * @package Shuttle\NewShuttle

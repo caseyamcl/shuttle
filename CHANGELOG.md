@@ -4,6 +4,13 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.4] - 2018-06-15
+### Added
+- Added `CallbackSource` for callback item sources (loading source records defered until source is used) 
+
+### Changed
+- `ArraySource` now extends `CallbackSource` and defers iterating over source record until source is used
+
 ## [0.3] - 2018-06-14
 
 ### Added
