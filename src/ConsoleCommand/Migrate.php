@@ -118,7 +118,7 @@ class Migrate extends Command
 
         $this->addOption(
             'abort-on-error',
-            'a',
+            'e',
             InputOption::VALUE_NONE,
             'Abort on the first error'
         );
