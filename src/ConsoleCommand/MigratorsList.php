@@ -72,7 +72,7 @@ class MigratorsList extends Command
         $list = array();
         foreach ($this->migrators as $migrator) {
             $row = array(
-                'slug'        => $migrator->getName(),
+                'slug'        => (string) $migrator,
                 'description' => $migrator->getDescription(),
                 'depends_on'  => $migrator->getDependsOn()
             );
