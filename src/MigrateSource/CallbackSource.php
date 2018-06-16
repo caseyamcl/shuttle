@@ -2,8 +2,8 @@
 
 namespace Shuttle\MigrateSource;
 
-use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use Shuttle\Exception\MissingItemException;
+use Shuttle\SourceIdIterator;
 use Shuttle\SourceInterface;
 use Shuttle\SourceItem;
 
@@ -18,12 +18,6 @@ class CallbackSource implements SourceInterface
      */
     private $getItems;
 
-    /**
-     * Set during runtime
-     *
-     * @var array|SourceInterface[]
-     */
-    private $items;
 
     /**
      * @var bool
@@ -55,17 +49,21 @@ class CallbackSource implements SourceInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|SourceItem[]
+     * @return SourceIdIterator|string[]
      */
-    public function getSourceIdIterator(): iterable
+    public function getSourceIdIterator(): SourceIdIterator
     {
+        $items = $this->getItems();
+
         if ($this->keysAreIds) {
-            return array_keys($this->getItems());
+            $iterator = array_keys($items);
         } else {
-            return array_map(function(SourceItem $item) {
+            $iterator = array_map(function(SourceItem $item) {
                 return $item->getId();
-            }, $this->getItems());
+            }, $items);
         }
+
+        return new SourceIdIterator($iterator);
     }
 
     /**
@@ -75,10 +73,12 @@ class CallbackSource implements SourceInterface
      */
     public function getSourceItem(string $id): SourceItem
     {
-        if ($this->keysAreIds && array_key_exists($id, $this->getItems()))
-            return $this->getItems()[$id];
+        $items = $this->getItems();
+
+        if ($this->keysAreIds && array_key_exists($id, $items))
+            return $items[$id];
         elseif (! $this->keysAreIds) {
-            foreach ($this->getItems() as $item) {
+            foreach ($items as $item) {
                 if ($item->getId() == $id) {
                     return $item;
                 }
@@ -87,7 +87,6 @@ class CallbackSource implements SourceInterface
 
         // If made it here..
         throw new MissingItemException('Missing Item: ' . $id);
-
     }
 
     /**
@@ -97,13 +96,8 @@ class CallbackSource implements SourceInterface
      */
     private function getItems(): array
     {
-        if (is_null($this->items)) {
-
-            $items = call_user_func($this->getItems);
-            $this->items = is_array($items) ? $items : iterator_to_array($items, true);
-        }
-
-        return $this->items;
+        $items = call_user_func($this->getItems);
+        return is_array($items) ? $items : iterator_to_array($items, true);
     }
 
 }

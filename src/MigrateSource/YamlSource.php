@@ -18,7 +18,6 @@ namespace Shuttle\MigrateSource;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
-use Traversable;
 
 /**
  * Simple YAML Source

@@ -16,6 +16,7 @@
 namespace Shuttle\MigrateSource;
 
 use Shuttle\Exception\MissingItemException;
+use Shuttle\SourceIdIterator;
 use Shuttle\SourceInterface;
 use Shuttle\SourceItem;
 
@@ -90,10 +91,10 @@ class JsonSource implements SourceInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|string[]
+     * @return SourceIdIterator|string[]
      */
-    public function getSourceIdIterator(): iterable
+    public function getSourceIdIterator(): SourceIdIterator
     {
-        return array_map('strval', array_keys($this->items));
+        return new SourceIdIterator(array_map('strval', array_keys($this->items)));
     }
 }

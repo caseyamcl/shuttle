@@ -29,7 +29,7 @@ interface SourceInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|string[]
+     * @return SourceIdIterator|string[]
      */
-    public function getSourceIdIterator(): iterable;
+    public function getSourceIdIterator(): SourceIdIterator;
 }
