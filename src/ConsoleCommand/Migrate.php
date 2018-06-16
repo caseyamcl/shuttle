@@ -21,6 +21,7 @@ use Shuttle\Migrator\MigratorInterface;
 use Shuttle\Shuttle;
 use Shuttle\ShuttleAction;
 use Shuttle\ShuttleEvents;
+use Shuttle\SourceIdIterator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -180,18 +181,19 @@ class Migrate extends Command
 
         /** @var MigratorInterface $migrator */
         foreach ($migrators as $migrator) {
+
+            $sourceIds = $idList ? new SourceIdIterator($idList) : $migrator->getSourceIdIterator();
+
             // Output some info
             $output->writeln(sprintf(
                 'Processing <info>%s</info> items from <info>%s</info> (%s)',
-                (! is_null($migrator->countSourceItems()))
-                    ? number_format($migrator->countSourceItems())
-                    : 'an unknown number of',
+                number_format($sourceIds->count()),
                 $migrator->__toString(),
                 $migrator->getDescription()
             ));
 
-            // Do it..
-            $this->runAction($migrator, $idList, $continueCallback);
+            // Do it.
+            $this->runAction($migrator, $sourceIds, $continueCallback);
 
             // Ouptut per-migrator report
             $output->writeln(sprintf(
