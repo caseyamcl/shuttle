@@ -181,7 +181,6 @@ class Migrate extends Command
 
         /** @var MigratorInterface $migrator */
         foreach ($migrators as $migrator) {
-
             $sourceIds = $idList ? new SourceIdIterator($idList) : $migrator->getSourceIdIterator();
 
             // Output some info

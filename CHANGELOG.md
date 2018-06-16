@@ -4,6 +4,15 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.5] - 2018-06-16
+### Added
+- `SourceIdIterator` class to clarify API for iterating source IDs
+
+### Changed
+- `SourceInterface` and `MigratorInterface::getSourceIdIterator` now require returning `SourceIdIterator` instance
+- `ArraySource` and `CallbackSource` now generate a list of source IDs each time `getSourceIdIterator` is called, not
+  just when they are constructed.
+
 ## [0.4] - 2018-06-15
 ### Added
 - Added `CallbackSource` for callback item sources (loading source records defered until source is used) 

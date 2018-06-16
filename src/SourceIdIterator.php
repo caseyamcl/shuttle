@@ -21,7 +21,7 @@ class SourceIdIterator extends \IteratorIterator implements \Countable
      */
     public function __construct(iterable $items, ?int $count = null)
     {
-        parent::__construct($items instanceOf \Traversable ? $items : new \ArrayIterator($items));
+        parent::__construct($items instanceof \Traversable ? $items : new \ArrayIterator($items));
         $this->count = $count;
     }
 
@@ -45,7 +45,8 @@ class SourceIdIterator extends \IteratorIterator implements \Countable
         } elseif (is_callable([$this->getInnerIterator(), 'count'])) {
             return call_user_func([$this->getInnerIterator(), 'count']);
         } else {
-            return iterator_apply($this, function() {});
+            return iterator_apply($this, function () {
+            });
         }
     }
 }

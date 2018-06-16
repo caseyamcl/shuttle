@@ -77,7 +77,7 @@ class Shuttle
         };
 
         // Build a source ID iterator
-        if (! $sourceIds instanceOf SourceIdIterator) {
+        if (! $sourceIds instanceof SourceIdIterator) {
             $sourceIds = $sourceIds ? new SourceIdIterator($sourceIds) : $migrator->getSourceIdIterator();
         }
 
@@ -109,9 +109,8 @@ class Shuttle
             return true;
         };
 
-        if (! $sourceIds instanceOf SourceIdIterator) {
+        if (! $sourceIds instanceof SourceIdIterator) {
             $sourceIds  = $sourceIds ? new SourceIdIterator($sourceIds) : $migrator->getMigratedSourceIdIterator();
-
         }
 
         for ($lastAction = null, $sourceIds->rewind(); $sourceIds->valid(); $sourceIds->next()) {

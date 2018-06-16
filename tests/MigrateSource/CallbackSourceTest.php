@@ -1,6 +1,7 @@
 <?php
 
 namespace ShuttleTest\MigrateSource;
+
 use Shuttle\MigrateSource\CallbackSource;
 use Shuttle\SourceInterface;
 use Shuttle\SourceItem;
@@ -17,7 +18,7 @@ class CallbackSourceTest extends AbstractSourceInterfaceTest
      */
     protected function getSourceObj(): SourceInterface
     {
-        return new CallbackSource(function() {
+        return new CallbackSource(function () {
             yield new SourceItem('1', ['foo'  => 'bar']);
             yield new SourceItem('2', ['baz'  => 'biz']);
             yield new SourceItem('3', ['buzz' => 'fuzz']);

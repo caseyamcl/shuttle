@@ -58,7 +58,7 @@ class CallbackSource implements SourceInterface
         if ($this->keysAreIds) {
             $iterator = array_keys($items);
         } else {
-            $iterator = array_map(function(SourceItem $item) {
+            $iterator = array_map(function (SourceItem $item) {
                 return $item->getId();
             }, $items);
         }
@@ -75,9 +75,9 @@ class CallbackSource implements SourceInterface
     {
         $items = $this->getItems();
 
-        if ($this->keysAreIds && array_key_exists($id, $items))
+        if ($this->keysAreIds && array_key_exists($id, $items)) {
             return $items[$id];
-        elseif (! $this->keysAreIds) {
+        } elseif (! $this->keysAreIds) {
             foreach ($items as $item) {
                 if ($item->getId() == $id) {
                     return $item;
@@ -99,5 +99,4 @@ class CallbackSource implements SourceInterface
         $items = call_user_func($this->getItems);
         return is_array($items) ? $items : iterator_to_array($items, true);
     }
-
 }
