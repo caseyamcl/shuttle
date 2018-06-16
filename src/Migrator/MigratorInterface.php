@@ -6,6 +6,7 @@ use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use Shuttle\Exception\MissingItemException;
 use Shuttle\Exception\UnmetDependencyException;
 use Shuttle\Recorder\MigrateRecordInterface;
+use Shuttle\SourceIdIterator;
 use Shuttle\SourceItem;
 
 /**
@@ -81,9 +82,9 @@ interface MigratorInterface
      *
      * Return an array for the next item, or NULL for no more item
      *
-     * @return iterable|string[]
+     * @return SourceIdIterator|string[]
      */
-    public function getSourceIdIterator(): iterable;
+    public function getSourceIdIterator(): SourceIdIterator;
 
     /**
      * @param SourceItem $sourceItem

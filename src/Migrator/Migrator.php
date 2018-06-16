@@ -7,6 +7,7 @@ use Shuttle\Exception\MissingItemException;
 use Shuttle\DestinationInterface;
 use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\Recorder\RecorderInterface;
+use Shuttle\SourceIdIterator;
 use Shuttle\SourceInterface;
 use Shuttle\SourceItem;
 
@@ -110,13 +111,11 @@ class Migrator extends AbstractMigrator
     }
 
     /**
-     * Get the next source record, represented as an array
+     * Get the source ID iterator
      *
-     * Return an array for the next item, or NULL for no more item
-     *
-     * @return iterable|SourceItem[]
+     * @return SourceIdIterator|SourceItem[]
      */
-    public function getSourceIdIterator(): iterable
+    public function getSourceIdIterator(): SourceIdIterator
     {
         return $this->source->getSourceIdIterator();
     }

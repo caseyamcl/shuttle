@@ -77,13 +77,12 @@ class Shuttle
         };
 
         // Build a source ID iterator
-        $iterator = $sourceIds ?: $migrator->getSourceIdIterator();
-        if (is_array($iterator)) {
-            $iterator = new \ArrayIterator($iterator);
+        if (! $sourceIds instanceOf SourceIdIterator) {
+            $sourceIds = $sourceIds ? new SourceIdIterator($sourceIds) : $migrator->getSourceIdIterator();
         }
 
         // Loop
-        for ($iterator->rewind(), $lastAction = null; $iterator->valid(); $iterator->next()) {
+        for ($sourceIds->rewind(), $lastAction = null; $sourceIds->valid(); $sourceIds->next()) {
             if (! $continue($lastAction)) {
                 $this->eventDispatcher->dispatch(
                     ShuttleEvents::ABORT,
@@ -92,7 +91,7 @@ class Shuttle
                 break;
             }
 
-            $lastAction = $this->migrateItem($migrator, $iterator->current());
+            $lastAction = $this->migrateItem($migrator, $sourceIds->current());
         }
     }
 
@@ -110,13 +109,13 @@ class Shuttle
             return true;
         };
 
-        $iterator = $sourceIds ?: $migrator->getMigratedSourceIdIterator();
-        if (is_array($iterator)) {
-            $iterator = new \ArrayIterator($iterator);
+        if (! $sourceIds instanceOf SourceIdIterator) {
+            $sourceIds  = $sourceIds ? new SourceIdIterator($sourceIds) : $migrator->getMigratedSourceIdIterator();
+
         }
 
-        for ($lastAction = null, $iterator->rewind(); $iterator->valid(); $iterator->next()) {
-            $sourceId = $iterator->current();
+        for ($lastAction = null, $sourceIds->rewind(); $sourceIds->valid(); $sourceIds->next()) {
+            $sourceId = $sourceIds->current();
 
             if (!$continue($lastAction)) {
                 $this->eventDispatcher->dispatch(
