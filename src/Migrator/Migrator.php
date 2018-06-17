@@ -82,13 +82,19 @@ class Migrator extends AbstractMigrator
     /**
      * Get a report of
      *
-     * @return \iterable|\Generator|MigrateRecordInterface[]
+     * @return SourceIdIterator|string[]
      */
-    public function getMigratedSourceIdIterator(): iterable
+    public function getMigratedSourceIdIterator(): SourceIdIterator
     {
-        foreach ($this->recorder->getRecords($this->__toString()) as $record) {
-            yield $record->getSourceId();
-        }
+        $records = $this->recorder->getRecords($this->__toString());
+        $iterator = new class(is_array($records) ? new \ArrayIterator($records) : $records) extends \IteratorIterator {
+            public function current()
+            {
+                return parent::current()->getSourceId();
+            }
+        };
+
+        return new SourceIdIterator($iterator);
     }
 
     /**

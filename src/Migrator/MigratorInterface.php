@@ -2,10 +2,8 @@
 
 namespace Shuttle\Migrator;
 
-use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use Shuttle\Exception\MissingItemException;
 use Shuttle\Exception\UnmetDependencyException;
-use Shuttle\Recorder\MigrateRecordInterface;
 use Shuttle\SourceIdIterator;
 use Shuttle\SourceItem;
 
@@ -50,9 +48,9 @@ interface MigratorInterface
     /**
      * Iterate over migrated source IDs
      *
-     * @return iterable|string[]
+     * @return SourceIdIterator|string[]
      */
-    public function getMigratedSourceIdIterator(): iterable;
+    public function getMigratedSourceIdIterator(): SourceIdIterator;
 
     /**
      * Count migrated items, if known
