@@ -143,4 +143,11 @@ class RecorderTest extends TestCase
         $obj->addMigrateRecord(new SourceItem(5, ['foo']), '10', 'foo');
         $obj->addMigrateRecord(new SourceItem(6, ['foo']), '10', 'foo');
     }
+
+    public function testFindMigrateRecordReturnsNullIfRecordDoesNotExist()
+    {
+        $obj = new Recorder($this->dbConn);
+        $obj->addMigrateRecord(new SourceItem(5, ['foo']), '10', 'foo');
+        $this->assertNull($obj->findRecord(10, 'foo'));
+    }
 }

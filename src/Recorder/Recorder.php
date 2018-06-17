@@ -95,14 +95,16 @@ class Recorder implements RecorderInterface
         $qb->setParameter(':source_id', $sourceId);
         $stmt = $qb->execute();
 
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        return new MigrateRecord(
-            $row['source_id'],
-            $row['destination_id'],
-            $row['type'],
-            $this->prepareTimestamp($row['timestamp'])
-        );
+        if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            return new MigrateRecord(
+                $row['source_id'],
+                $row['destination_id'],
+                $row['type'],
+                $this->prepareTimestamp($row['timestamp'])
+            );
+        } else {
+            return null;
+        }
     }
 
     /**
