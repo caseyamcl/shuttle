@@ -16,6 +16,8 @@
 namespace Shuttle\ConsoleCommand;
 
 use Shuttle\Event\ActionResultInterface;
+use Shuttle\Event\MigrateFailedEvent;
+use Shuttle\Event\RevertFailedEvent;
 use Shuttle\Helper\Tracker;
 use Shuttle\Migrator\MigratorInterface;
 use Shuttle\Shuttle;
@@ -118,7 +120,7 @@ class Migrate extends Command
 
         $this->addOption(
             'abort-on-error',
-            'e',
+            'o',
             InputOption::VALUE_NONE,
             'Abort on the first error'
         );
@@ -170,7 +172,22 @@ class Migrate extends Command
             $limit = (int) $input->getOption('limit') ?: 0;
             $errorAbort = $input->getOption('abort-on-error');
 
-            if ($errorAbort && $lastAction->getStatus() == ActionResultInterface::FAILED) {
+            if ($errorAbort && $lastAction && $lastAction->getStatus() == ActionResultInterface::FAILED) {
+                if ($lastAction instanceof MigrateFailedEvent OR $lastAction instanceof RevertFailedEvent) {
+                    $message = sprintf(
+                        '%s failed for record (type %s) with source ID %s: %s',
+                        ucfirst(static::ACTION_NAME),
+                        $lastAction->getMigratorName(),
+                        $lastAction->getSourceId(),
+                        $lastAction->getException()->getMessage()
+                    );
+
+                    throw new \RuntimeException(
+                        $message,
+                        $lastAction->getException()->getCode(),
+                        $lastAction->getException()
+                    );
+                }
                 return false;
             } elseif ($limit && $tracker->getTotalCount() >= $limit) {
                 return false;
@@ -181,7 +198,7 @@ class Migrate extends Command
 
         /** @var MigratorInterface $migrator */
         foreach ($migrators as $migrator) {
-            $sourceIds = $idList ? new SourceIdIterator($idList) : $migrator->getSourceIdIterator();
+            $sourceIds = $idList ? new SourceIdIterator($idList) : $this->getIdIterator($migrator);
 
             // Output some info
             $output->writeln(sprintf(
@@ -231,6 +248,15 @@ class Migrate extends Command
     protected function runAction(MigratorInterface $migrator, ?iterable $sourceIds, callable $continue)
     {
         $this->shuttle->migrate($migrator, $sourceIds, $continue);
+    }
+
+    /**
+     * @param MigratorInterface $migrator
+     * @return SourceIdIterator
+     */
+    protected function getIdIterator(MigratorInterface $migrator): SourceIdIterator
+    {
+        return $migrator->getSourceIdIterator();
     }
 
     /**

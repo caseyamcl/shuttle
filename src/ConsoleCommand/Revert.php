@@ -17,6 +17,7 @@ namespace Shuttle\ConsoleCommand;
 
 use Shuttle\Migrator\MigratorInterface;
 use Shuttle\ShuttleAction;
+use Shuttle\SourceIdIterator;
 
 /**
  * Revert Command
@@ -36,4 +37,14 @@ class Revert extends Migrate
     {
         $this->shuttle->revert($migrator, $sourceIds, $continue);
     }
+
+    /**
+     * @param MigratorInterface $migrator
+     * @return SourceIdIterator
+     */
+    protected function getIdIterator(MigratorInterface $migrator): SourceIdIterator
+    {
+        return $migrator->getMigratedSourceIdIterator();
+    }
+
 }
