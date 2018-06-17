@@ -4,6 +4,13 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.5.1] - 2018-06-16
+### Fixed
+- Recorder should return NULL if record not found
+- `MigratorInterface::getMigratedSourceIdIterator()` should return a `SourceIdIterator` instance
+- Bugfixes to CLI commands 
+- Print detailed exception if `--abort-on-failure` specified
+
 ## [0.5] - 2018-06-16
 ### Added
 - `SourceIdIterator` class to clarify API for iterating source IDs
@@ -15,7 +22,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [0.4] - 2018-06-15
 ### Added
-- Added `CallbackSource` for callback item sources (loading source records defered until source is used) 
+- Added `CallbackSource` for callback item sources (loading source records deferred until source is used) 
 
 ### Changed
 - `ArraySource` now extends `CallbackSource` and defers iterating over source record until source is used
