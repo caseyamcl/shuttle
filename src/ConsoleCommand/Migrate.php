@@ -213,9 +213,10 @@ class Migrate extends Command
 
             // Ouptut per-migrator report
             $output->writeln(sprintf(
-                '<info>%s</info> complete; %d total: <fg=green>%d</fg=green> processed'
-                . ' / <fg=yellow>%d</fg=yellow> skipped / <fg=red>%d</fg=red> failed',
+                '<info>%s</info> %s complete (%s total): <fg=green>%s</fg=green> processed'
+                . ' / <fg=yellow>%s</fg=yellow> skipped / <fg=red>%s</fg=red> failed',
                 (string) $migrator,
+                static::ACTION_NAME,
                 number_format($tracker->getTotalCount((string) $migrator)),
                 number_format($tracker->getProcessedCount((string) $migrator)),
                 number_format($tracker->getSkippedCount((string) $migrator)),
@@ -226,8 +227,8 @@ class Migrate extends Command
         // Final report
         $output->writeln(''); // Skip a line
         $output->writeln(sprintf(
-            '%s complete (%d total): <fg=green>%d</fg=green> processed'
-            . ' / <fg=yellow>%d</fg=yellow> skipped / <fg=red>%d</fg=red> failed',
+            '%s complete (%s total): <fg=green>%s</fg=green> processed'
+            . ' / <fg=yellow>%s</fg=yellow> skipped / <fg=red>%s</fg=red> failed',
             ucfirst(static::ACTION_NAME),
             number_format($tracker->getTotalCount()),
             number_format($tracker->getProcessedCount()),
