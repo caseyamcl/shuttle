@@ -48,7 +48,7 @@ class MigratorsList extends Command
 
     protected function configure()
     {
-        $this->setName('migrators:list');
+        $this->setName('shuttle:list');
         $this->setDescription('List available migrators');
 
         $this->addOption(

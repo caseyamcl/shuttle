@@ -70,10 +70,10 @@ class Migrate extends Command
     protected function configure()
     {
         if ($this->migrator) {
-            $this->setName('migrators:' . static::ACTION_NAME . ':' . (string) $this->migrator);
+            $this->setName('shuttle:' . static::ACTION_NAME . ':' . (string) $this->migrator);
             $this->setDescription(ucfirst(static::ACTION_NAME) . " " . (string) $this->migrator);
         } else {
-            $this->setName('migrators:' . static::ACTION_NAME);
+            $this->setName('shuttle:' . static::ACTION_NAME);
             $this->addArgument(
                 'migrator',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
