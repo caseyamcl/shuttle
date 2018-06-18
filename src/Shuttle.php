@@ -200,10 +200,19 @@ class Shuttle
                 $actuallyDeleted = $migrator->remove($sourceId);
                 $result = new RevertProcessedEvent((string) $migrator, $sourceId, $actuallyDeleted);
             } else {
-                $result = new RevertSkippedEvent((string) $migrator, $sourceId, 'Destination record no longer found');
+                $result = new RevertSkippedEvent(
+                    (string) $migrator,
+                    $sourceId,
+                    sprintf('Destination record no longer found (source ID: %s)', $sourceId)
+                );
             }
         } catch (\Throwable $e) {
-            $result = new RevertFailedEvent((string) $migrator, $sourceId, 'An unexpected error occurred', $e);
+            $result = new RevertFailedEvent(
+                (string) $migrator,
+                $sourceId,
+                sprintf('An unexpected error occurred (source ID: %s): %s', $sourceId, $e->getMessage()),
+                $e
+            );
         }
 
         $this->getEventDispatcher()->dispatch(ShuttleEvents::REVERT_RESULT, $result);
