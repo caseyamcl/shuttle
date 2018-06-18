@@ -162,20 +162,20 @@ class Shuttle
             $result = new MigrateSkippedEvent(
                 (string) $migrator,
                 $sourceItemId,
-                'Item is already migrated'
+                sprintf('Item (source ID: %s) is already migrated', $sourceItemId)
             );
         } catch (UnmetDependencyException $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
                 $sourceItemId,
-                'Unmet dependency: ' . $e->getMessage(),
+                sprintf('Unmet dependency (source ID: %s): %s', $sourceItemId, $e->getMessage()),
                 $e
             );
         } catch (\Throwable $e) {
             $result = new MigrateFailedEvent(
                 (string) $migrator,
                 $sourceItemId,
-                'An unexpected error occurred',
+                sprintf('An unexpected error occurred (source ID: %s): %s', $sourceItemId, $e->getMessage()),
                 $e
             );
         }
