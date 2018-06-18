@@ -86,7 +86,7 @@ class CallbackSource implements SourceInterface
         }
 
         // If made it here..
-        throw new MissingItemException('Missing Item: ' . $id);
+        throw MissingItemException::forId($id);
     }
 
     /**

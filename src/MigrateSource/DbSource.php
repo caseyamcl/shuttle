@@ -100,7 +100,7 @@ class DbSource implements SourceInterface
         if ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             return new SourceItem($id, $row);
         } else {
-            throw new MissingItemException();
+            throw MissingItemException::forId($id);
         }
     }
 

@@ -173,7 +173,7 @@ class Migrate extends Command
             $errorAbort = $input->getOption('abort-on-error');
 
             if ($errorAbort && $lastAction && $lastAction->getStatus() == ActionResultInterface::FAILED) {
-                if ($lastAction instanceof MigrateFailedEvent OR $lastAction instanceof RevertFailedEvent) {
+                if ($lastAction instanceof MigrateFailedEvent or $lastAction instanceof RevertFailedEvent) {
                     $message = sprintf(
                         '%s failed for record (type %s) with source ID %s: %s',
                         ucfirst(static::ACTION_NAME),

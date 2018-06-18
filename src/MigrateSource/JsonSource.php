@@ -82,7 +82,7 @@ class JsonSource implements SourceInterface
         if (array_key_exists($id, $this->items)) {
             return new SourceItem($id, $this->items[$id]);
         } else {
-            throw new MissingItemException("Could not find record with ID: " . $id);
+            throw MissingItemException::forId($id);
         }
     }
 

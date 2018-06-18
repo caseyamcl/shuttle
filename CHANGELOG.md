@@ -4,6 +4,10 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.6] - 2018-06-18
+### Added
+- New `DoctrineQuerySource` to use Doctrine DBAL query builder as a source
+
 ## [0.5.1] - 2018-06-16
 ### Fixed
 - Recorder should return NULL if record not found

@@ -46,5 +46,4 @@ class Revert extends Migrate
     {
         return $migrator->getMigratedSourceIdIterator();
     }
-
 }

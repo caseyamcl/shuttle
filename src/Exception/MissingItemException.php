@@ -15,7 +15,17 @@
 
 namespace Shuttle\Exception;
 
+use Throwable;
+
 class MissingItemException extends MigratorException
 {
-    // pass.
+    /**
+     * @param string $id
+     * @param Throwable|null $previous
+     * @return \Exception
+     */
+    public static function forId(string $id, Throwable $previous = null)
+    {
+        return new static('Missing Item: ' . $id, $previous ? $previous->getCode() : 0, $previous);
+    }
 }
