@@ -113,7 +113,11 @@ class MigratorCollection implements \IteratorAggregate, Countable
     public function getIterator(string $action = ShuttleAction::MIGRATE): \ArrayIterator
     {
         $items = array_map([$this, 'get'], $this->sorter->sort());
-        return new ArrayIterator($action = ShuttleAction::REVERT ? array_reverse($items, true) : $items);
+        return new ArrayIterator(
+            $action == ShuttleAction::REVERT
+                ? array_reverse($items, true)
+                : $items
+        );
     }
 
     /**
