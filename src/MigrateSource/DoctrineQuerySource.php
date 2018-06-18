@@ -43,7 +43,7 @@ class DoctrineQuerySource implements SourceInterface
      */
     public function countSourceItems(): ?int
     {
-        $qb = clone $this->queryBuilder;
+        $qb = $this->prepareQueryBuilder();
         $qb->resetQueryPart('select');
         $qb->select(sprintf('COUNT(%s)', $this->idColumn));
         $stmt = $qb->execute();
@@ -58,7 +58,7 @@ class DoctrineQuerySource implements SourceInterface
      */
     public function getSourceItem(string $id): SourceItem
     {
-        $qb = clone $this->queryBuilder;
+        $qb = $this->prepareQueryBuilder();
         $qb->andWhere($qb->expr()->eq($this->idColumn, ':id'));
         $qb->setParameter(':id', $id);
         $stmt = $qb->execute();
@@ -79,11 +79,28 @@ class DoctrineQuerySource implements SourceInterface
      */
     public function getSourceIdIterator(): SourceIdIterator
     {
-        $qb = clone $this->queryBuilder;
+        $qb = $this->prepareQueryBuilder();
         $qb->resetQueryPart('select');
         $qb->select($this->idColumn);
         $stmt = $qb->execute();
         $stmt->setFetchMode(\PDO::FETCH_COLUMN, 0);
         return new SourceIdIterator($stmt, $this->countSourceItems());
+    }
+
+    /**
+     * Clone and check the query builder
+     *
+     * @return QueryBuilder
+     */
+    private function prepareQueryBuilder(): QueryBuilder
+    {
+        $qb = clone $this->queryBuilder;
+        if ($qb->getType() !== QueryBuilder::SELECT) {
+            throw new \RuntimeException(
+                get_called_class() . ' requires that the query builder be a SELECT query'
+            );
+        }
+
+        return $qb;
     }
 }
