@@ -172,9 +172,6 @@ class Recorder implements RecorderInterface
             ['unsigned' => true, 'notnull' => true, 'autoincrement' => true]
         );
         $table->setPrimaryKey(['rowid']);
-
-        $table->addIndex(['source_id']);
-        $table->addIndex(['destination_id']);
         $table->addUniqueIndex(['type', 'source_id']);
         $table->addUniqueIndex(['type', 'destination_id']);
 
