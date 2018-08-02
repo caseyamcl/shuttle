@@ -119,11 +119,19 @@ class Migrate extends Command
         );
 
         $this->addOption(
-            'abort-on-error',
+            'abort-on-fail',
             'o',
             InputOption::VALUE_NONE,
-            'Abort on the first error'
+            'Abort on the first failed ' . static::ACTION_NAME
         );
+
+        $this->addOption(
+            'log-failed-only',
+            'f',
+            InputOption::VALUE_NONE,
+            'Log only actions that failed (no output for individual items that succeeded or were skipped)'
+        );
+
     }
 
     /**
@@ -139,8 +147,10 @@ class Migrate extends Command
         $tracker = Tracker::createAndAttach(static::ACTION_NAME, $this->shuttle->getEventDispatcher());
 
         // Setup console logging
-        $consoleLogger = function (ActionResultInterface $result) use ($output, $tracker) {
-            $this->logAction($output, $result, $tracker);
+        $consoleLogger = function (ActionResultInterface $result) use ($input, $output, $tracker) {
+            if ($result->getStatus() === ActionResultInterface::FAILED OR ! $input->getOption('log-failed-only')) {
+                $this->logAction($output, $result, $tracker);
+            }
         };
         $this->shuttle->getEventDispatcher()->addListener(ShuttleEvents::MIGRATE_RESULT, $consoleLogger);
         $this->shuttle->getEventDispatcher()->addListener(ShuttleEvents::REVERT_RESULT, $consoleLogger);
@@ -170,9 +180,9 @@ class Migrate extends Command
         // Setup a continue callback
         $continueCallback = function (?ActionResultInterface $lastAction) use ($tracker, $input): bool {
             $limit = (int) $input->getOption('limit') ?: 0;
-            $errorAbort = $input->getOption('abort-on-error');
+            $failAbort = $input->getOption('abort-on-fail');
 
-            if ($errorAbort && $lastAction && $lastAction->getStatus() == ActionResultInterface::FAILED) {
+            if ($failAbort && $lastAction && $lastAction->getStatus() == ActionResultInterface::FAILED) {
                 if ($lastAction instanceof MigrateFailedEvent or $lastAction instanceof RevertFailedEvent) {
                     $message = sprintf(
                         '%s failed for record (type %s) with source ID %s: %s',

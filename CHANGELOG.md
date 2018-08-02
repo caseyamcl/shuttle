@@ -4,6 +4,12 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.7] - 2018-08-02
+### Changed
+- Console command option is now `abort-on-fail` instead of `abort-on-error`
+### Added
+- Console option to log only failed items (not succeeded or skipped)
+
 ## [0.6] - 2018-06-18
 ### Added
 - New `DoctrineQuerySource` to use Doctrine DBAL query builder as a source
