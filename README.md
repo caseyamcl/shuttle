@@ -97,6 +97,29 @@ There are two ways to expose `migrate` and `revert` commands in your application
 
 ### Creating a Separate Command for Each Migrator
 
+## Caveat when using Doctrine Migrations or Doctrine DBAL Schema Manager
+
+If you are using the Doctrine DBAL Schema Manager in your application to manage schemas, you probably want to ignore the
+tracking table.  To do this, set the `setFilterSchemaAssetsExpression` on the DBAL config when you are creating your
+connection object: 
+
+```php
+
+// $connection is an instance of \Doctrine\DBAL\Connection
+// Assuming your table name is using the default; 'data_migrate_tracker'
+$connection->getCOnfiguration()->setFilterSchemaAssetsExpression('/^((?!data_migrate_tracker).)*$/'); 
+
+```
+
+If you are using Symfony, you can [set this in the configuration](https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html#manual-tables):
+
+```yaml
+# Assuming your table name is using the default; 'data_migrate_tracker'
+doctrine:
+    dbal:
+        schema_filter: ~^((?!data_migrate_tracker).)*$~
+```  
+
 ## Tracking Migrations using Events
 
 Shuttle uses the [Symfony Event Dispatcher](https://symfony.com/doc/current/components/event_dispatcher.html) library 
