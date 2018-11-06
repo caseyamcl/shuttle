@@ -152,7 +152,17 @@ class Recorder implements RecorderInterface
     private function init()
     {
         $tableName = $this->tableName;
-        $sm = $this->dbConn->getSchemaManager();
+
+        // Set the schema manager for this connection so that it cares only about the recorder table.
+        $dbConfig = clone $this->dbConn->getConfiguration();
+        $dbConfig->setFilterSchemaAssetsExpression('/^' . $this->tableName . '$/');
+        $dbConn = new Connection(
+            $this->dbConn->getParams(),
+            $this->dbConn->getDriver(),
+            $dbConfig,
+            $this->dbConn->getEventManager()
+        );
+        $sm = $dbConn->getSchemaManager();
 
         // Table exists? Nothing to do.
         if ($sm->tablesExist([$tableName])) {
@@ -178,9 +188,9 @@ class Recorder implements RecorderInterface
         $table->addUniqueIndex(['type', 'source_id']);
         $table->addUniqueIndex(['type', 'destination_id']);
 
-        $queries = $schema->toSql($this->dbConn->getDatabasePlatform());
+        $queries = $schema->toSql($dbConn->getDatabasePlatform());
         foreach ($queries as $query) {
-            $this->dbConn->query($query);
+            $dbConn->query($query);
         }
     }
 
