@@ -4,6 +4,13 @@ All notable changes to `shuttle` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## [0.7.1] - 2018-11-06
+### Added
+- Notes in `README.md` for excluding the table in Doctrine schema mappings
+### Fixed
+- The `Recorder::init()` method now clones the db connection and sets the appropriate configuration to care
+  only about the tracking table.
+
 ## [0.7] - 2018-08-02
 ### Changed
 - Console command option is now `abort-on-fail` instead of `abort-on-error`
