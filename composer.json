@@ -49,5 +49,6 @@
   },
   "config": {
     "sort-packages": true
-  }
+  },
+  "abandoned": "scriptfusion/porter"
 }
