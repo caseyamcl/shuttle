@@ -1,5 +1,7 @@
 # Shuttle
 
+> This project is **ABANDONED**.  The author recommends [Porter](https://github.com/ScriptFUSION/Porter) as an alternative.
+
 A Data Migration Tool - Get Data from Here to There!
 
 ## Overview
